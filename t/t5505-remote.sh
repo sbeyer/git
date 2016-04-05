@@ -746,7 +746,7 @@ test_expect_success 'rename a remote' '
 		git remote rename origin upstream &&
 		test -z "$(git for-each-ref refs/remotes/origin)" &&
 		test "$(git symbolic-ref refs/remotes/upstream/HEAD)" = "refs/remotes/upstream/master" &&
-		test "$(git rev-parse upstream/master)" = "$(git rev-parse master)" &&
+		test_cmp_rev upstream/master master &&
 		test "$(git config remote.upstream.fetch)" = "+refs/heads/*:refs/remotes/upstream/*" &&
 		test "$(git config branch.master.remote)" = "upstream"
 	)
@@ -779,7 +779,7 @@ test_expect_success 'rename a remote with name prefix of other remote' '
 		cd four.three &&
 		git remote add o git://example.com/repo.git &&
 		git remote rename o upstream &&
-		test "$(git rev-parse origin/master)" = "$(git rev-parse master)"
+		test_cmp_rev origin/master master
 	)
 '
 
