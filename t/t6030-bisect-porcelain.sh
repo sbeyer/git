@@ -8,37 +8,19 @@ exec </dev/null
 
 . ./test-lib.sh
 
-add_line_into_file()
-{
-    _line=$1
-    _file=$2
-
-    if [ -f "$_file" ]; then
-        echo "$_line" >> $_file || return $?
-        MSG="Add <$_line> into <$_file>."
-    else
-        echo "$_line" > $_file || return $?
-        git add $_file || return $?
-        MSG="Create file <$_file> with <$_line> inside."
-    fi
-
-    test_tick
-    git commit --quiet -m "$MSG" $_file
-}
-
 HASH1=
 HASH2=
 HASH3=
 HASH4=
 
 test_expect_success 'set up basic repo with 1 file (hello) and 4 commits' '
-     add_line_into_file "1: Hello World" hello &&
+     test_commit_add_line "1: Hello World" hello &&
      HASH1=$(git rev-parse --verify HEAD) &&
-     add_line_into_file "2: A new day for git" hello &&
+     test_commit_add_line "2: A new day for git" hello &&
      HASH2=$(git rev-parse --verify HEAD) &&
-     add_line_into_file "3: Another new day for git" hello &&
+     test_commit_add_line "3: Another new day for git" hello &&
      HASH3=$(git rev-parse --verify HEAD) &&
-     add_line_into_file "4: Ciao for now" hello &&
+     test_commit_add_line "4: Ciao for now" hello &&
      HASH4=$(git rev-parse --verify HEAD)
 '
 
@@ -275,7 +257,7 @@ test_expect_success \
 # so we should find $HASH5 as the first bad commit
 HASH5=
 test_expect_success 'bisect skip: add line and then a new test' '
-	add_line_into_file "5: Another new line." hello &&
+	test_commit_add_line "5: Another new line." hello &&
 	HASH5=$(git rev-parse --verify HEAD) &&
 	git bisect start $HASH5 $HASH1 &&
 	git bisect skip &&
@@ -293,7 +275,7 @@ test_expect_success 'bisect skip and bisect replay' '
 
 HASH6=
 test_expect_success 'bisect run & skip: cannot tell between 2' '
-	add_line_into_file "6: Yet a line." hello &&
+	test_commit_add_line "6: Yet a line." hello &&
 	HASH6=$(git rev-parse --verify HEAD) &&
 	echo "#"\!"/bin/sh" > test_script.sh &&
 	echo "sed -ne \\\$p hello | grep Ciao > /dev/null && exit 125" >> test_script.sh &&
@@ -318,7 +300,7 @@ test_expect_success 'bisect run & skip: cannot tell between 2' '
 HASH7=
 test_expect_success 'bisect run & skip: find first bad' '
 	git bisect reset &&
-	add_line_into_file "7: Should be the last line." hello &&
+	test_commit_add_line "7: Should be the last line." hello &&
 	HASH7=$(git rev-parse --verify HEAD) &&
 	echo "#"\!"/bin/sh" > test_script.sh &&
 	echo "sed -ne \\\$p hello | grep Ciao > /dev/null && exit 125" >> test_script.sh &&
@@ -394,11 +376,11 @@ test_expect_success 'bisect does not create a "bisect" branch' '
 test_expect_success 'side branch creation' '
 	git bisect reset &&
 	git checkout -b side $HASH4 &&
-	add_line_into_file "5(side): first line on a side branch" hello2 &&
+	test_commit_add_line "5(side): first line on a side branch" hello2 &&
 	SIDE_HASH5=$(git rev-parse --verify HEAD) &&
-	add_line_into_file "6(side): second line on a side branch" hello2 &&
+	test_commit_add_line "6(side): second line on a side branch" hello2 &&
 	SIDE_HASH6=$(git rev-parse --verify HEAD) &&
-	add_line_into_file "7(side): third line on a side branch" hello2 &&
+	test_commit_add_line "7(side): third line on a side branch" hello2 &&
 	SIDE_HASH7=$(git rev-parse --verify HEAD)
 '
 
@@ -505,17 +487,17 @@ test_expect_success '"parallel" side branch creation' '
 	git bisect reset &&
 	git checkout -b parallel $HASH1 &&
 	mkdir dir1 dir2 &&
-	add_line_into_file "1(para): line 1 on parallel branch" dir1/file1 &&
+	test_commit_add_line "1(para): line 1 on parallel branch" dir1/file1 &&
 	PARA_HASH1=$(git rev-parse --verify HEAD) &&
-	add_line_into_file "2(para): line 2 on parallel branch" dir2/file2 &&
+	test_commit_add_line "2(para): line 2 on parallel branch" dir2/file2 &&
 	PARA_HASH2=$(git rev-parse --verify HEAD) &&
-	add_line_into_file "3(para): line 3 on parallel branch" dir2/file3 &&
+	test_commit_add_line "3(para): line 3 on parallel branch" dir2/file3 &&
 	PARA_HASH3=$(git rev-parse --verify HEAD) &&
 	git merge -m "merge HASH4 and PARA_HASH3" "$HASH4" &&
 	PARA_HASH4=$(git rev-parse --verify HEAD) &&
-	add_line_into_file "5(para): add line on parallel branch" dir1/file1 &&
+	test_commit_add_line "5(para): add line on parallel branch" dir1/file1 &&
 	PARA_HASH5=$(git rev-parse --verify HEAD) &&
-	add_line_into_file "6(para): add line on parallel branch" dir2/file2 &&
+	test_commit_add_line "6(para): add line on parallel branch" dir2/file2 &&
 	PARA_HASH6=$(git rev-parse --verify HEAD) &&
 	git merge -m "merge HASH7 and PARA_HASH6" "$HASH7" &&
 	PARA_HASH7=$(git rev-parse --verify HEAD)
@@ -608,16 +590,16 @@ test_expect_success 'broken branch creation' '
 	git bisect reset &&
 	git checkout -b broken $HASH4 &&
 	git tag BROKEN_HASH4 $HASH4 &&
-	add_line_into_file "5(broken): first line on a broken branch" hello2 &&
+	test_commit_add_line "5(broken): first line on a broken branch" hello2 &&
 	git tag BROKEN_HASH5 &&
 	mkdir missing &&
 	:> missing/MISSING &&
 	git add missing/MISSING &&
 	git commit -m "6(broken): Added file that will be deleted" &&
 	git tag BROKEN_HASH6 &&
-	add_line_into_file "7(broken): second line on a broken branch" hello2 &&
+	test_commit_add_line "7(broken): second line on a broken branch" hello2 &&
 	git tag BROKEN_HASH7 &&
-	add_line_into_file "8(broken): third line on a broken branch" hello2 &&
+	test_commit_add_line "8(broken): third line on a broken branch" hello2 &&
 	git tag BROKEN_HASH8 &&
 	git rm missing/MISSING &&
 	git commit -m "9(broken): Remove missing file" &&

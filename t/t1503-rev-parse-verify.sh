@@ -8,37 +8,19 @@ exec </dev/null
 
 . ./test-lib.sh
 
-add_line_into_file()
-{
-    _line=$1
-    _file=$2
-
-    if [ -f "$_file" ]; then
-        echo "$_line" >> $_file || return $?
-        MSG="Add <$_line> into <$_file>."
-    else
-        echo "$_line" > $_file || return $?
-        git add $_file || return $?
-        MSG="Create file <$_file> with <$_line> inside."
-    fi
-
-    test_tick
-    git commit --quiet -m "$MSG" $_file
-}
-
 HASH1=
 HASH2=
 HASH3=
 HASH4=
 
 test_expect_success 'set up basic repo with 1 file (hello) and 4 commits' '
-	add_line_into_file "1: Hello World" hello &&
+	test_commit_add_line "1: Hello World" hello &&
 	HASH1=$(git rev-parse --verify HEAD) &&
-	add_line_into_file "2: A new day for git" hello &&
+	test_commit_add_line "2: A new day for git" hello &&
 	HASH2=$(git rev-parse --verify HEAD) &&
-	add_line_into_file "3: Another new day for git" hello &&
+	test_commit_add_line "3: Another new day for git" hello &&
 	HASH3=$(git rev-parse --verify HEAD) &&
-	add_line_into_file "4: Ciao for now" hello &&
+	test_commit_add_line "4: Ciao for now" hello &&
 	HASH4=$(git rev-parse --verify HEAD)
 '
 

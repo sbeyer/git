@@ -199,9 +199,29 @@ test_commit () {
 	git ${indir:+ -C "$indir"} tag "${4:-$1}"
 }
 
+# Call test_commit_add_line with arguments <line> <file>.
+# <line> is appended to <file> and this change is commited.
+test_commit_add_line() {
+	_line="$1"
+	_file="$2"
+
+	if test -f "$_file"
+	then
+		echo "$_line" >> "$_file" || return
+		MSG="Add <$_line> into <$_file>."
+	else
+		echo "$_line" > "$_file" || return
+		MSG="Create file <$_file> with <$_line> inside."
+	fi
+
+	git add "$_file" || return
+
+	test_tick
+	git commit --quiet -m "$MSG" "$_file" || return
+}
+
 # Call test_merge with the arguments "<message> <commit>", where <commit>
 # can be a tag pointing to the commit-to-merge.
-
 test_merge () {
 	test_tick &&
 	git merge -m "$1" "$2" &&
