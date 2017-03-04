@@ -16,20 +16,12 @@ test_expect_success 'setup' '
 	git tag -a -m commit commit-tag &&
 	git branch ref &&
 	git checkout master &&
-	echo modified >>a-blob &&
-	git add -u &&
-	git commit -m Modified &&
+	test_commit_add_line -m Modified modified a-blob &&
 	git branch modref &&
-	echo changed! >>a-blob &&
-	git add -u &&
-	git commit -m !Exp &&
+	test_commit_add_line -m "!Exp" "changed!" a-blob &&
 	git branch expref &&
-	echo changed >>a-blob &&
-	git add -u &&
-	git commit -m Changed &&
-	echo changed-again >>a-blob &&
-	git add -u &&
-	git commit -m Changed-again
+	test_commit_add_line -m Changed changed a-blob &&
+	test_commit_add_line -m Changed-again changed-again a-blob
 '
 
 test_expect_success 'ref^{non-existent}' '

@@ -199,9 +199,24 @@ test_commit () {
 	git ${indir:+ -C "$indir"} tag "${4:-$1}"
 }
 
-# Call test_commit_add_line with arguments <line> <file>.
+# test_commit_add_line usage:
+#      test_commit_add_line [-m <message>] <line> <file>.
 # <line> is appended to <file> and this change is commited.
 test_commit_add_line() {
+	while test $# != 0
+	do
+		case "$1" in
+		-m)
+			_message="$2"
+			shift
+			;;
+		*)
+			break
+			;;
+		esac
+		shift
+	done
+
 	_line="$1"
 	_file="$2"
 
@@ -217,6 +232,7 @@ test_commit_add_line() {
 	git add "$_file" || return
 
 	test_tick
+	test -n "$_message" && MSG="$_message"
 	git commit --quiet -m "$MSG" "$_file" || return
 }
 

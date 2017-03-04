@@ -662,9 +662,7 @@ test_expect_success 'setup criss-cross+rename/rename/add-dest + simple modify' '
 	git checkout B^0 &&
 	git merge --no-commit -s ours C^0 &&
 	git mv b a &&
-	echo 8 >>c &&
-	git add c &&
-	git commit -m "E like D but has mod in c" &&
+	test_commit_add_line -m "E like D but has mod in c" 8 c &&
 	git tag E
 '
 

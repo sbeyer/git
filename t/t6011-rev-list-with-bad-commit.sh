@@ -13,18 +13,10 @@ test_expect_success 'setup' \
    git init &&
    git config core.compression 0 &&
    git config core.logallrefupdates false &&
-   echo "foo" > foo &&
-   git add foo &&
-   git commit -m "first commit" &&
-   echo "bar" > bar &&
-   git add bar &&
-   git commit -m "second commit" &&
-   echo "baz" > baz &&
-   git add baz &&
-   git commit -m "third commit" &&
-   echo "foo again" >> foo &&
-   git add foo &&
-   git commit -m "fourth commit" &&
+   test_commit_add_line foo foo &&
+   test_commit_add_line -m "second commit" bar bar &&
+   test_commit_add_line baz baz &&
+   test_commit_add_line "foo again" foo &&
    git repack -a -f -d
    '
 

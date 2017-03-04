@@ -5,11 +5,8 @@ test_description='git branch display tests'
 . "$TEST_DIRECTORY"/lib-terminal.sh
 
 test_expect_success 'make commits' '
-	echo content >file &&
-	git add file &&
-	git commit -m one &&
-	echo content >>file &&
-	git commit -a -m two
+	test_commit_add_line -m one content file &&
+	test_commit_add_line -m two content file
 '
 
 test_expect_success 'make branches' '

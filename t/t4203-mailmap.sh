@@ -18,10 +18,7 @@ test_expect_success setup '
 	nick1 <bugs@company.xx>
 	EOF
 
-	echo one >one &&
-	git add one &&
-	test_tick &&
-	git commit -m initial &&
+	test_commit_add_line -m initial one one &&
 	echo two >>one &&
 	git add one &&
 	test_tick &&
