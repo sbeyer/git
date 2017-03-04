@@ -726,11 +726,15 @@ test_must_be_empty () {
 	fi
 }
 
-# Tests that its two parameters refer to the same revision
+# Tests that its two parameters refer to the same revision.
+# The first argument is the expected and the second one the actual revision.
 test_cmp_rev () {
-	git rev-parse --verify "$1" >expect.rev &&
-	git rev-parse --verify "$2" >actual.rev &&
-	test_cmp expect.rev actual.rev
+	expected=$(git rev-parse --verify "$1") || return
+	actual=$(git rev-parse --verify "$2") || return
+
+	test "$expected" = "$actual" && return
+	printf -- "Actual revision $2 ($actual) does not match expected $1 ($expected)\n" >&2
+	return 1
 }
 
 # Print a sequence of integers in increasing order, either with
