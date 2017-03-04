@@ -135,9 +135,7 @@ test_expect_success 'packsize limit' '
 
 test_expect_success 'diff --raw' '
 	git commit -q -m initial &&
-	echo modified >>large1 &&
-	git add large1 &&
-	git commit -q -m modified &&
+	test_commit_add_line modified large1 &&
 	git diff --raw HEAD^
 '
 

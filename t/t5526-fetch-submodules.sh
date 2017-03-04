@@ -39,18 +39,14 @@ test_expect_success setup '
 	(
 		cd deepsubmodule &&
 		git init &&
-		echo deepsubcontent > deepsubfile &&
-		git add deepsubfile &&
-		git commit -m new deepsubfile
+		test_commit_add_line deepsubcontent deepsubfile
 	) &&
 	mkdir submodule &&
 	(
 		cd submodule &&
 		git init &&
-		echo subcontent > subfile &&
-		git add subfile &&
 		git submodule add "$pwd/deepsubmodule" subdir/deepsubmodule &&
-		git commit -a -m new
+		test_commit_add_line subcontent subfile
 	) &&
 	git submodule add "$pwd/submodule" submodule &&
 	git commit -am initial &&
@@ -258,9 +254,7 @@ test_expect_success "Recursion stops when no new submodule commits are fetched" 
 test_expect_success "Recursion doesn't happen when new superproject commits don't change any submodules" '
 	add_upstream_commit &&
 	head1=$(git rev-parse --short HEAD) &&
-	echo a > file &&
-	git add file &&
-	git commit -m "new file" &&
+	test_commit_add_line a file &&
 	head2=$(git rev-parse --short HEAD) &&
 	echo "From $pwd/." > expect.err.file &&
 	echo "   $head1..$head2  master     -> origin/master" >> expect.err.file &&
@@ -392,9 +386,7 @@ test_expect_success "'--recurse-submodules=on-demand' recurses as deep as necess
 test_expect_success "'--recurse-submodules=on-demand' stops when no new submodule commits are found in the superproject (and ignores config)" '
 	add_upstream_commit &&
 	head1=$(git rev-parse --short HEAD) &&
-	echo a >> file &&
-	git add file &&
-	git commit -m "new file" &&
+	test_commit_add_line a file &&
 	head2=$(git rev-parse --short HEAD) &&
 	echo "From $pwd/." > expect.err.file &&
 	echo "   $head1..$head2  master     -> origin/master" >> expect.err.file &&

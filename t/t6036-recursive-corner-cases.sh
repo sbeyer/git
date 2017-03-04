@@ -101,9 +101,7 @@ test_expect_success 'setup criss-cross + rename merges with basic modification' 
 	git branch L1 &&
 	git checkout -b R1 &&
 	git mv one three &&
-	echo more >>two &&
-	git add two &&
-	test_tick && git commit -m R1 &&
+	test_commit_add_line more two &&
 
 	git checkout L1 &&
 	git mv two three &&
@@ -241,10 +239,7 @@ test_expect_success 'setup criss-cross + modify/delete resolved differently' '
 	rm -rf .git &&
 	git init &&
 
-	echo A >file &&
-	git add file &&
-	test_tick &&
-	git commit -m A &&
+	test_commit_add_line A file &&
 
 	git branch B &&
 	git checkout -b C &&

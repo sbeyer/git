@@ -53,9 +53,7 @@ test_expect_success \
 
 test_expect_success \
 	'Make initial commit' \
-	'echo "Not an empty file." > file &&
-	 git add file &&
-	 git commit -a -m "Initial commit." &&
+	'test_commit_add_line "Not an empty file." file &&
 	 git branch b'
 
 test_expect_success \
@@ -139,9 +137,7 @@ test_expect_success \
 
 test_expect_success \
 	'commitdiff(0): file added' \
-	'echo "New file" > new_file &&
-	 git add new_file &&
-	 git commit -a -m "File added." &&
+	'test_commit_add_line "New file" new_file &&
 	 gitweb_run "p=.git;a=commitdiff"'
 
 test_expect_success \
@@ -179,9 +175,8 @@ test_expect_success \
 
 test_expect_success \
 	'commitdiff(0): mode change and modified' \
-	'echo "New line" >> file2 &&
-	 test_chmod +x file2 &&
-	 git commit -a -m "Mode change and modification." &&
+	'test_chmod +x file2 &&
+	 test_commit_add_line "New line" file2 &&
 	 gitweb_run "p=.git;a=commitdiff"'
 
 test_expect_success \
@@ -197,16 +192,14 @@ propter nomen suum.
 EOF
 	 git commit -a -m "File added." &&
 	 git mv file2 file3 &&
-	 echo "Propter nomen suum." >> file3 &&
-	 git commit -a -m "File rename and modification." &&
+	 test_commit_add_line "Propter nomen suum." file3 &&
 	 gitweb_run "p=.git;a=commitdiff"'
 
 test_expect_success \
 	'commitdiff(0): renamed, mode change and modified' \
 	'git mv file3 file2 &&
-	 echo "Propter nomen suum." >> file2 &&
 	 test_chmod +x file2 &&
-	 git commit -a -m "File rename, mode change and modification." &&
+	 test_commit_add_line "Propter nomen suum." file2 &&
 	 gitweb_run "p=.git;a=commitdiff"'
 
 # ----------------------------------------------------------------------
@@ -298,8 +291,7 @@ test_expect_success 'setup incomplete lines' '
 	echo "incomplete line" | tr -d "\\012" >>file &&
 	git commit -a -m "Change incomplete line" &&
 	git tag incomplete_lines_chg &&
-	echo "Dominus regit me," >file &&
-	git commit -a -m "Remove incomplete line" &&
+	test_commit_add_line "Dominus regit me," file &&
 	git tag incomplete_lines_rem
 '
 
@@ -324,9 +316,7 @@ test_expect_success 'commitdiff(1): removal of incomplete line' '
 test_expect_success \
 	'Create a merge' \
 	'git checkout b &&
-	 echo "Branch" >> b &&
-	 git add b &&
-	 git commit -a -m "On branch" &&
+	 test_commit_add_line "Branch" b &&
 	 git checkout master &&
 	 git merge b &&
 	 git tag merge_commit'
@@ -444,9 +434,7 @@ test_expect_success \
 test_expect_success \
 	'logs: history (implicit HEAD, deleted file)' \
 	'git checkout master &&
-	 echo "to be deleted" > deleted_file &&
-	 git add deleted_file &&
-	 git commit -m "Add file to be deleted" &&
+	 test_commit_add_line "to be deleted" deleted_file &&
 	 git rm deleted_file &&
 	 git commit -m "Delete file" &&
 	 gitweb_run "p=.git;a=history;f=deleted_file"'
@@ -704,17 +692,13 @@ test_expect_success HIGHLIGHT \
 test_expect_success HIGHLIGHT \
 	'syntax highlighting (highlighted, shell script)' \
 	'git config gitweb.highlight yes &&
-	 echo "#!/usr/bin/sh" > test.sh &&
-	 git add test.sh &&
-	 git commit -m "Add test.sh" &&
+	 test_commit_add_line "#!/usr/bin/sh" test.sh &&
 	 gitweb_run "p=.git;a=blob;f=test.sh"'
 
 test_expect_success HIGHLIGHT \
 	'syntax highlighting (highlighter language autodetection)' \
 	'git config gitweb.highlight yes &&
-	 echo "#!/usr/bin/perl" > test &&
-	 git add test &&
-	 git commit -m "Add test" &&
+	 test_commit_add_line "#!/usr/bin/perl" test &&
 	 gitweb_run "p=.git;a=blob;f=test"'
 
 # ----------------------------------------------------------------------

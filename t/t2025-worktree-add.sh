@@ -26,9 +26,7 @@ test_expect_success '"add" using shorthand - fails when no previous branch' '
 
 test_expect_success '"add" using - shorthand' '
 	git checkout -b newbranch &&
-	echo hello >myworld &&
-	git add myworld &&
-	git commit -m myworld &&
+	test_commit_add_line hello myworld &&
 	git checkout master &&
 	git worktree add short-hand - &&
 	echo refs/heads/newbranch >expect &&

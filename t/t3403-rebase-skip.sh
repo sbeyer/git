@@ -11,22 +11,15 @@ test_description='git rebase --merge --skip tests'
 # and always works :)
 
 test_expect_success setup '
-	echo hello > hello &&
-	git add hello &&
-	git commit -m "hello" &&
+	test_commit_add_line hello hello &&
 	git branch skip-reference &&
 
-	echo world >> hello &&
-	git commit -a -m "hello world" &&
-	echo goodbye >> hello &&
-	git commit -a -m "goodbye" &&
+	test_commit_add_line world hello &&
+	test_commit_add_line goodbye hello &&
 
 	git checkout -f skip-reference &&
-	echo moo > hello &&
-	git commit -a -m "we should skip this" &&
-	echo moo > cow &&
-	git add cow &&
-	git commit -m "this should not be skipped" &&
+	test_commit_add_line moo hello &&
+	test_commit_add_line moo cow &&
 	git branch pre-rebase skip-reference &&
 	git branch skip-merge skip-reference
 	'

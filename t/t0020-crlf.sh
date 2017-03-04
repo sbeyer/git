@@ -253,9 +253,7 @@ test_expect_success '.gitattributes says two and three are text' '
 
 test_expect_success 'in-tree .gitattributes (1)' '
 
-	echo "one -crlf" >>.gitattributes &&
-	git add .gitattributes &&
-	git commit -m "Add .gitattributes" &&
+	test_commit_add_line "one -crlf" .gitattributes &&
 
 	rm -rf tmp one dir .gitattributes patch.file three &&
 	git read-tree --reset -u HEAD &&

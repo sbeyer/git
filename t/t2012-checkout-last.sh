@@ -5,13 +5,9 @@ test_description='checkout can switch to last branch and merge base'
 . ./test-lib.sh
 
 test_expect_success 'setup' '
-	echo hello >world &&
-	git add world &&
-	git commit -m initial &&
+	test_commit_add_line hello world &&
 	git branch other &&
-	echo "hello again" >>world &&
-	git add world &&
-	git commit -m second
+	test_commit_add_line "hello again" world
 '
 
 test_expect_success '"checkout -" does not work initially' '
@@ -93,9 +89,7 @@ test_expect_success 'switch to twelfth from the last' '
 
 test_expect_success 'merge base test setup' '
 	git checkout -b another other &&
-	echo "hello again" >>world &&
-	git add world &&
-	git commit -m third
+	test_commit_add_line "hello again" world
 '
 
 test_expect_success 'another...master' '

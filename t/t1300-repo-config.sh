@@ -1020,9 +1020,7 @@ test_expect_success SYMLINKS 'symlink to nonexistent configuration' '
 test_expect_success 'check split_cmdline return' "
 	git config alias.split-cmdline-fix 'echo \"' &&
 	test_must_fail git split-cmdline-fix &&
-	echo foo > foo &&
-	git add foo &&
-	git commit -m 'initial commit' &&
+	test_commit_add_line foo foo &&
 	git config branch.master.mergeoptions 'echo \"' &&
 	test_must_fail git merge master
 "

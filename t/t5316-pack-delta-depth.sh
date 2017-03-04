@@ -52,9 +52,7 @@ test_expect_success 'create series of packs' '
 	for i in $(test_seq 1 10)
 	do
 		cat content >file &&
-		echo $i >>file &&
-		git add file &&
-		git commit -m $i &&
+		test_commit_add_line $i file &&
 		cur=$(git rev-parse HEAD^{tree}) &&
 		{
 			test -n "$prev" && echo "-$prev"

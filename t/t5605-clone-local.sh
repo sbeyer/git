@@ -95,9 +95,7 @@ test_expect_success 'clone empty repository' '
 	git clone empty empty-clone &&
 	test_tick &&
 	(cd empty-clone
-	 echo "content" >> foo &&
-	 git add foo &&
-	 git commit -m "Initial commit" &&
+	 test_commit_add_line content foo &&
 	 git push origin master &&
 	 expected=$(git rev-parse master) &&
 	 actual=$(git --git-dir=../empty/.git rev-parse master) &&

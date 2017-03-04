@@ -28,9 +28,7 @@ test_pull_autostash_fail () {
 }
 
 test_expect_success setup '
-	echo file >file &&
-	git add file &&
-	git commit -a -m original
+	test_commit_add_line file file
 '
 
 test_expect_success 'pulling into void' '
@@ -280,9 +278,7 @@ test_expect_success '--rebase --autostash fast forward' '
 		git branch -D behind" &&
 	git branch behind &&
 	git checkout -b to-rebase-ff &&
-	echo another modification >>file &&
-	git add file &&
-	git commit -m mod &&
+	test_commit_add_line "another modification" file &&
 
 	git checkout behind &&
 	echo dirty >file &&

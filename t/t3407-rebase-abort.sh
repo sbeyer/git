@@ -11,9 +11,7 @@ test_expect_success setup '
 	mkdir -p "$work_dir" &&
 	cd "$work_dir" &&
 	git init &&
-	echo a > a &&
-	git add a &&
-	git commit -m a &&
+	test_commit_add_line a a &&
 	git branch to-rebase &&
 
 	echo b > a &&

@@ -86,10 +86,7 @@ test_expect_success 'setup: messages' '
 '
 
 test_expect_success setup '
-	echo hello >file &&
-	git add file &&
-	test_tick &&
-	git commit -m first &&
+	test_commit_add_line hello file &&
 	git tag first &&
 
 	echo world >>file &&
@@ -175,10 +172,7 @@ test_expect_success setup '
 	test_tick &&
 	git commit -a -m "moved stuff" &&
 
-	echo goodbye >another &&
-	git add another &&
-	test_tick &&
-	git commit -m "added another file" &&
+	test_commit_add_line goodbye another &&
 
 	git format-patch --stdout master >lorem-move.patch &&
 	git format-patch --no-prefix --stdout master >lorem-zero.patch &&

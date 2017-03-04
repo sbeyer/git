@@ -121,11 +121,9 @@ test_expect_success '3-way not overwriting local changes (setup)' '
 
 	git reset --hard &&
 	git checkout -b side-a branch-point &&
-	echo >>file1 "new line to be kept in the merge result" &&
-	git commit -a -m "side-a changes file1" &&
+	test_commit_add_line "new line to be kept in the merge result" file1 &&
 	git checkout -b side-b branch-point &&
-	echo >>file2 "new line to be kept in the merge result" &&
-	git commit -a -m "side-b changes file2" &&
+	test_commit_add_line "new line to be kept in the merge result" file2 &&
 	git checkout side-a
 
 '
@@ -199,10 +197,7 @@ test_expect_success 'D/F setup' '
 	git checkout side-a &&
 	rm -f subdir/file2 &&
 	mkdir subdir/file2 &&
-	echo qfwfq >subdir/file2/another &&
-	git add subdir/file2/another &&
-	test_tick &&
-	git commit -m "side-a changes file2 to directory"
+	test_commit_add_line qfwfq subdir/file2/another
 
 '
 
