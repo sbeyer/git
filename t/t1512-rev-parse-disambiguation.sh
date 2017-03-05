@@ -177,19 +177,11 @@ test_expect_success 'parse describe name' '
 test_expect_success 'more history' '
 	# commit 0000000000043
 	git mv a0blgqsjc d12cr3h8t &&
-	echo h62xsjeu >>d12cr3h8t &&
-	git add d12cr3h8t &&
-
-	test_tick &&
-	git commit -m czy8f73t &&
+	test_commit_add_line -m czy8f73t h62xsjeu d12cr3h8t &&
 
 	# commit 00000000008ec
 	git mv d12cr3h8t j000jmpzn &&
-	echo j08bekfvt >>j000jmpzn &&
-	git add j000jmpzn &&
-
-	test_tick &&
-	git commit -m ioiley5o &&
+	test_commit_add_line -m ioiley5o j08bekfvt j000jmpzn &&
 
 	# commit 0000000005b0
 	git checkout v1.0.0^0 &&

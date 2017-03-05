@@ -201,7 +201,7 @@ test_commit () {
 
 # test_commit_add_line usage:
 #      test_commit_add_line [-m <message>] <line> <file>.
-# <line> is appended to <file> and this change is commited.
+# <line> is appended to <file> and all indexed changes are commited.
 test_commit_add_line() {
 	while test $# != 0
 	do
@@ -233,7 +233,7 @@ test_commit_add_line() {
 
 	test_tick
 	test -n "$_message" && MSG="$_message"
-	git commit --quiet -m "$MSG" "$_file" || return
+	git commit --quiet -m "$MSG" || return
 }
 
 # Call test_merge with the arguments "<message> <commit>", where <commit>
