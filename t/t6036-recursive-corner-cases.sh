@@ -161,7 +161,7 @@ test_expect_success 'setup differently handled merges of rename/add conflict' '
 	rm -rf .git &&
 	git init &&
 
-	printf "0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n" >a &&
+	test_write_lines 0 1 2 3 4 5 6 7 8 9 >a &&
 	git add a &&
 	test_tick && git commit -m A &&
 
@@ -385,7 +385,7 @@ test_expect_success 'setup differently handled merges of directory/file conflict
 	test_must_fail git merge B &&
 	git clean -f &&
 	git rm --cached a &&
-	printf "10\n11\n" >a/file &&
+	test_write_lines 10 11 >a/file &&
 	git add a/file &&
 	test_tick &&
 	git commit -m E2 &&
@@ -498,7 +498,7 @@ test_expect_success 'setup rename/rename(1to2)/modify followed by what looks lik
 	rm -rf .git &&
 	git init &&
 
-	printf "1\n2\n3\n4\n5\n6\n" >a &&
+	test_write_lines 1 2 3 4 5 6 >a &&
 	git add a &&
 	git commit -m A &&
 	git tag A &&
@@ -522,7 +522,7 @@ test_expect_success 'setup rename/rename(1to2)/modify followed by what looks lik
 	git checkout -q C^0 &&
 	git merge --no-commit -s ours B^0 &&
 	git mv c newname &&
-	printf "7\n8\n" >>newname &&
+	test_write_lines 7 8 >>newname &&
 	git add -u &&
 	git commit -m "Merge commit B^0 into HEAD" &&
 	git tag E
@@ -568,7 +568,7 @@ test_expect_success 'setup criss-cross + rename/rename/add + modify/modify' '
 	rm -rf .git &&
 	git init &&
 
-	printf "lots\nof\nwords\nand\ncontent\n" >a &&
+	test_write_lines lots of words and content >a &&
 	git add a &&
 	git commit -m A &&
 	git tag A &&
@@ -579,7 +579,7 @@ test_expect_success 'setup criss-cross + rename/rename/add + modify/modify' '
 
 	git checkout -b C A &&
 	git mv a c &&
-	printf "2\n3\n4\n5\n6\n7\n" >a &&
+	test_write_lines 2 3 4 5 6 7 >a &&
 	git add a &&
 	git commit -m C &&
 
@@ -614,7 +614,7 @@ test_expect_failure 'detect rename/rename/add-source for virtual merge-base' '
 
 	test $(git rev-parse HEAD:b) = $(git rev-parse A:a) &&
 	test $(git rev-parse HEAD:c) = $(git rev-parse A:a) &&
-	test "$(cat a)" = "$(printf "1\n2\n3\n4\n5\n6\n7\n8\n")"
+	test "$(cat a)" = "$(test_write_lines 1 2 3 4 5 6 7 8)"
 '
 
 #
@@ -650,7 +650,7 @@ test_expect_success 'setup criss-cross+rename/rename/add-dest + simple modify' '
 
 	git checkout -b B A &&
 	git mv a b &&
-	printf "1\n2\n3\n4\n5\n6\n7\n" >c &&
+	test_write_lines 1 2 3 4 5 6 7 >c &&
 	git add c &&
 	git commit -m B &&
 

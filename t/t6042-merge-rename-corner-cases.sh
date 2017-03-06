@@ -6,10 +6,7 @@ test_description="recursive merge corner cases w/ renames but not criss-crosses"
 . ./test-lib.sh
 
 test_expect_success 'setup rename/delete + untracked file' '
-	echo "A pretty inscription" >ring &&
-	git add ring &&
-	test_tick &&
-	git commit -m beginning &&
+	test_commit_add_line "A pretty inscription" ring &&
 
 	git branch people &&
 	git checkout -b rename-the-ring &&
@@ -19,10 +16,7 @@ test_expect_success 'setup rename/delete + untracked file' '
 
 	git checkout people &&
 	git rm ring &&
-	echo gollum >owner &&
-	git add owner &&
-	test_tick &&
-	git commit -m track-people-instead-of-objects &&
+	test_commit_add_line gollum owner &&
 	echo "Myyy PRECIOUSSS" >ring
 '
 
@@ -46,21 +40,17 @@ test_expect_success 'setup rename/modify/add-source conflict' '
 	rm -rf .git &&
 	git init &&
 
-	printf "1\n2\n3\n4\n5\n6\n7\n" >a &&
+	test_write_lines 1 2 3 4 5 6 7 >a &&
 	git add a &&
 	git commit -m A &&
 	git tag A &&
 
 	git checkout -b B A &&
-	echo 8 >>a &&
-	git add a &&
-	git commit -m B &&
+	test_commit_add_line 8 a &&
 
 	git checkout -b C A &&
 	git mv a b &&
-	echo something completely different >a &&
-	git add a &&
-	git commit -m C
+	test_commit_add_line "something completely different" a
 '
 
 test_expect_failure 'rename/modify/add-source conflict resolvable' '
@@ -78,22 +68,17 @@ test_expect_success 'setup resolvable conflict missed if rename missed' '
 	rm -rf .git &&
 	git init &&
 
-	printf "1\n2\n3\n4\n5\n" >a &&
-	echo foo >b &&
-	git add a b &&
-	git commit -m A &&
+	test_write_lines 1 2 3 4 5 >a &&
+	git add a &&
+	test_commit_add_line foo b &&
 	git tag A &&
 
 	git checkout -b B A &&
 	git mv a c &&
-	echo "Completely different content" >a &&
-	git add a &&
-	git commit -m B &&
+	test_commit_add_line "Completely different content" a &&
 
 	git checkout -b C A &&
-	echo 6 >>a &&
-	git add a &&
-	git commit -m C
+	test_commit_add_line 6 a
 '
 
 test_expect_failure 'conflict caused if rename not detected' '
@@ -150,7 +135,7 @@ test_expect_success 'setup undetected rename/add-source causes data loss' '
 	rm -rf .git &&
 	git init &&
 
-	printf "1\n2\n3\n4\n5\n" >a &&
+	test_write_lines 1 2 3 4 5 >a &&
 	git add a &&
 	git commit -m A &&
 	git tag A &&
@@ -204,7 +189,7 @@ test_expect_success 'setup content merge + rename/directory conflict' '
 	rm -rf .git &&
 	git init &&
 
-	printf "1\n2\n3\n4\n5\n6\n" >file &&
+	test_write_lines 1 2 3 4 5 6 >file &&
 	git add file &&
 	test_tick &&
 	git commit -m base &&
@@ -297,7 +282,7 @@ test_expect_success 'setup content merge + rename/directory conflict w/ disappea
 	git init &&
 
 	mkdir sub &&
-	printf "1\n2\n3\n4\n5\n6\n" >sub/file &&
+	test_write_lines 1 2 3 4 5 6 >sub/file &&
 	git add sub/file &&
 	test_tick &&
 	git commit -m base &&
@@ -357,8 +342,8 @@ test_expect_success 'setup rename/rename (2to1) + modify/modify' '
 	rm -rf .git &&
 	git init &&
 
-	printf "1\n2\n3\n4\n5\n" >a &&
-	printf "5\n4\n3\n2\n1\n" >b &&
+	test_write_lines 1 2 3 4 5 >a &&
+	test_write_lines 5 4 3 2 1 >b &&
 	git add a b &&
 	git commit -m A &&
 	git tag A &&
@@ -454,7 +439,7 @@ test_expect_success 'setup rename/rename(1to2)/add-source conflict' '
 	rm -rf .git &&
 	git init &&
 
-	printf "1\n2\n3\n4\n5\n6\n7\n" >a &&
+	test_write_lines 1 2 3 4 5 6 7 >a &&
 	git add a &&
 	git commit -m A &&
 	git tag A &&

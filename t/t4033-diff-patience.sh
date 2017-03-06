@@ -6,8 +6,8 @@ test_description='patience diff algorithm'
 . "$TEST_DIRECTORY"/lib-diff-alternative.sh
 
 test_expect_success '--ignore-space-at-eol with a single appended character' '
-	printf "a\nb\nc\n" >pre &&
-	printf "a\nbX\nc\n" >post &&
+	test_write_lines a b c >pre &&
+	test_write_lines a bX c >post &&
 	test_must_fail git diff --no-index \
 		--patience --ignore-space-at-eol pre post >diff &&
 	grep "^+.*X" diff

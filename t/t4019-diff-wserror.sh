@@ -266,9 +266,9 @@ test_expect_success 'trailing empty lines (2)' '
 
 test_expect_success 'checkdiff shows correct line number for trailing blank lines' '
 
-	printf "a\nb\n" > G &&
+	test_write_lines a b >G &&
 	git add G &&
-	printf "x\nx\nx\na\nb\nc\n\n" > G &&
+	test_write_lines x x x a b c "" >G &&
 	[ "$(git diff --check -- G)" = "G:7: new blank line at EOF." ]
 
 '

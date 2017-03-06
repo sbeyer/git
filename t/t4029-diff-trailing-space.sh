@@ -20,10 +20,10 @@ exit 1
 
 test_expect_success \
     "$test_description" \
-    'printf "\nx\n" > f &&
+    'test_write_lines "" x >f &&
      git add f &&
      git commit -q -m. f &&
-     printf "\ny\n" > f &&
+     test_write_lines "" y >f &&
      git config --bool diff.suppressBlankEmpty true &&
      git diff f > actual &&
      test_cmp exp actual &&

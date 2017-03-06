@@ -55,7 +55,7 @@ test_expect_success 'setup modify/delete + directory/file conflict' '
 	git rm -rf . &&
 	git clean -fdqx &&
 
-	printf "a\nb\nc\nd\ne\nf\ng\nh\n" >letters &&
+	test_write_lines a b c d e f g h >letters &&
 	git add letters &&
 	git commit -m initial &&
 

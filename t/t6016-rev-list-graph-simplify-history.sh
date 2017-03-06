@@ -60,59 +60,59 @@ test_expect_success 'set up rev-list --graph test' '
 	'
 
 test_expect_success '--graph --all' '
-	rm -f expected &&
-	echo "* $A7" >> expected &&
-	echo "*   $A6" >> expected &&
-	echo "|\\  " >> expected &&
-	echo "| * $C4" >> expected &&
-	echo "| * $C3" >> expected &&
-	echo "* | $A5" >> expected &&
-	echo "| |     " >> expected &&
-	echo "|  \\    " >> expected &&
-	echo "*-. \\   $A4" >> expected &&
-	echo "|\\ \\ \\  " >> expected &&
-	echo "| | |/  " >> expected &&
-	echo "| | * $C2" >> expected &&
-	echo "| | * $C1" >> expected &&
-	echo "| * | $B2" >> expected &&
-	echo "| * | $B1" >> expected &&
-	echo "* | | $A3" >> expected &&
-	echo "| |/  " >> expected &&
-	echo "|/|   " >> expected &&
-	echo "* | $A2" >> expected &&
-	echo "|/  " >> expected &&
-	echo "* $A1" >> expected &&
-	git rev-list --graph --all > actual &&
+	test_write_lines >expected \
+		"* $A7" \
+		"*   $A6" \
+		"|\\  " \
+		"| * $C4" \
+		"| * $C3" \
+		"* | $A5" \
+		"| |     " \
+		"|  \\    " \
+		"*-. \\   $A4" \
+		"|\\ \\ \\  " \
+		"| | |/  " \
+		"| | * $C2" \
+		"| | * $C1" \
+		"| * | $B2" \
+		"| * | $B1" \
+		"* | | $A3" \
+		"| |/  " \
+		"|/|   " \
+		"* | $A2" \
+		"|/  " \
+		"* $A1" &&
+	git rev-list --graph --all >actual &&
 	test_cmp expected actual
 	'
 
 # Make sure the graph_is_interesting() code still realizes
 # that undecorated merges are interesting, even with --simplify-by-decoration
 test_expect_success '--graph --simplify-by-decoration' '
-	rm -f expected &&
 	git tag -d A4 &&
-	echo "* $A7" >> expected &&
-	echo "*   $A6" >> expected &&
-	echo "|\\  " >> expected &&
-	echo "| * $C4" >> expected &&
-	echo "| * $C3" >> expected &&
-	echo "* | $A5" >> expected &&
-	echo "| |     " >> expected &&
-	echo "|  \\    " >> expected &&
-	echo "*-. \\   $A4" >> expected &&
-	echo "|\\ \\ \\  " >> expected &&
-	echo "| | |/  " >> expected &&
-	echo "| | * $C2" >> expected &&
-	echo "| | * $C1" >> expected &&
-	echo "| * | $B2" >> expected &&
-	echo "| * | $B1" >> expected &&
-	echo "* | | $A3" >> expected &&
-	echo "| |/  " >> expected &&
-	echo "|/|   " >> expected &&
-	echo "* | $A2" >> expected &&
-	echo "|/  " >> expected &&
-	echo "* $A1" >> expected &&
-	git rev-list --graph --all --simplify-by-decoration > actual &&
+	test_write_lines >expected \
+		"* $A7" \
+		"*   $A6" \
+		"|\\  " \
+		"| * $C4" \
+		"| * $C3" \
+		"* | $A5" \
+		"| |     " \
+		"|  \\    " \
+		"*-. \\   $A4" \
+		"|\\ \\ \\  " \
+		"| | |/  " \
+		"| | * $C2" \
+		"| | * $C1" \
+		"| * | $B2" \
+		"| * | $B1" \
+		"* | | $A3" \
+		"| |/  " \
+		"|/|   " \
+		"* | $A2" \
+		"|/  " \
+		"* $A1" &&
+	git rev-list --graph --all --simplify-by-decoration >actual &&
 	test_cmp expected actual
 	'
 
@@ -124,115 +124,115 @@ test_expect_success 'setup: get rid of decorations on B' '
 
 # Graph with branch B simplified away
 test_expect_success '--graph --simplify-by-decoration prune branch B' '
-	rm -f expected &&
-	echo "* $A7" >> expected &&
-	echo "*   $A6" >> expected &&
-	echo "|\\  " >> expected &&
-	echo "| * $C4" >> expected &&
-	echo "| * $C3" >> expected &&
-	echo "* | $A5" >> expected &&
-	echo "* |   $A4" >> expected &&
-	echo "|\\ \\  " >> expected &&
-	echo "| |/  " >> expected &&
-	echo "| * $C2" >> expected &&
-	echo "| * $C1" >> expected &&
-	echo "* | $A3" >> expected &&
-	echo "|/  " >> expected &&
-	echo "* $A2" >> expected &&
-	echo "* $A1" >> expected &&
-	git rev-list --graph --simplify-by-decoration --all > actual &&
+	test_write_lines >expected \
+		"* $A7" \
+		"*   $A6" \
+		"|\\  " \
+		"| * $C4" \
+		"| * $C3" \
+		"* | $A5" \
+		"* |   $A4" \
+		"|\\ \\  " \
+		"| |/  " \
+		"| * $C2" \
+		"| * $C1" \
+		"* | $A3" \
+		"|/  " \
+		"* $A2" \
+		"* $A1" &&
+	git rev-list --graph --simplify-by-decoration --all >actual &&
 	test_cmp expected actual
 	'
 
 test_expect_success '--graph --full-history -- bar.txt' '
-	rm -f expected &&
-	echo "* $A7" >> expected &&
-	echo "*   $A6" >> expected &&
-	echo "|\\  " >> expected &&
-	echo "| * $C4" >> expected &&
-	echo "* | $A5" >> expected &&
-	echo "* |   $A4" >> expected &&
-	echo "|\\ \\  " >> expected &&
-	echo "| |/  " >> expected &&
-	echo "* | $A3" >> expected &&
-	echo "|/  " >> expected &&
-	echo "* $A2" >> expected &&
-	git rev-list --graph --full-history --all -- bar.txt > actual &&
+	test_write_lines >expected \
+		"* $A7" \
+		"*   $A6" \
+		"|\\  " \
+		"| * $C4" \
+		"* | $A5" \
+		"* |   $A4" \
+		"|\\ \\  " \
+		"| |/  " \
+		"* | $A3" \
+		"|/  " \
+		"* $A2" &&
+	git rev-list --graph --full-history --all -- bar.txt >actual &&
 	test_cmp expected actual
 	'
 
 test_expect_success '--graph --full-history --simplify-merges -- bar.txt' '
-	rm -f expected &&
-	echo "* $A7" >> expected &&
-	echo "*   $A6" >> expected &&
-	echo "|\\  " >> expected &&
-	echo "| * $C4" >> expected &&
-	echo "* | $A5" >> expected &&
-	echo "* | $A3" >> expected &&
-	echo "|/  " >> expected &&
-	echo "* $A2" >> expected &&
+	test_write_lines >expected \
+		"* $A7" \
+		"*   $A6" \
+		"|\\  " \
+		"| * $C4" \
+		"* | $A5" \
+		"* | $A3" \
+		"|/  " \
+		"* $A2" &&
 	git rev-list --graph --full-history --simplify-merges --all \
-		-- bar.txt > actual &&
+		-- bar.txt >actual &&
 	test_cmp expected actual
 	'
 
 test_expect_success '--graph -- bar.txt' '
-	rm -f expected &&
-	echo "* $A7" >> expected &&
-	echo "* $A5" >> expected &&
-	echo "* $A3" >> expected &&
-	echo "| * $C4" >> expected &&
-	echo "|/  " >> expected &&
-	echo "* $A2" >> expected &&
-	git rev-list --graph --all -- bar.txt > actual &&
+	test_write_lines >expected \
+		"* $A7" \
+		"* $A5" \
+		"* $A3" \
+		"| * $C4" \
+		"|/  " \
+		"* $A2" &&
+	git rev-list --graph --all -- bar.txt >actual &&
 	test_cmp expected actual
 	'
 
 test_expect_success '--graph --sparse -- bar.txt' '
-	rm -f expected &&
-	echo "* $A7" >> expected &&
-	echo "* $A6" >> expected &&
-	echo "* $A5" >> expected &&
-	echo "* $A4" >> expected &&
-	echo "* $A3" >> expected &&
-	echo "| * $C4" >> expected &&
-	echo "| * $C3" >> expected &&
-	echo "| * $C2" >> expected &&
-	echo "| * $C1" >> expected &&
-	echo "|/  " >> expected &&
-	echo "* $A2" >> expected &&
-	echo "* $A1" >> expected &&
-	git rev-list --graph --sparse --all -- bar.txt > actual &&
+	test_write_lines >expected \
+		"* $A7" \
+		"* $A6" \
+		"* $A5" \
+		"* $A4" \
+		"* $A3" \
+		"| * $C4" \
+		"| * $C3" \
+		"| * $C2" \
+		"| * $C1" \
+		"|/  " \
+		"* $A2" \
+		"* $A1" &&
+	git rev-list --graph --sparse --all -- bar.txt >actual &&
 	test_cmp expected actual
 	'
 
 test_expect_success '--graph ^C4' '
-	rm -f expected &&
-	echo "* $A7" >> expected &&
-	echo "* $A6" >> expected &&
-	echo "* $A5" >> expected &&
-	echo "*   $A4" >> expected &&
-	echo "|\\  " >> expected &&
-	echo "| * $B2" >> expected &&
-	echo "| * $B1" >> expected &&
-	echo "* $A3" >> expected &&
-	git rev-list --graph --all ^C4 > actual &&
+	test_write_lines >expected \
+		"* $A7" \
+		"* $A6" \
+		"* $A5" \
+		"*   $A4" \
+		"|\\  " \
+		"| * $B2" \
+		"| * $B1" \
+		"* $A3" &&
+	git rev-list --graph --all ^C4 >actual &&
 	test_cmp expected actual
 	'
 
 test_expect_success '--graph ^C3' '
-	rm -f expected &&
-	echo "* $A7" >> expected &&
-	echo "*   $A6" >> expected &&
-	echo "|\\  " >> expected &&
-	echo "| * $C4" >> expected &&
-	echo "* $A5" >> expected &&
-	echo "*   $A4" >> expected &&
-	echo "|\\  " >> expected &&
-	echo "| * $B2" >> expected &&
-	echo "| * $B1" >> expected &&
-	echo "* $A3" >> expected &&
-	git rev-list --graph --all ^C3 > actual &&
+	test_write_lines >expected \
+		"* $A7" \
+		"*   $A6" \
+		"|\\  " \
+		"| * $C4" \
+		"* $A5" \
+		"*   $A4" \
+		"|\\  " \
+		"| * $B2" \
+		"| * $B1" \
+		"* $A3" &&
+	git rev-list --graph --all ^C3 >actual &&
 	test_cmp expected actual
 	'
 
@@ -240,27 +240,27 @@ test_expect_success '--graph ^C3' '
 # that important, but this test depends on it.  If the ordering ever changes
 # in the code, we'll need to update this test.
 test_expect_success '--graph --boundary ^C3' '
-	rm -f expected &&
-	echo "* $A7" >> expected &&
-	echo "*   $A6" >> expected &&
-	echo "|\\  " >> expected &&
-	echo "| * $C4" >> expected &&
-	echo "* | $A5" >> expected &&
-	echo "| |     " >> expected &&
-	echo "|  \\    " >> expected &&
-	echo "*-. \\   $A4" >> expected &&
-	echo "|\\ \\ \\  " >> expected &&
-	echo "| * | | $B2" >> expected &&
-	echo "| * | | $B1" >> expected &&
-	echo "* | | | $A3" >> expected &&
-	echo "o | | | $A2" >> expected &&
-	echo "|/ / /  " >> expected &&
-	echo "o | | $A1" >> expected &&
-	echo " / /  " >> expected &&
-	echo "| o $C3" >> expected &&
-	echo "|/  " >> expected &&
-	echo "o $C2" >> expected &&
-	git rev-list --graph --boundary --all ^C3 > actual &&
+	test_write_lines >expected \
+		"* $A7" \
+		"*   $A6" \
+		"|\\  " \
+		"| * $C4" \
+		"* | $A5" \
+		"| |     " \
+		"|  \\    " \
+		"*-. \\   $A4" \
+		"|\\ \\ \\  " \
+		"| * | | $B2" \
+		"| * | | $B1" \
+		"* | | | $A3" \
+		"o | | | $A2" \
+		"|/ / /  " \
+		"o | | $A1" \
+		" / /  " \
+		"| o $C3" \
+		"|/  " \
+		"o $C2" &&
+	git rev-list --graph --boundary --all ^C3 >actual &&
 	test_cmp expected actual
 	'
 

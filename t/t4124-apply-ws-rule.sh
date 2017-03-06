@@ -217,9 +217,9 @@ test_expect_success 'blank at EOF with --whitespace=fix (1)' '
 	test_might_fail git config --unset core.whitespace &&
 	rm -f .gitattributes &&
 
-	{ echo a; echo b; echo c; } >one &&
+	test_write_lines a b c >one &&
 	git add one &&
-	{ echo a; echo b; echo c; } >expect &&
+	test_write_lines a b c >expect &&
 	{ cat expect; echo; } >one &&
 	git diff -- one >patch &&
 
@@ -229,9 +229,9 @@ test_expect_success 'blank at EOF with --whitespace=fix (1)' '
 '
 
 test_expect_success 'blank at EOF with --whitespace=fix (2)' '
-	{ echo a; echo b; echo c; } >one &&
+	test_write_lines a b c >one &&
 	git add one &&
-	{ echo a; echo c; } >expect &&
+	test_write_lines a c >expect &&
 	{ cat expect; echo; echo; } >one &&
 	git diff -- one >patch &&
 
@@ -241,9 +241,9 @@ test_expect_success 'blank at EOF with --whitespace=fix (2)' '
 '
 
 test_expect_success 'blank at EOF with --whitespace=fix (3)' '
-	{ echo a; echo b; echo; } >one &&
+	test_write_lines a b "" >one &&
 	git add one &&
-	{ echo a; echo c; echo; } >expect &&
+	test_write_lines a c "" >expect &&
 	{ cat expect; echo; echo; } >one &&
 	git diff -- one >patch &&
 
@@ -253,9 +253,9 @@ test_expect_success 'blank at EOF with --whitespace=fix (3)' '
 '
 
 test_expect_success 'blank at end of hunk, not at EOF with --whitespace=fix' '
-	{ echo a; echo b; echo; echo; echo; echo; echo; echo d; } >one &&
+	test_write_lines a b "" "" "" "" d >one &&
 	git add one &&
-	{ echo a; echo c; echo; echo; echo; echo; echo; echo; echo d; } >expect &&
+	test_write_lines a c "" "" "" "" "" "" d >expect &&
 	cp expect one &&
 	git diff -- one >patch &&
 
@@ -265,7 +265,7 @@ test_expect_success 'blank at end of hunk, not at EOF with --whitespace=fix' '
 '
 
 test_expect_success 'blank at EOF with --whitespace=warn' '
-	{ echo a; echo b; echo c; } >one &&
+	test_write_lines a b c >one &&
 	git add one &&
 	echo >>one &&
 	cat one >expect &&
@@ -278,7 +278,7 @@ test_expect_success 'blank at EOF with --whitespace=warn' '
 '
 
 test_expect_success 'blank at EOF with --whitespace=error' '
-	{ echo a; echo b; echo c; } >one &&
+	test_write_lines a b c >one &&
 	git add one &&
 	cat one >expect &&
 	echo >>one &&
@@ -291,7 +291,7 @@ test_expect_success 'blank at EOF with --whitespace=error' '
 '
 
 test_expect_success 'blank but not empty at EOF' '
-	{ echo a; echo b; echo c; } >one &&
+	test_write_lines a b c >one &&
 	git add one &&
 	echo "   " >>one &&
 	cat one >expect &&
@@ -304,13 +304,13 @@ test_expect_success 'blank but not empty at EOF' '
 '
 
 test_expect_success 'applying beyond EOF requires one non-blank context line' '
-	{ echo; echo; echo; echo; } >one &&
+	test_write_lines "" "" "" "" >one &&
 	git add one &&
-	{ echo b; } >>one &&
+	echo b >>one &&
 	git diff -- one >patch &&
 
 	git checkout one &&
-	{ echo a; echo; } >one &&
+	test_write_lines a "" >one &&
 	cp one expect &&
 	test_must_fail git apply --whitespace=fix patch &&
 	test_cmp one expect &&
@@ -320,7 +320,7 @@ test_expect_success 'applying beyond EOF requires one non-blank context line' '
 
 test_expect_success 'tons of blanks at EOF should not apply' '
 	for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16; do
-		echo; echo; echo; echo;
+		test_write_lines "" "" "" "";
 	done >one &&
 	git add one &&
 	echo a >>one &&
@@ -332,8 +332,7 @@ test_expect_success 'tons of blanks at EOF should not apply' '
 '
 
 test_expect_success 'missing blank line at end with --whitespace=fix' '
-	echo a >one &&
-	echo >>one &&
+	test_write_lines a "" >one &&
 	git add one &&
 	echo b >>one &&
 	cp one expect &&
@@ -349,9 +348,9 @@ test_expect_success 'missing blank line at end with --whitespace=fix' '
 '
 
 test_expect_success 'two missing blank lines at end with --whitespace=fix' '
-	{ echo a; echo; echo b; echo c; } >one &&
+	test_write_lines a "" b c >one &&
 	cp one no-blank-lines &&
-	{ echo; echo; } >>one &&
+	test_write_lines "" "" >>one &&
 	git add one &&
 	echo d >>one &&
 	cp one expect &&
@@ -368,9 +367,9 @@ test_expect_success 'two missing blank lines at end with --whitespace=fix' '
 '
 
 test_expect_success 'missing blank line at end, insert before end, --whitespace=fix' '
-	{ echo a; echo; } >one &&
+	test_write_lines a "" >one &&
 	git add one &&
-	{ echo b; echo a; echo; } >one &&
+	test_write_lines b a "" >one &&
 	cp one expect &&
 	git diff -- one >patch &&
 	echo a >one &&
@@ -380,10 +379,10 @@ test_expect_success 'missing blank line at end, insert before end, --whitespace=
 '
 
 test_expect_success 'shrink file with tons of missing blanks at end of file' '
-	{ echo a; echo b; echo c; } >one &&
+	test_write_lines a b c >one &&
 	cp one no-blank-lines &&
 	for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16; do
-		echo; echo; echo; echo;
+		test_write_lines "" "" "" "";
 	done >>one &&
 	git add one &&
 	echo a >one &&
@@ -399,9 +398,9 @@ test_expect_success 'shrink file with tons of missing blanks at end of file' '
 '
 
 test_expect_success 'missing blanks at EOF must only match blank lines' '
-	{ echo a; echo b; } >one &&
+	test_write_lines a b >one &&
 	git add one &&
-	{ echo c; echo d; } >>one &&
+	test_write_lines c d >>one &&
 	git diff -- one >patch &&
 
 	echo a >one &&
@@ -421,9 +420,9 @@ test_expect_success 'missing blank line should match context line with spaces' '
 	git add one &&
 	echo d >>one &&
 	git diff -- one >patch &&
-	{ echo a; echo b; echo c; } >one &&
+	test_write_lines a b c >one &&
 	cp one expect &&
-	{ echo; echo d; } >>expect &&
+	test_write_lines "" d >>expect &&
 	git add one &&
 
 	git apply --whitespace=fix patch &&
@@ -442,7 +441,7 @@ test_expect_success 'same, but with the --ignore-space-option' '
 	echo d >>one &&
 	cp one expect &&
 	git diff -- one >patch &&
-	{ echo a; echo b; echo c; } >one &&
+	test_write_lines a b c >one &&
 	git add one &&
 
 	git checkout-index -f one &&

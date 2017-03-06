@@ -95,7 +95,7 @@ test_expect_success 'two push options work' '
 		git push --push-option=asdf --push-option="more structured text" up master
 	) &&
 	test_refs master master &&
-	printf "asdf\nmore structured text\n" >expect &&
+	test_write_lines asdf "more structured text" >expect &&
 	test_cmp expect upstream/.git/hooks/pre-receive.push_options &&
 	test_cmp expect upstream/.git/hooks/post-receive.push_options
 '
@@ -133,7 +133,7 @@ test_expect_success 'push options and submodules' '
 	git -C parent rev-parse --verify master >actual &&
 	test_cmp expect actual &&
 
-	printf "asdf\nmore structured text\n" >expect &&
+	test_write_lines asdf "more structured text" >expect &&
 	test_cmp expect upstream/.git/hooks/pre-receive.push_options &&
 	test_cmp expect upstream/.git/hooks/post-receive.push_options &&
 	test_cmp expect parent_upstream/.git/hooks/pre-receive.push_options &&
@@ -174,7 +174,7 @@ test_expect_success 'push options work properly across http' '
 
 	test_commit -C test_http_clone two &&
 	git -C test_http_clone push --push-option=asdf --push-option="more structured text" origin master &&
-	printf "asdf\nmore structured text\n" >expect &&
+	test_write_lines asdf "more structured text" >expect &&
 	test_cmp expect "$HTTPD_DOCUMENT_ROOT_PATH"/upstream.git/hooks/pre-receive.push_options &&
 	test_cmp expect "$HTTPD_DOCUMENT_ROOT_PATH"/upstream.git/hooks/post-receive.push_options &&
 

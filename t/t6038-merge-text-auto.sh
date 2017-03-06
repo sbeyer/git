@@ -127,10 +127,7 @@ test_expect_success 'Merge addition of text=auto eol=CRLF' '
 
 test_expect_success 'Detect CRLF/LF conflict after setting text=auto' '
 	git config core.eol native &&
-	echo "<<<<<<<" >expected &&
-	echo first line >>expected &&
-	echo same line >>expected &&
-	echo ======= >>expected &&
+	test_write_lines >expected "<<<<<<<" "first line" "same line" "=======" &&
 	echo first line | append_cr >>expected &&
 	echo same line | append_cr >>expected &&
 	echo ">>>>>>>" >>expected &&
@@ -146,10 +143,7 @@ test_expect_success 'Detect LF/CRLF conflict from addition of text=auto' '
 	echo "<<<<<<<" >expected &&
 	echo first line | append_cr >>expected &&
 	echo same line | append_cr >>expected &&
-	echo ======= >>expected &&
-	echo first line >>expected &&
-	echo same line >>expected &&
-	echo ">>>>>>>" >>expected &&
+	test_write_lines >>expected "=======" "first line" "same line" ">>>>>>>" &&
 	git config merge.renormalize false &&
 	rm -f .gitattributes &&
 	git reset --hard b &&

@@ -305,8 +305,9 @@ test_expect_success 'cleanup after mailmap.blob tests' '
 '
 
 test_expect_success 'single-character name' '
-	echo "     1	A <author@example.com>" >expect &&
-	echo "     1	nick1 <bugs@company.xx>" >>expect &&
+	test_write_lines >expect \
+		"     1	A <author@example.com>" \
+		"     1	nick1 <bugs@company.xx>" &&
 	echo "A <author@example.com>" >.mailmap &&
 	test_when_finished "rm .mailmap" &&
 	git shortlog -es HEAD >actual &&
@@ -314,8 +315,9 @@ test_expect_success 'single-character name' '
 '
 
 test_expect_success 'preserve canonical email case' '
-	echo "     1	A U Thor <AUTHOR@example.com>" >expect &&
-	echo "     1	nick1 <bugs@company.xx>" >>expect &&
+	test_write_lines >expect \
+		"     1	A U Thor <AUTHOR@example.com>" \
+		"     1	nick1 <bugs@company.xx>" &&
 	echo "<AUTHOR@example.com> <author@example.com>" >.mailmap &&
 	test_when_finished "rm .mailmap" &&
 	git shortlog -es HEAD >actual &&
@@ -370,13 +372,14 @@ test_expect_success 'Shortlog output (complex mapping)' '
 	git commit --author "CTO <cto@coompany.xx>" -m seventh &&
 
 	mkdir -p internal_mailmap &&
-	echo "Committed <committer@example.com>" > internal_mailmap/.mailmap &&
-	echo "<cto@company.xx>                       <cto@coompany.xx>" >> internal_mailmap/.mailmap &&
-	echo "Some Dude <some@dude.xx>         nick1 <bugs@company.xx>" >> internal_mailmap/.mailmap &&
-	echo "Other Author <other@author.xx>   nick2 <bugs@company.xx>" >> internal_mailmap/.mailmap &&
-	echo "Other Author <other@author.xx>         <nick2@company.xx>" >> internal_mailmap/.mailmap &&
-	echo "Santa Claus <santa.claus@northpole.xx> <me@company.xx>" >> internal_mailmap/.mailmap &&
-	echo "Santa Claus <santa.claus@northpole.xx> <me@company.xx>" >> internal_mailmap/.mailmap &&
+	test_write_lines >internal_mailmap/.mailmap \
+		"Committed <committer@example.com>" \
+		"<cto@company.xx>                       <cto@coompany.xx>" \
+		"Some Dude <some@dude.xx>         nick1 <bugs@company.xx>" \
+		"Other Author <other@author.xx>   nick2 <bugs@company.xx>" \
+		"Other Author <other@author.xx>         <nick2@company.xx>" \
+		"Santa Claus <santa.claus@northpole.xx> <me@company.xx>" \
+		"Santa Claus <santa.claus@northpole.xx> <me@company.xx>" &&
 
 	git shortlog -e HEAD >actual &&
 	test_cmp expect actual

@@ -60,36 +60,26 @@ HASH6=
 HASH7=
 
 test_expect_success 'set up buggy branch' '
-     echo "line 1" >>hello &&
-     echo "line 2" >>hello &&
-     echo "line 3" >>hello &&
-     echo "line 4" >>hello &&
+     test_write_lines "line 1" "line 2" "line 3" "line 4" >>hello &&
      add_and_commit_file hello "4 lines" &&
      HASH1=$(git rev-parse --verify HEAD) &&
-     echo "line BUG" >>hello &&
-     echo "line 6" >>hello &&
-     echo "line 7" >>hello &&
-     echo "line 8" >>hello &&
+     test_write_lines "line BUG" "line 6" "line 7" "line 8" >>hello &&
      add_and_commit_file hello "4 more lines with a BUG" &&
      HASH2=$(git rev-parse --verify HEAD) &&
-     echo "line 9" >>hello &&
-     echo "line 10" >>hello &&
+     test_write_lines "line 9" "line 10" >>hello &&
      add_and_commit_file hello "2 more lines" &&
      HASH3=$(git rev-parse --verify HEAD) &&
-     echo "line 11" >>hello &&
+     test_write_lines "line 11" >>hello &&
      add_and_commit_file hello "1 more line" &&
      HASH4=$(git rev-parse --verify HEAD) &&
      sed -e "s/BUG/5/" hello >hello.new &&
      mv hello.new hello &&
      add_and_commit_file hello "BUG fixed" &&
      HASH5=$(git rev-parse --verify HEAD) &&
-     echo "line 12" >>hello &&
-     echo "line 13" >>hello &&
+     test_write_lines "line 12" "line 13" >>hello &&
      add_and_commit_file hello "2 more lines" &&
      HASH6=$(git rev-parse --verify HEAD) &&
-     echo "line 14" >>hello &&
-     echo "line 15" >>hello &&
-     echo "line 16" >>hello &&
+     test_write_lines "line 14" "line 15" "line 16" >>hello &&
      add_and_commit_file hello "again 3 more lines" &&
      HASH7=$(git rev-parse --verify HEAD)
 '
@@ -400,8 +390,7 @@ test_expect_success '--graft with and without already replaced object' '
 '
 
 test_expect_success GPG 'set up a signed commit' '
-	echo "line 17" >>hello &&
-	echo "line 18" >>hello &&
+	test_write_lines "line 17" "line 18" >>hello &&
 	git add hello &&
 	test_tick &&
 	git commit --quiet -S -m "hello: 2 more lines in a signed commit" &&
@@ -425,8 +414,7 @@ test_expect_success GPG '--graft with a signed commit' '
 test_expect_success GPG 'set up a merge commit with a mergetag' '
 	git reset --hard HEAD &&
 	git checkout -b test_branch HEAD~2 &&
-	echo "line 1 from test branch" >>hello &&
-	echo "line 2 from test branch" >>hello &&
+	test_write_lines "line 1 from test branch" "line 2 from test branch" >>hello &&
 	git add hello &&
 	test_tick &&
 	git commit -m "hello: 2 more lines from a test branch" &&

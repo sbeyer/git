@@ -256,7 +256,7 @@ test_expect_success 'setup for rename + d/f conflicts' '
 
 	mkdir sub &&
 	mkdir dir &&
-	printf "1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n" >sub/file &&
+	test_write_lines 1 2 3 4 5 6 7 8 9 10 >sub/file &&
 	echo foo >dir/file-in-the-way &&
 	git add -A &&
 	git commit -m "Common commit" &&
@@ -274,7 +274,7 @@ test_expect_success 'setup for rename + d/f conflicts' '
 	git checkout -b renamed-file-has-no-conflicts dir-in-way~1 &&
 	git rm -rf dir &&
 	git rm sub/file &&
-	printf "1\n2\n3\n4\n5555\n6\n7\n8\n9\n10\n" >dir &&
+	test_write_lines 1 2 3 4 5555 6 7 8 9 10 >dir &&
 	git add dir &&
 	git commit -m "Independent change" &&
 
@@ -286,7 +286,7 @@ test_expect_success 'setup for rename + d/f conflicts' '
 	git commit -m "Conflicting change"
 '
 
-printf "1\n2\n3\n4\n5555\n6\n7\n8\n9\n10\n11\n" >expected
+test_write_lines 1 2 3 4 5555 6 7 8 9 10 11 >expected
 
 test_expect_success 'Rename+D/F conflict; renamed file merges + dir not in way' '
 	git reset --hard &&
@@ -616,7 +616,7 @@ test_expect_success 'setup avoid unnecessary update, normal rename' '
 	git rm -rf . &&
 	git clean -fdqx &&
 
-	printf "1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n" >original &&
+	test_write_lines 1 2 3 4 5 6 7 8 9 10 >original &&
 	git add -A &&
 	git commit -m "Common commit" &&
 
@@ -647,7 +647,7 @@ test_expect_success 'setup to test avoiding unnecessary update, with D/F conflic
 	git clean -fdqx &&
 
 	mkdir df &&
-	printf "1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n" >df/file &&
+	test_write_lines 1 2 3 4 5 6 7 8 9 10 >df/file &&
 	git add -A &&
 	git commit -m "Common commit" &&
 
@@ -741,7 +741,7 @@ test_expect_success 'setup avoid unnecessary update, rename/add-dest' '
 	rm -rf .git &&
 	git init &&
 
-	printf "1\n2\n3\n4\n5\n6\n7\n8\n" >file &&
+	test_write_lines 1 2 3 4 5 6 7 8 >file &&
 	git add -A &&
 	git commit -mA &&
 
@@ -797,7 +797,7 @@ test_expect_success 'setup for use of extended merge markers' '
 	rm -rf .git &&
 	git init &&
 
-	printf "1\n2\n3\n4\n5\n6\n7\n8\n" >original_file &&
+	test_write_lines 1 2 3 4 5 6 7 8 >original_file &&
 	git add original_file &&
 	git commit -mA &&
 
@@ -865,7 +865,7 @@ test_expect_success 'setup spurious "refusing to lose untracked" message' '
 	git init &&
 
 	> irrelevant_file &&
-	printf "1\n2\n3\n4\n5\n6\n7\n8\n" >original_file &&
+	test_write_lines 1 2 3 4 5 6 7 8 >original_file &&
 	git add irrelevant_file original_file &&
 	git commit -mA &&
 

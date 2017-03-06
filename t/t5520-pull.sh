@@ -622,7 +622,7 @@ test_expect_success 'setup for detecting upstreamed changes' '
 	mkdir src &&
 	(cd src &&
 	 git init &&
-	 printf "1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n" > stuff &&
+	 test_write_lines 1 2 3 4 5 6 7 8 9 10 >stuff &&
 	 git add stuff &&
 	 git commit -m "Initial revision"
 	) &&
