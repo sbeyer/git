@@ -126,16 +126,16 @@ static void create_pack_revindex(struct packed_git *p)
 	index += 4 * 256;
 
 	if (p->index_version > 1) {
-		const uint32_t *off_32 = (uint32_t *)(index + 8 +
-						      p->num_objects * (20 + 4));
+		const uint32_t *off_32 =
+			(uint32_t *)(index + 8 + p->num_objects * (20 + 4));
 		const uint32_t *off_64 = off_32 + p->num_objects;
 		for (i = 0; i < num_ent; i++) {
 			uint32_t off = ntohl(*off_32++);
 			if (!(off & 0x80000000)) {
 				p->revindex[i].offset = off;
 			} else {
-				p->revindex[i].offset = ((uint64_t)ntohl(*off_64++))
-							<< 32;
+				p->revindex[i].offset =
+					((uint64_t)ntohl(*off_64++)) << 32;
 				p->revindex[i].offset |= ntohl(*off_64++);
 			}
 			p->revindex[i].nr = i;

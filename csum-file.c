@@ -76,8 +76,9 @@ int sha1close(struct sha1file *f, unsigned char *result, unsigned int flags)
 		char discard;
 		int cnt = read_in_full(f->check_fd, &discard, 1);
 		if (cnt < 0)
-			die_errno("%s: error when reading the tail of sha1 file",
-				  f->name);
+			die_errno(
+				"%s: error when reading the tail of sha1 file",
+				f->name);
 		if (cnt)
 			die("%s: sha1 file has trailing garbage", f->name);
 		if (close(f->check_fd))
@@ -140,7 +141,8 @@ struct sha1file *sha1fd_check(const char *name)
 	return f;
 }
 
-struct sha1file *sha1fd_throughput(int fd, const char *name, struct progress *tp)
+struct sha1file *
+sha1fd_throughput(int fd, const char *name, struct progress *tp)
 {
 	struct sha1file *f = xmalloc(sizeof(*f));
 	f->fd = fd;
@@ -154,18 +156,21 @@ struct sha1file *sha1fd_throughput(int fd, const char *name, struct progress *tp
 	return f;
 }
 
-void sha1file_checkpoint(struct sha1file *f, struct sha1file_checkpoint *checkpoint)
+void sha1file_checkpoint(struct sha1file *f,
+			 struct sha1file_checkpoint *checkpoint)
 {
 	sha1flush(f);
 	checkpoint->offset = f->total;
 	checkpoint->ctx = f->ctx;
 }
 
-int sha1file_truncate(struct sha1file *f, struct sha1file_checkpoint *checkpoint)
+int sha1file_truncate(struct sha1file *f,
+		      struct sha1file_checkpoint *checkpoint)
 {
 	off_t offset = checkpoint->offset;
 
-	if (ftruncate(f->fd, offset) || lseek(f->fd, offset, SEEK_SET) != offset)
+	if (ftruncate(f->fd, offset) ||
+	    lseek(f->fd, offset, SEEK_SET) != offset)
 		return -1;
 	f->total = offset;
 	f->ctx = checkpoint->ctx;

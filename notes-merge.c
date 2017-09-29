@@ -146,7 +146,8 @@ diff_tree_remote(struct notes_merge_options *o, const struct object_id *base,
 				     oid_to_hex(&p->two->oid));
 			continue;
 		}
-		mp = find_notes_merge_pair_pos(changes, len, &obj, 1, &occupied);
+		mp = find_notes_merge_pair_pos(changes, len, &obj, 1,
+					       &occupied);
 		if (occupied) {
 			/* We've found an addition/deletion pair */
 			assert(!oidcmp(&mp->obj, &obj));
@@ -322,8 +323,8 @@ static void write_buf_to_worktree(const struct object_id *obj, const char *buf,
 	free(path);
 }
 
-static void
-write_note_to_worktree(const struct object_id *obj, const struct object_id *note)
+static void write_note_to_worktree(const struct object_id *obj,
+				   const struct object_id *note)
 {
 	enum object_type type;
 	unsigned long size;
@@ -438,12 +439,14 @@ static int merge_one_change(struct notes_merge_options *o,
 		return merge_one_change_manual(o, p, t);
 	case NOTES_MERGE_RESOLVE_OURS:
 		if (o->verbosity >= 2)
-			printf("Using local notes for %s\n", oid_to_hex(&p->obj));
+			printf("Using local notes for %s\n",
+			       oid_to_hex(&p->obj));
 		/* nothing to do */
 		return 0;
 	case NOTES_MERGE_RESOLVE_THEIRS:
 		if (o->verbosity >= 2)
-			printf("Using remote notes for %s\n", oid_to_hex(&p->obj));
+			printf("Using remote notes for %s\n",
+			       oid_to_hex(&p->obj));
 		if (add_note(t, &p->obj, &p->remote, combine_notes_overwrite))
 			die("BUG: combine_notes_overwrite failed");
 		return 0;
@@ -460,7 +463,8 @@ static int merge_one_change(struct notes_merge_options *o,
 			printf("Concatenating unique lines in local and remote "
 			       "notes for %s\n",
 			       oid_to_hex(&p->obj));
-		if (add_note(t, &p->obj, &p->remote, combine_notes_cat_sort_uniq))
+		if (add_note(t, &p->obj, &p->remote,
+			     combine_notes_cat_sort_uniq))
 			die("failed to concatenate notes "
 			    "(combine_notes_cat_sort_uniq)");
 		return 0;
@@ -491,7 +495,8 @@ merge_changes(struct notes_merge_options *o, struct notes_merge_pair *changes,
 			   !oidcmp(&p->local, &p->base)) {
 			/* no local change; adopt remote change */
 			trace_printf("\t\t\tno local change, adopted remote\n");
-			if (add_note(t, &p->obj, &p->remote, combine_notes_overwrite))
+			if (add_note(t, &p->obj, &p->remote,
+				     combine_notes_overwrite))
 				die("BUG: combine_notes_overwrite failed");
 		} else {
 			/* need file-level merge between local and remote */
@@ -549,7 +554,8 @@ int notes_merge(struct notes_merge_options *o, struct notes_tree *local_tree,
 	/* Dereference o->local_ref into local_sha1 */
 	if (read_ref_full(o->local_ref, 0, local_oid.hash, NULL))
 		die("Failed to resolve local notes ref '%s'", o->local_ref);
-	else if (!check_refname_format(o->local_ref, 0) && is_null_oid(&local_oid))
+	else if (!check_refname_format(o->local_ref, 0) &&
+		 is_null_oid(&local_oid))
 		local = NULL; /* local_oid == null_oid indicates unborn ref */
 	else if (!(local = lookup_commit_reference(&local_oid)))
 		die("Could not parse local commit %s (%s)",
@@ -657,7 +663,8 @@ found_result:
 
 int notes_merge_commit(struct notes_merge_options *o,
 		       struct notes_tree *partial_tree,
-		       struct commit *partial_commit, struct object_id *result_oid)
+		       struct commit *partial_commit,
+		       struct object_id *result_oid)
 {
 	/*
 	 * Iterate through files in .git/NOTES_MERGE_WORKTREE and add all

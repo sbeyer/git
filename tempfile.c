@@ -149,7 +149,8 @@ struct tempfile *create_tempfile(const char *path)
 	activate_tempfile(tempfile);
 	if (adjust_shared_perm(tempfile->filename.buf)) {
 		int save_errno = errno;
-		error("cannot fix permission bits on %s", tempfile->filename.buf);
+		error("cannot fix permission bits on %s",
+		      tempfile->filename.buf);
 		delete_tempfile(&tempfile);
 		errno = save_errno;
 		return NULL;
@@ -171,7 +172,8 @@ struct tempfile *mks_tempfile_sm(const char *template, int suffixlen, int mode)
 	struct tempfile *tempfile = new_tempfile();
 
 	strbuf_add_absolute_path(&tempfile->filename, template);
-	tempfile->fd = git_mkstemps_mode(tempfile->filename.buf, suffixlen, mode);
+	tempfile->fd =
+		git_mkstemps_mode(tempfile->filename.buf, suffixlen, mode);
 	if (tempfile->fd < 0) {
 		deactivate_tempfile(tempfile);
 		return NULL;
@@ -190,7 +192,8 @@ struct tempfile *mks_tempfile_tsm(const char *template, int suffixlen, int mode)
 		tmpdir = "/tmp";
 
 	strbuf_addf(&tempfile->filename, "%s/%s", tmpdir, template);
-	tempfile->fd = git_mkstemps_mode(tempfile->filename.buf, suffixlen, mode);
+	tempfile->fd =
+		git_mkstemps_mode(tempfile->filename.buf, suffixlen, mode);
 	if (tempfile->fd < 0) {
 		deactivate_tempfile(tempfile);
 		return NULL;

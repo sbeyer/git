@@ -164,8 +164,9 @@ void *object_as_type(struct object *obj, enum object_type type, int quiet)
 		return obj;
 	} else {
 		if (!quiet)
-			error("object %s is a %s, not a %s", oid_to_hex(&obj->oid),
-			      typename(obj->type), typename(type));
+			error("object %s is a %s, not a %s",
+			      oid_to_hex(&obj->oid), typename(obj->type),
+			      typename(type));
 		return NULL;
 	}
 }
@@ -224,13 +225,15 @@ parse_object_buffer(const struct object_id *oid, enum object_type type,
 			obj = &tag->object;
 		}
 	} else {
-		warning("object %s has unknown type id %d", oid_to_hex(oid), type);
+		warning("object %s has unknown type id %d", oid_to_hex(oid),
+			type);
 		obj = NULL;
 	}
 	return obj;
 }
 
-struct object *parse_object_or_die(const struct object_id *oid, const char *name)
+struct object *
+parse_object_or_die(const struct object_id *oid, const char *name)
 {
 	struct object *o = parse_object(oid);
 	if (o)
@@ -265,7 +268,8 @@ struct object *parse_object(const struct object_id *oid)
 
 	buffer = read_sha1_file(oid->hash, &type, &size);
 	if (buffer) {
-		if (check_sha1_signature(repl, buffer, size, typename(type)) < 0) {
+		if (check_sha1_signature(repl, buffer, size, typename(type)) <
+		    0) {
 			free(buffer);
 			error("sha1 mismatch %s", sha1_to_hex(repl));
 			return NULL;

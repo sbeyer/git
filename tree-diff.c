@@ -72,8 +72,8 @@ static int tree_entry_pathcmp(struct tree_desc *t1, struct tree_desc *t2)
  * emits diff to first parent only, and tells diff tree-walker that we are done
  * with p and it can be freed.
  */
-static int
-emit_diff_first_parent_only(struct diff_options *opt, struct combine_diff_path *p)
+static int emit_diff_first_parent_only(struct diff_options *opt,
+				       struct combine_diff_path *p)
 {
 	struct combine_diff_parent *p0 = &p->parent[0];
 	if (p->mode && p0->mode) {
@@ -230,7 +230,8 @@ emit_path(struct combine_diff_path *p, struct strbuf *base,
 			 * tp[i] is valid, if present and if tp[i]==tp[imin] -
 			 * otherwise, we should ignore it.
 			 */
-			int tpi_valid = tp && !(tp[i].entry.mode & S_IFXMIN_NEQ);
+			int tpi_valid = tp &&
+					!(tp[i].entry.mode & S_IFXMIN_NEQ);
 
 			const struct object_id *oid_i;
 			unsigned mode_i;
@@ -279,7 +280,8 @@ emit_path(struct combine_diff_path *p, struct strbuf *base,
 		FAST_ARRAY_ALLOC(parents_oid, nparent);
 		for (i = 0; i < nparent; ++i) {
 			/* same rule as in emitthis */
-			int tpi_valid = tp && !(tp[i].entry.mode & S_IFXMIN_NEQ);
+			int tpi_valid = tp &&
+					!(tp[i].entry.mode & S_IFXMIN_NEQ);
 
 			parents_oid[i] = tpi_valid ? tp[i].entry.oid : NULL;
 		}
@@ -300,7 +302,8 @@ static void skip_uninteresting(struct tree_desc *t, struct strbuf *base,
 	enum interesting match;
 
 	while (t->size) {
-		match = tree_entry_interesting(&t->entry, base, 0, &opt->pathspec);
+		match = tree_entry_interesting(&t->entry, base, 0,
+					       &opt->pathspec);
 		if (match) {
 			if (match == all_entries_not_interesting)
 				t->size = 0;
@@ -487,7 +490,8 @@ ll_diff_tree_paths(struct combine_diff_path *p, const struct object_id *oid,
 						continue;
 
 					/* diff(t,pi) != ø */
-					if (oidcmp(t.entry.oid, tp[i].entry.oid) ||
+					if (oidcmp(t.entry.oid,
+						   tp[i].entry.oid) ||
 					    (t.entry.mode != tp[i].entry.mode))
 						continue;
 
@@ -508,7 +512,8 @@ ll_diff_tree_paths(struct combine_diff_path *p, const struct object_id *oid,
 		/* t < p[imin] */
 		else if (cmp < 0) {
 			/* D += "+t" */
-			p = emit_path(p, base, opt, nparent, &t, /*tp=*/NULL, -1);
+			p = emit_path(p, base, opt, nparent, &t, /*tp=*/NULL,
+				      -1);
 
 			/* t↓ */
 			update_tree_entry(&t);
@@ -692,8 +697,9 @@ static int ll_diff_tree_oid(const struct object_id *old_oid,
 	return 0;
 }
 
-int diff_tree_oid(const struct object_id *old_oid, const struct object_id *new_oid,
-		  const char *base_str, struct diff_options *opt)
+int diff_tree_oid(const struct object_id *old_oid,
+		  const struct object_id *new_oid, const char *base_str,
+		  struct diff_options *opt)
 {
 	struct strbuf base;
 	int retval;

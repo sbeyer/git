@@ -135,7 +135,8 @@ static void add_domainname(struct strbuf *out, int *is_bogus)
 	}
 }
 
-static void copy_email(const struct passwd *pw, struct strbuf *email, int *is_bogus)
+static void
+copy_email(const struct passwd *pw, struct strbuf *email, int *is_bogus)
 {
 	/*
 	 * Make up a fake email address
@@ -161,7 +162,8 @@ const char *ident_default_name(void)
 
 const char *ident_default_email(void)
 {
-	if (!(ident_config_given & IDENT_MAIL_GIVEN) && !git_default_email.len) {
+	if (!(ident_config_given & IDENT_MAIL_GIVEN) &&
+	    !git_default_email.len) {
 		const char *email = getenv("EMAIL");
 
 		if (email && email[0]) {
@@ -332,18 +334,18 @@ person_only:
 	return 0;
 }
 
-static const char *env_hint = N_(
-	"\n"
-	"*** Please tell me who you are.\n"
-	"\n"
-	"Run\n"
-	"\n"
-	"  git config --global user.email \"you@example.com\"\n"
-	"  git config --global user.name \"Your Name\"\n"
-	"\n"
-	"to set your account\'s default identity.\n"
-	"Omit --global to set the identity only in this repository.\n"
-	"\n");
+static const char *env_hint =
+	N_("\n"
+	   "*** Please tell me who you are.\n"
+	   "\n"
+	   "Run\n"
+	   "\n"
+	   "  git config --global user.email \"you@example.com\"\n"
+	   "  git config --global user.name \"Your Name\"\n"
+	   "\n"
+	   "to set your account\'s default identity.\n"
+	   "Omit --global to set the identity only in this repository.\n"
+	   "\n");
 
 const char *
 fmt_ident(const char *name, const char *email, const char *date_str, int flag)

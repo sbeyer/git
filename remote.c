@@ -13,7 +13,9 @@
 
 enum map_direction { FROM_SRC, FROM_DST };
 
-static struct refspec s_tag_refspec = { 0, 1, 0, 0, "refs/tags/*", "refs/tags/*" };
+static struct refspec s_tag_refspec = {
+	0, 1, 0, 0, "refs/tags/*", "refs/tags/*"
+};
 
 const struct refspec *tag_refspec = &s_tag_refspec;
 
@@ -102,7 +104,8 @@ static void add_url(struct remote *remote, const char *url)
 
 static void add_pushurl(struct remote *remote, const char *pushurl)
 {
-	ALLOC_GROW(remote->pushurl, remote->pushurl_nr + 1, remote->pushurl_alloc);
+	ALLOC_GROW(remote->pushurl, remote->pushurl_nr + 1,
+		   remote->pushurl_alloc);
 	remote->pushurl[remote->pushurl_nr++] = pushurl;
 }
 
@@ -132,7 +135,8 @@ static int remotes_hash_cmp(const void *unused_cmp_data, const void *entry,
 	const struct remotes_hash_key *key = keydata;
 
 	if (key)
-		return strncmp(a->name, key->str, key->len) || a->name[key->len];
+		return strncmp(a->name, key->str, key->len) ||
+		       a->name[key->len];
 	else
 		return strcmp(a->name, b->name);
 }
@@ -174,7 +178,8 @@ static struct remote *make_remote(const char *name, int len)
 
 static void add_merge(struct branch *branch, const char *name)
 {
-	ALLOC_GROW(branch->merge_name, branch->merge_nr + 1, branch->merge_alloc);
+	ALLOC_GROW(branch->merge_name, branch->merge_nr + 1,
+		   branch->merge_alloc);
 	branch->merge_name[branch->merge_nr++] = name;
 }
 
@@ -202,7 +207,8 @@ static struct branch *make_branch(const char *name, int len)
 	return ret;
 }
 
-static struct rewrite *make_rewrite(struct rewrites *r, const char *base, int len)
+static struct rewrite *
+make_rewrite(struct rewrites *r, const char *base, int len)
 {
 	struct rewrite *ret;
 	int i;
@@ -324,7 +330,8 @@ static int handle_config(const char *key, const char *value, void *cb)
 			return 0;
 		branch = make_branch(name, namelen);
 		if (!strcmp(subkey, "remote")) {
-			return git_config_string(&branch->remote_name, key, value);
+			return git_config_string(&branch->remote_name, key,
+						 value);
 		} else if (!strcmp(subkey, "pushremote")) {
 			return git_config_string(&branch->pushremote_name, key,
 						 value);
@@ -363,7 +370,8 @@ static int handle_config(const char *key, const char *value, void *cb)
 		return 0;
 	/* Handle remote.<name>.* variables */
 	if (*name == '/') {
-		warning("Config remote shorthand cannot begin with '/': %s", name);
+		warning("Config remote shorthand cannot begin with '/': %s",
+			name);
 		return 0;
 	}
 	remote = make_remote(name, namelen);
@@ -423,8 +431,9 @@ static int handle_config(const char *key, const char *value, void *cb)
 		return git_config_string((const char **)&remote->http_proxy,
 					 key, value);
 	} else if (!strcmp(subkey, "proxyauthmethod")) {
-		return git_config_string((const char **)&remote->http_proxy_authmethod,
-					 key, value);
+		return git_config_string(
+			(const char **)&remote->http_proxy_authmethod, key,
+			value);
 	} else if (!strcmp(subkey, "vcs")) {
 		return git_config_string(&remote->foreign_vcs, key, value);
 	}
@@ -439,15 +448,16 @@ static void alias_all_urls(void)
 		if (!remotes[i])
 			continue;
 		for (j = 0; j < remotes[i]->pushurl_nr; j++) {
-			remotes[i]->pushurl[j] = alias_url(remotes[i]->pushurl[j],
-							   &rewrites);
+			remotes[i]->pushurl[j] =
+				alias_url(remotes[i]->pushurl[j], &rewrites);
 		}
 		add_pushurl_aliases = remotes[i]->pushurl_nr == 0;
 		for (j = 0; j < remotes[i]->url_nr; j++) {
 			if (add_pushurl_aliases)
-				add_pushurl_alias(remotes[i], remotes[i]->url[j]);
-			remotes[i]->url[j] = alias_url(remotes[i]->url[j],
-						       &rewrites);
+				add_pushurl_alias(remotes[i],
+						  remotes[i]->url[j]);
+			remotes[i]->url[j] =
+				alias_url(remotes[i]->url[j], &rewrites);
 		}
 	}
 }
@@ -463,7 +473,8 @@ static void read_config(void)
 
 	current_branch = NULL;
 	if (startup_info->have_repository) {
-		const char *head_ref = resolve_ref_unsafe("HEAD", 0, NULL, &flag);
+		const char *head_ref =
+			resolve_ref_unsafe("HEAD", 0, NULL, &flag);
 		if (head_ref && (flag & REF_ISSYMREF) &&
 		    skip_prefix(head_ref, "refs/heads/", &head_ref)) {
 			current_branch = make_branch(head_ref, 0);
@@ -474,7 +485,8 @@ static void read_config(void)
 }
 
 static struct refspec *
-parse_refspec_internal(int nr_refspec, const char **refspec, int fetch, int verify)
+parse_refspec_internal(int nr_refspec, const char **refspec, int fetch,
+		       int verify)
 {
 	int i;
 	struct refspec *rs = xcalloc(nr_refspec, sizeof(*rs));
@@ -667,7 +679,8 @@ const char *pushremote_for_branch(struct branch *branch, int *explicit)
 }
 
 static struct remote *
-remote_get_1(const char *name, const char *(*get_default)(struct branch *, int *))
+remote_get_1(const char *name,
+	     const char *(*get_default)(struct branch *, int *))
 {
 	struct remote *ret;
 	int name_given = 0;
@@ -690,7 +703,8 @@ remote_get_1(const char *name, const char *(*get_default)(struct branch *, int *
 		add_url_alias(ret, name);
 	if (!valid_remote(ret))
 		return NULL;
-	ret->fetch = parse_fetch_refspec(ret->fetch_refspec_nr, ret->fetch_refspec);
+	ret->fetch =
+		parse_fetch_refspec(ret->fetch_refspec_nr, ret->fetch_refspec);
 	ret->push = parse_push_refspec(ret->push_refspec_nr, ret->push_refspec);
 	return ret;
 }
@@ -879,7 +893,8 @@ int query_refspecs(struct refspec *refs, int ref_count, struct refspec *query)
 		if (!refspec->dst)
 			continue;
 		if (refspec->pattern) {
-			if (match_name_with_pattern(key, needle, value, result)) {
+			if (match_name_with_pattern(key, needle, value,
+						    result)) {
 				query->force = refspec->force;
 				return 0;
 			}
@@ -1092,8 +1107,8 @@ static char *guess_ref(const char *name, struct ref *peer)
 {
 	struct strbuf buf = STRBUF_INIT;
 
-	const char *r = resolve_ref_unsafe(peer->name, RESOLVE_REF_READING,
-					   NULL, NULL);
+	const char *r =
+		resolve_ref_unsafe(peer->name, RESOLVE_REF_READING, NULL, NULL);
 	if (!r)
 		return NULL;
 
@@ -1122,7 +1137,8 @@ static int match_explicit_lhs(struct ref *src, struct refspec *rs,
 		 * way to delete 'other' ref at the remote end.
 		 */
 		if (try_explicit_object_name(rs->src, match) < 0)
-			return error("src refspec %s does not match any.", rs->src);
+			return error("src refspec %s does not match any.",
+				     rs->src);
 		if (allocated_match)
 			*allocated_match = 1;
 		return 0;
@@ -1150,11 +1166,12 @@ static int match_explicit(struct ref *src, struct ref *dst,
 	if (!dst_value) {
 		int flag;
 
-		dst_value = resolve_ref_unsafe(matched_src->name,
-					       RESOLVE_REF_READING, NULL, &flag);
+		dst_value = resolve_ref_unsafe(
+			matched_src->name, RESOLVE_REF_READING, NULL, &flag);
 		if (!dst_value || ((flag & REF_ISSYMREF) &&
 				   !starts_with(dst_value, "refs/heads/")))
-			die("%s cannot be resolved to branch.", matched_src->name);
+			die("%s cannot be resolved to branch.",
+			    matched_src->name);
 	}
 
 	switch (count_refspec_match(dst_value, dst, &matched_dst)) {
@@ -1220,15 +1237,15 @@ get_ref_match(const struct refspec *rs, int rs_nr, const struct ref *ref,
 		}
 
 		if (rs[i].pattern) {
-			const char *dst_side = rs[i].dst ? rs[i].dst : rs[i].src;
+			const char *dst_side = rs[i].dst ? rs[i].dst :
+							   rs[i].src;
 			int match;
 			if (direction == FROM_SRC)
-				match = match_name_with_pattern(rs[i].src,
-								ref->name,
-								dst_side, &name);
+				match = match_name_with_pattern(
+					rs[i].src, ref->name, dst_side, &name);
 			else
-				match = match_name_with_pattern(dst_side, ref->name,
-								rs[i].src, &name);
+				match = match_name_with_pattern(
+					dst_side, ref->name, rs[i].src, &name);
 			if (match) {
 				matching_refs = i;
 				break;
@@ -1335,7 +1352,8 @@ add_missing_tags(struct ref *src, struct ref **dst, struct ref ***dst_tail)
 
 			if (is_null_oid(&ref->new_oid))
 				continue;
-			commit = lookup_commit_reference_gently(&ref->new_oid, 1);
+			commit = lookup_commit_reference_gently(&ref->new_oid,
+								1);
 			if (!commit)
 				/* not pushing a commit, which is not an error
 				 */
@@ -1461,7 +1479,8 @@ int match_push_refs(struct ref *src, struct ref **dst, int nr_refspec,
 			/* Create a new one and link it */
 			dst_peer = make_linked_ref(dst_name, &dst_tail);
 			oidcpy(&dst_peer->new_oid, &ref->new_oid);
-			string_list_insert(&dst_ref_index, dst_peer->name)->util = dst_peer;
+			string_list_insert(&dst_ref_index, dst_peer->name)
+				->util = dst_peer;
 		}
 		dst_peer->peer_ref = copy_ref(ref);
 		dst_peer->force = pat->force;
@@ -1490,7 +1509,8 @@ int match_push_refs(struct ref *src, struct ref **dst, int nr_refspec,
 			if (src_name) {
 				if (!src_ref_index.nr)
 					prepare_ref_index(&src_ref_index, src);
-				if (!string_list_has_string(&src_ref_index, src_name))
+				if (!string_list_has_string(&src_ref_index,
+							    src_name))
 					ref->peer_ref = alloc_delete_ref();
 				free(src_name);
 			}
@@ -1564,14 +1584,18 @@ void set_ref_status_for_push(struct ref *remote_refs, int send_mirror,
 		if (!reject_reason && !ref->deletion &&
 		    !is_null_oid(&ref->old_oid)) {
 			if (starts_with(ref->name, "refs/tags/"))
-				reject_reason = REF_STATUS_REJECT_ALREADY_EXISTS;
+				reject_reason =
+					REF_STATUS_REJECT_ALREADY_EXISTS;
 			else if (!has_object_file(&ref->old_oid))
 				reject_reason = REF_STATUS_REJECT_FETCH_FIRST;
-			else if (!lookup_commit_reference_gently(&ref->old_oid, 1) ||
-				 !lookup_commit_reference_gently(&ref->new_oid, 1))
+			else if (!lookup_commit_reference_gently(&ref->old_oid,
+								 1) ||
+				 !lookup_commit_reference_gently(&ref->new_oid,
+								 1))
 				reject_reason = REF_STATUS_REJECT_NEEDS_FORCE;
 			else if (!ref_newer(&ref->new_oid, &ref->old_oid))
-				reject_reason = REF_STATUS_REJECT_NONFASTFORWARD;
+				reject_reason =
+					REF_STATUS_REJECT_NONFASTFORWARD;
 		}
 
 		/*
@@ -1673,28 +1697,32 @@ const char *branch_get_upstream(struct branch *branch, struct strbuf *err)
 		if (!ref_exists(branch->refname))
 			return error_buf(err, _("no such branch: '%s'"),
 					 branch->name);
-		return error_buf(err, _("no upstream configured for branch '%s'"),
+		return error_buf(err,
+				 _("no upstream configured for branch '%s'"),
 				 branch->name);
 	}
 
 	if (!branch->merge[0]->dst)
-		return error_buf(err,
-				 _("upstream branch '%s' not stored as a remote-tracking branch"),
-				 branch->merge[0]->src);
+		return error_buf(
+			err,
+			_("upstream branch '%s' not stored as a remote-tracking branch"),
+			branch->merge[0]->src);
 
 	return branch->merge[0]->dst;
 }
 
-static const char *tracking_for_push_dest(struct remote *remote,
-					  const char *refname, struct strbuf *err)
+static const char *
+tracking_for_push_dest(struct remote *remote, const char *refname,
+		       struct strbuf *err)
 {
 	char *ret;
 
 	ret = apply_refspecs(remote->fetch, remote->fetch_refspec_nr, refname);
 	if (!ret)
-		return error_buf(err,
-				 _("push destination '%s' on remote '%s' has no local tracking branch"),
-				 refname, remote->name);
+		return error_buf(
+			err,
+			_("push destination '%s' on remote '%s' has no local tracking branch"),
+			refname, remote->name);
 	return ret;
 }
 
@@ -1704,7 +1732,8 @@ static const char *branch_get_push_1(struct branch *branch, struct strbuf *err)
 
 	remote = remote_get(pushremote_for_branch(branch, NULL));
 	if (!remote)
-		return error_buf(err, _("branch '%s' has no remote for pushing"),
+		return error_buf(err,
+				 _("branch '%s' has no remote for pushing"),
 				 branch->name);
 
 	if (remote->push_refspec_nr) {
@@ -1714,9 +1743,10 @@ static const char *branch_get_push_1(struct branch *branch, struct strbuf *err)
 		dst = apply_refspecs(remote->push, remote->push_refspec_nr,
 				     branch->refname);
 		if (!dst)
-			return error_buf(err,
-					 _("push refspecs for '%s' do not include '%s'"),
-					 remote->name, branch->name);
+			return error_buf(
+				err,
+				_("push refspecs for '%s' do not include '%s'"),
+				remote->name, branch->name);
 
 		ret = tracking_for_push_dest(remote, dst, err);
 		free(dst);
@@ -2052,14 +2082,17 @@ int format_tracking_info(struct branch *branch, struct strbuf *sb)
 
 	base = shorten_unambiguous_ref(full_base, 0);
 	if (upstream_is_gone) {
-		strbuf_addf(sb,
-			    _("Your branch is based on '%s', but the upstream is gone.\n"),
-			    base);
+		strbuf_addf(
+			sb,
+			_("Your branch is based on '%s', but the upstream is gone.\n"),
+			base);
 		if (advice_status_hints)
-			strbuf_addstr(sb,
-				      _("  (use \"git branch --unset-upstream\" to fixup)\n"));
+			strbuf_addstr(
+				sb,
+				_("  (use \"git branch --unset-upstream\" to fixup)\n"));
 	} else if (!ours && !theirs) {
-		strbuf_addf(sb, _("Your branch is up to date with '%s'.\n"), base);
+		strbuf_addf(sb, _("Your branch is up to date with '%s'.\n"),
+			    base);
 	} else if (!theirs) {
 		strbuf_addf(sb,
 			    Q_("Your branch is ahead of '%s' by %d commit.\n",
@@ -2067,8 +2100,9 @@ int format_tracking_info(struct branch *branch, struct strbuf *sb)
 			       ours),
 			    base, ours);
 		if (advice_status_hints)
-			strbuf_addstr(sb,
-				      _("  (use \"git push\" to publish your local commits)\n"));
+			strbuf_addstr(
+				sb,
+				_("  (use \"git push\" to publish your local commits)\n"));
 	} else if (!ours) {
 		strbuf_addf(sb,
 			    Q_("Your branch is behind '%s' by %d commit, "
@@ -2078,8 +2112,9 @@ int format_tracking_info(struct branch *branch, struct strbuf *sb)
 			       theirs),
 			    base, theirs);
 		if (advice_status_hints)
-			strbuf_addstr(sb,
-				      _("  (use \"git pull\" to update your local branch)\n"));
+			strbuf_addstr(
+				sb,
+				_("  (use \"git pull\" to update your local branch)\n"));
 	} else {
 		strbuf_addf(sb,
 			    Q_("Your branch and '%s' have diverged,\n"
@@ -2091,8 +2126,9 @@ int format_tracking_info(struct branch *branch, struct strbuf *sb)
 			       ours + theirs),
 			    base, ours, theirs);
 		if (advice_status_hints)
-			strbuf_addstr(sb,
-				      _("  (use \"git pull\" to merge the remote branch into yours)\n"));
+			strbuf_addstr(
+				sb,
+				_("  (use \"git pull\" to merge the remote branch into yours)\n"));
 	}
 	free(base);
 	return 1;
@@ -2194,11 +2230,13 @@ static int get_stale_heads_cb(const char *refname, const struct object_id *oid,
 		goto clean_exit;
 
 	for (i = 0; stale && i < matches.nr; i++)
-		if (string_list_has_string(info->ref_names, matches.items[i].string))
+		if (string_list_has_string(info->ref_names,
+					   matches.items[i].string))
 			stale = 0;
 
 	if (stale) {
-		struct ref *ref = make_linked_ref(refname, &info->stale_refs_tail);
+		struct ref *ref =
+			make_linked_ref(refname, &info->stale_refs_tail);
 		oidcpy(&ref->new_oid, oid);
 	}
 
@@ -2239,8 +2277,8 @@ static void clear_cas_option(struct push_cas_option *cas)
 	memset(cas, 0, sizeof(*cas));
 }
 
-static struct push_cas *
-add_cas_entry(struct push_cas_option *cas, const char *refname, size_t refnamelen)
+static struct push_cas *add_cas_entry(struct push_cas_option *cas,
+				      const char *refname, size_t refnamelen)
 {
 	struct push_cas *entry;
 	ALLOC_GROW(cas->entry, cas->nr + 1, cas->alloc);
@@ -2276,11 +2314,13 @@ parse_push_cas_option(struct push_cas_option *cas, const char *arg, int unset)
 	else if (!colon[1])
 		oidclr(&entry->expect);
 	else if (get_oid(colon + 1, &entry->expect))
-		return error("cannot parse expected object name '%s'", colon + 1);
+		return error("cannot parse expected object name '%s'",
+			     colon + 1);
 	return 0;
 }
 
-int parseopt_push_cas_option(const struct option *opt, const char *arg, int unset)
+int parseopt_push_cas_option(const struct option *opt, const char *arg,
+			     int unset)
 {
 	return parse_push_cas_option(opt->value, arg, unset);
 }
@@ -2296,8 +2336,8 @@ int is_empty_cas(const struct push_cas_option *cas)
  * value in sha1[].
  * If we cannot do so, return negative to signal an error.
  */
-static int
-remote_tracking(struct remote *remote, const char *refname, struct object_id *oid)
+static int remote_tracking(struct remote *remote, const char *refname,
+			   struct object_id *oid)
 {
 	char *dst;
 
@@ -2323,7 +2363,8 @@ apply_cas(struct push_cas_option *cas, struct remote *remote, struct ref *ref)
 		ref->expect_old_sha1 = 1;
 		if (!entry->use_tracking)
 			oidcpy(&ref->old_oid_expect, &entry->expect);
-		else if (remote_tracking(remote, ref->name, &ref->old_oid_expect))
+		else if (remote_tracking(remote, ref->name,
+					 &ref->old_oid_expect))
 			oidclr(&ref->old_oid_expect);
 		return;
 	}

@@ -76,8 +76,9 @@ struct attr_hash_entry {
 };
 
 /* attr_hashmap comparison function */
-static int attr_hash_entry_cmp(const void *unused_cmp_data, const void *entry,
-			       const void *entry_or_key, const void *unused_keydata)
+static int
+attr_hash_entry_cmp(const void *unused_cmp_data, const void *entry,
+		    const void *entry_or_key, const void *unused_keydata)
 {
 	const struct attr_hash_entry *a = entry;
 	const struct attr_hash_entry *b = entry_or_key;
@@ -211,7 +212,8 @@ static void
 report_invalid_attr(const char *name, size_t len, const char *src, int lineno)
 {
 	struct strbuf err = STRBUF_INIT;
-	strbuf_addf(&err, _("%.*s is not a valid attribute name"), (int)len, name);
+	strbuf_addf(&err, _("%.*s is not a valid attribute name"), (int)len,
+		    name);
 	fprintf(stderr, "%s: %s:%d\n", err.buf, src, lineno);
 	strbuf_release(&err);
 }
@@ -237,7 +239,8 @@ static const struct git_attr *git_attr_internal(const char *name, int namelen)
 		a->attr_nr = hashmap_get_size(&g_attr_hashmap.map);
 
 		attr_hashmap_add(&g_attr_hashmap, a->name, namelen, a);
-		assert(a->attr_nr == (hashmap_get_size(&g_attr_hashmap.map) - 1));
+		assert(a->attr_nr ==
+		       (hashmap_get_size(&g_attr_hashmap.map) - 1));
 	}
 
 	hashmap_unlock(&g_attr_hashmap);
@@ -401,8 +404,9 @@ parse_attr_line(const char *line, const char *src, int lineno, int macro_ok)
 				      &res->u.pat.patternlen, &res->u.pat.flags,
 				      &res->u.pat.nowildcardlen);
 		if (res->u.pat.flags & EXC_FLAG_NEGATIVE) {
-			warning(_("Negative patterns are ignored in git attributes\n"
-				  "Use '\\!' for literal leading exclamation."));
+			warning(_(
+				"Negative patterns are ignored in git attributes\n"
+				"Use '\\!' for literal leading exclamation."));
 			goto fail_return;
 		}
 	}
@@ -508,7 +512,8 @@ static void check_vector_add(struct attr_check *c)
 {
 	vector_lock();
 
-	ALLOC_GROW(check_vector.checks, check_vector.nr + 1, check_vector.alloc);
+	ALLOC_GROW(check_vector.checks, check_vector.nr + 1,
+		   check_vector.alloc);
 	check_vector.checks[check_vector.nr++] = c;
 
 	vector_unlock();
@@ -929,7 +934,8 @@ prepare_attr_stack(const char *path, int dirlen, struct attr_stack **stack)
 		struct attr_stack *elem;
 
 		elem = *stack;
-		if (namelen <= dirlen && !strncmp(elem->origin, path, namelen) &&
+		if (namelen <= dirlen &&
+		    !strncmp(elem->origin, path, namelen) &&
 		    (!namelen || path[namelen] == '/'))
 			break;
 
@@ -982,8 +988,9 @@ prepare_attr_stack(const char *path, int dirlen, struct attr_stack **stack)
 	strbuf_release(&pathbuf);
 }
 
-static int path_matches(const char *pathname, int pathlen, int basename_offset,
-			const struct pattern *pat, const char *base, int baselen)
+static int
+path_matches(const char *pathname, int pathlen, int basename_offset,
+	     const struct pattern *pat, const char *base, int baselen)
 {
 	const char *pattern = pat->pattern;
 	int prefix = pat->nowildcardlen;
@@ -994,8 +1001,9 @@ static int path_matches(const char *pathname, int pathlen, int basename_offset,
 
 	if (pat->flags & EXC_FLAG_NODIR) {
 		return match_basename(pathname + basename_offset,
-				      pathlen - basename_offset - isdir, pattern,
-				      prefix, pat->patternlen, pat->flags);
+				      pathlen - basename_offset - isdir,
+				      pattern, prefix, pat->patternlen,
+				      pat->flags);
 	}
 	return match_pathname(pathname, pathlen - isdir, base, baselen, pattern,
 			      prefix, pat->patternlen, pat->flags);
@@ -1015,7 +1023,8 @@ static int fill_one(const char *what, struct all_attrs_item *all_attrs,
 
 		if (*n == ATTR__UNKNOWN) {
 			debug_set(what,
-				  a->is_macro ? a->u.attr->name : a->u.pat.pattern,
+				  a->is_macro ? a->u.attr->name :
+						a->u.pat.pattern,
 				  attr, v);
 			*n = v;
 			rem--;
@@ -1061,8 +1070,8 @@ static int macroexpand_one(struct all_attrs_item *all_attrs, int nr, int rem)
  * This prevents having to search through the attribute stack each time
  * a macro needs to be expanded during the fill stage.
  */
-static void
-determine_macros(struct all_attrs_item *all_attrs, const struct attr_stack *stack)
+static void determine_macros(struct all_attrs_item *all_attrs,
+			     const struct attr_stack *stack)
 {
 	for (; stack; stack = stack->prev) {
 		int i;
@@ -1121,7 +1130,8 @@ static void collect_some_attrs(const char *path, struct attr_check *check)
 	}
 
 	rem = check->all_attrs_nr;
-	fill(path, pathlen, basename_offset, check->stack, check->all_attrs, rem);
+	fill(path, pathlen, basename_offset, check->stack, check->all_attrs,
+	     rem);
 }
 
 int git_check_attr(const char *path, struct attr_check *check)

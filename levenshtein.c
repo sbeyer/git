@@ -38,7 +38,8 @@
  *
  * Note that this algorithm calculates a distance _iff_ d == a.
  */
-int levenshtein(const char *string1, const char *string2, int w, int s, int a, int d)
+int levenshtein(const char *string1, const char *string2, int w, int s, int a,
+		int d)
 {
 	int len1 = strlen(string1), len2 = strlen(string2);
 	int *row0, *row1, *row2;

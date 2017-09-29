@@ -112,7 +112,8 @@ static void replace_entry(size_t pos, void *data)
 		    si->saved_cache_nr);
 	dst = istate->cache[pos];
 	if (dst->ce_flags & CE_REMOVE)
-		die("entry %d is marked as both replaced and deleted", (int)pos);
+		die("entry %d is marked as both replaced and deleted",
+		    (int)pos);
 	src = si->saved_cache[si->nr_replacements];
 	if (ce_namelen(src))
 		die("corrupt link extension, entry %d should have "
@@ -154,7 +155,8 @@ void merge_base_index(struct index_state *istate)
 			    "have non-zero length name",
 			    i);
 		add_index_entry(istate, si->saved_cache[i],
-				ADD_CACHE_OK_TO_ADD | ADD_CACHE_KEEP_CACHE_TREE |
+				ADD_CACHE_OK_TO_ADD |
+					ADD_CACHE_KEEP_CACHE_TREE |
 					/*
 					 * we may have to replay what
 					 * merge-recursive.c:update_stages()
@@ -192,8 +194,8 @@ void prepare_to_write_split_index(struct index_state *istate)
 		for (i = 0; i < istate->cache_nr; i++) {
 			struct cache_entry *base;
 			/* namelen is checked separately */
-			const unsigned int ondisk_flags = CE_STAGEMASK | CE_VALID |
-							  CE_EXTENDED_FLAGS;
+			const unsigned int ondisk_flags =
+				CE_STAGEMASK | CE_VALID | CE_EXTENDED_FLAGS;
 			unsigned int ce_flags, base_flags, ret;
 			ce = istate->cache[i];
 			if (!ce->index)
@@ -290,7 +292,8 @@ void discard_split_index(struct index_state *istate)
 	free(si);
 }
 
-void save_or_free_index_entry(struct index_state *istate, struct cache_entry *ce)
+void save_or_free_index_entry(struct index_state *istate,
+			      struct cache_entry *ce)
 {
 	if (ce->index && istate->split_index && istate->split_index->base &&
 	    ce->index <= istate->split_index->base->cache_nr &&
@@ -301,7 +304,8 @@ void save_or_free_index_entry(struct index_state *istate, struct cache_entry *ce
 }
 
 void replace_index_entry_in_base(struct index_state *istate,
-				 struct cache_entry *old, struct cache_entry *new)
+				 struct cache_entry *old,
+				 struct cache_entry *new)
 {
 	if (old->index && istate->split_index && istate->split_index->base &&
 	    old->index <= istate->split_index->base->cache_nr) {

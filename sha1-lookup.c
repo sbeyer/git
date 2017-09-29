@@ -50,7 +50,8 @@ static uint32_t take2(const unsigned char *sha1)
  * The sha1 of element i (between 0 and nr - 1) should be returned
  * by "fn(i, table)".
  */
-int sha1_pos(const unsigned char *sha1, void *table, size_t nr, sha1_access_fn fn)
+int sha1_pos(const unsigned char *sha1, void *table, size_t nr,
+	     sha1_access_fn fn)
 {
 	size_t hi = nr;
 	size_t lo = 0;

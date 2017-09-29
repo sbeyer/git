@@ -73,7 +73,8 @@ match_stat_with_submodule(struct diff_options *diffopt,
 	if (S_ISGITLINK(ce->ce_mode)) {
 		unsigned orig_flags = diffopt->flags;
 		if (!DIFF_OPT_TST(diffopt, OVERRIDE_SUBMODULE_CONFIG))
-			set_diffopt_flags_from_submodule_config(diffopt, ce->name);
+			set_diffopt_flags_from_submodule_config(diffopt,
+								ce->name);
 		if (DIFF_OPT_TST(diffopt, IGNORE_SUBMODULES))
 			changed = 0;
 		else if (!DIFF_OPT_TST(diffopt, IGNORE_DIRTY_SUBMODULES) &&
@@ -91,9 +92,8 @@ int run_diff_files(struct rev_info *revs, unsigned int option)
 {
 	int entries, i;
 	int diff_unmerged_stage = revs->max_count;
-	unsigned ce_option = ((option & DIFF_RACY_IS_MODIFIED) ?
-				      CE_MATCH_RACY_IS_DIRTY :
-				      0);
+	unsigned ce_option =
+		((option & DIFF_RACY_IS_MODIFIED) ? CE_MATCH_RACY_IS_DIRTY : 0);
 
 	diff_set_mnemonic_prefix(&revs->diffopt, "i/", "w/");
 
@@ -379,7 +379,8 @@ do_oneway_diff(struct unpack_trees_options *o, const struct cache_entry *idx,
 	int match_missing, cached;
 
 	/* i-t-a entries do not actually exist in the index */
-	if (revs->diffopt.ita_invisible_in_index && idx && ce_intent_to_add(idx)) {
+	if (revs->diffopt.ita_invisible_in_index && idx &&
+	    ce_intent_to_add(idx)) {
 		idx = NULL;
 		if (!tree)
 			return; /* nothing to diff.. */
@@ -441,8 +442,8 @@ do_oneway_diff(struct unpack_trees_options *o, const struct cache_entry *idx,
  * the fairly complex unpack_trees() semantic requirements, including
  * the skipping, the path matching, the type conflict cases etc.
  */
-static int
-oneway_diff(const struct cache_entry *const *src, struct unpack_trees_options *o)
+static int oneway_diff(const struct cache_entry *const *src,
+		       struct unpack_trees_options *o)
 {
 	const struct cache_entry *idx = src[0];
 	const struct cache_entry *tree = src[1];
@@ -482,8 +483,8 @@ static int diff_cache(struct rev_info *revs, const struct object_id *tree_oid,
 	memset(&opts, 0, sizeof(opts));
 	opts.head_idx = 1;
 	opts.index_only = cached;
-	opts.diff_index_cached = (cached && !DIFF_OPT_TST(&revs->diffopt,
-							  FIND_COPIES_HARDER));
+	opts.diff_index_cached =
+		(cached && !DIFF_OPT_TST(&revs->diffopt, FIND_COPIES_HARDER));
 	opts.merge = 1;
 	opts.fn = oneway_diff;
 	opts.unpack_data = revs;
@@ -524,7 +525,8 @@ int do_diff_cache(const struct object_id *tree_oid, struct diff_options *opt)
 	return 0;
 }
 
-int index_differs_from(const char *def, int diff_flags, int ita_invisible_in_index)
+int index_differs_from(const char *def, int diff_flags,
+		       int ita_invisible_in_index)
 {
 	struct rev_info rev;
 	struct setup_revision_opt opt;

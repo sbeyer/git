@@ -262,7 +262,8 @@ static int handle_alias(int *argcp, const char ***argv)
 			die("alias '%s' changes environment variables\n"
 			    "You can use '!git' in the alias to do this.",
 			    alias_command);
-		memmove(new_argv - option_count, new_argv, count * sizeof(char *));
+		memmove(new_argv - option_count, new_argv,
+			count * sizeof(char *));
 		new_argv -= option_count;
 
 		if (count < 1)
@@ -322,7 +323,8 @@ static int run_builtin(struct cmd_struct *p, int argc, const char **argv)
 			prefix = setup_git_directory_gently(&nongit_ok);
 		}
 
-		if (use_pager == -1 && p->option & (RUN_SETUP | RUN_SETUP_GENTLY) &&
+		if (use_pager == -1 &&
+		    p->option & (RUN_SETUP | RUN_SETUP_GENTLY) &&
 		    !(p->option & DELAY_PAGER_CONFIG))
 			use_pager = check_pager_config(p->cmd);
 		if (use_pager == -1 && p->option & USE_PAGER)
@@ -428,8 +430,10 @@ static struct cmd_struct commands[] = {
 	{ "merge-index", cmd_merge_index, RUN_SETUP },
 	{ "merge-ours", cmd_merge_ours, RUN_SETUP },
 	{ "merge-recursive", cmd_merge_recursive, RUN_SETUP | NEED_WORK_TREE },
-	{ "merge-recursive-ours", cmd_merge_recursive, RUN_SETUP | NEED_WORK_TREE },
-	{ "merge-recursive-theirs", cmd_merge_recursive, RUN_SETUP | NEED_WORK_TREE },
+	{ "merge-recursive-ours", cmd_merge_recursive,
+	  RUN_SETUP | NEED_WORK_TREE },
+	{ "merge-recursive-theirs", cmd_merge_recursive,
+	  RUN_SETUP | NEED_WORK_TREE },
 	{ "merge-subtree", cmd_merge_recursive, RUN_SETUP | NEED_WORK_TREE },
 	{ "merge-tree", cmd_merge_tree, RUN_SETUP },
 	{ "mktag", cmd_mktag, RUN_SETUP },
@@ -699,7 +703,8 @@ int cmd_main(int argc, const char **argv)
 			break;
 	}
 
-	fprintf(stderr, "Failed to run command '%s': %s\n", cmd, strerror(errno));
+	fprintf(stderr, "Failed to run command '%s': %s\n", cmd,
+		strerror(errno));
 
 	return 1;
 }

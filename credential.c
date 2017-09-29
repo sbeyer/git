@@ -24,7 +24,8 @@ void credential_clear(struct credential *c)
 	credential_init(c);
 }
 
-int credential_match(const struct credential *want, const struct credential *have)
+int credential_match(const struct credential *want,
+		     const struct credential *have)
 {
 #define CHECK(x) (!want->x || (have->x && !strcmp(want->x, have->x)))
 	return CHECK(protocol) && CHECK(host) && CHECK(path) && CHECK(username);
@@ -106,7 +107,8 @@ static void credential_describe(struct credential *c, struct strbuf *out)
 		strbuf_addf(out, "/%s", c->path);
 }
 
-static char *credential_ask_one(const char *what, struct credential *c, int flags)
+static char *
+credential_ask_one(const char *what, struct credential *c, int flags)
 {
 	struct strbuf desc = STRBUF_INIT;
 	struct strbuf prompt = STRBUF_INIT;

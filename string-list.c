@@ -33,11 +33,13 @@ static int get_entry_index(const struct string_list *list, const char *string,
 }
 
 /* returns -1-index if already exists */
-static int add_entry(int insert_at, struct string_list *list, const char *string)
+static int
+add_entry(int insert_at, struct string_list *list, const char *string)
 {
 	int exact_match = 0;
-	int index = insert_at != -1 ? insert_at :
-				      get_entry_index(list, string, &exact_match);
+	int index = insert_at != -1 ?
+			    insert_at :
+			    get_entry_index(list, string, &exact_match);
 
 	if (exact_match)
 		return -1 - index;
@@ -65,7 +67,8 @@ string_list_insert(struct string_list *list, const char *string)
 	return list->items + index;
 }
 
-void string_list_remove(struct string_list *list, const char *string, int free_util)
+void string_list_remove(struct string_list *list, const char *string,
+			int free_util)
 {
 	int exact_match;
 	int i = get_entry_index(list, string, &exact_match);
@@ -89,7 +92,8 @@ int string_list_has_string(const struct string_list *list, const char *string)
 }
 
 int string_list_find_insert_index(const struct string_list *list,
-				  const char *string, int negative_existing_index)
+				  const char *string,
+				  int negative_existing_index)
 {
 	int exact_match;
 	int index = get_entry_index(list, string, &exact_match);
@@ -224,9 +228,8 @@ string_list_append_nodup(struct string_list *list, char *string)
 struct string_list_item *
 string_list_append(struct string_list *list, const char *string)
 {
-	return string_list_append_nodup(list, list->strdup_strings ?
-						      xstrdup(string) :
-						      (char *)string);
+	return string_list_append_nodup(
+		list, list->strdup_strings ? xstrdup(string) : (char *)string);
 }
 
 static int cmp_items(const void *a, const void *b, void *ctx)
@@ -239,7 +242,8 @@ static int cmp_items(const void *a, const void *b, void *ctx)
 
 void string_list_sort(struct string_list *list)
 {
-	QSORT_S(list->items, list->nr, cmp_items, list->cmp ? list->cmp : strcmp);
+	QSORT_S(list->items, list->nr, cmp_items,
+		list->cmp ? list->cmp : strcmp);
 }
 
 struct string_list_item *
@@ -254,12 +258,14 @@ unsorted_string_list_lookup(struct string_list *list, const char *string)
 	return NULL;
 }
 
-int unsorted_string_list_has_string(struct string_list *list, const char *string)
+int unsorted_string_list_has_string(struct string_list *list,
+				    const char *string)
 {
 	return unsorted_string_list_lookup(list, string) != NULL;
 }
 
-void unsorted_string_list_delete_item(struct string_list *list, int i, int free_util)
+void unsorted_string_list_delete_item(struct string_list *list, int i,
+				      int free_util)
 {
 	if (list->strdup_strings)
 		free(list->items[i].string);

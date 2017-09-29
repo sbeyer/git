@@ -27,47 +27,52 @@ static struct userdiff_driver builtin_drivers[] = {
 		 "[a-zA-Z][a-zA-Z0-9_]*"
 		 "|[-+]?[0-9][0-9#_.aAbBcCdDeEfF]*([eE][+-]?[0-9_]+)?"
 		 "|=>|\\.\\.|\\*\\*|:=|/=|>=|<=|<<|>>|<>"),
-	IPATTERN("fortran",
-		 "!^([C*]|[ \t]*!)\n"
-		 "!^[ \t]*MODULE[ \t]+PROCEDURE[ \t]\n"
-		 "^[ \t]*((END[ \t]+)?(PROGRAM|MODULE|BLOCK[ \t]+DATA"
-		 "|([^'\" \t]+[ \t]+)*(SUBROUTINE|FUNCTION))[ \t]+[A-Z].*)$",
-		 /* -- */
-		 "[a-zA-Z][a-zA-Z0-9_]*"
-		 "|\\.([Ee][Qq]|[Nn][Ee]|[Gg][TtEe]|[Ll][TtEe]|[Tt][Rr][Uu][Ee]|[Ff][Aa][Ll][Ss][Ee]|[Aa][Nn][Dd]|[Oo][Rr]|[Nn]?[Ee][Qq][Vv]|[Nn][Oo][Tt])\\."
-		 /* numbers and format statements like 2E14.4, or ES12.6, 9X.
-		  * Don't worry about format statements without leading digits
-		  * since they would have been matched above as a variable
-		  * anyway. */
-		 "|[-+]?[0-9.]+([AaIiDdEeFfLlTtXx][Ss]?[-+]?[0-9.]*)?(_[a-zA-Z0-9][a-zA-Z0-9_]*)?"
-		 "|//|\\*\\*|::|[/<>=]="),
-	IPATTERN("fountain", "^((\\.[^.]|(int|ext|est|int\\.?/ext|i/e)[. ]).*)$",
+	IPATTERN(
+		"fortran",
+		"!^([C*]|[ \t]*!)\n"
+		"!^[ \t]*MODULE[ \t]+PROCEDURE[ \t]\n"
+		"^[ \t]*((END[ \t]+)?(PROGRAM|MODULE|BLOCK[ \t]+DATA"
+		"|([^'\" \t]+[ \t]+)*(SUBROUTINE|FUNCTION))[ \t]+[A-Z].*)$",
+		/* -- */
+		"[a-zA-Z][a-zA-Z0-9_]*"
+		"|\\.([Ee][Qq]|[Nn][Ee]|[Gg][TtEe]|[Ll][TtEe]|[Tt][Rr][Uu][Ee]|[Ff][Aa][Ll][Ss][Ee]|[Aa][Nn][Dd]|[Oo][Rr]|[Nn]?[Ee][Qq][Vv]|[Nn][Oo][Tt])\\."
+		/* numbers and format statements like 2E14.4, or ES12.6, 9X.
+		 * Don't worry about format statements without leading digits
+		 * since they would have been matched above as a variable
+		 * anyway. */
+		"|[-+]?[0-9.]+([AaIiDdEeFfLlTtXx][Ss]?[-+]?[0-9.]*)?(_[a-zA-Z0-9][a-zA-Z0-9_]*)?"
+		"|//|\\*\\*|::|[/<>=]="),
+	IPATTERN("fountain",
+		 "^((\\.[^.]|(int|ext|est|int\\.?/ext|i/e)[. ]).*)$",
 		 "[^ \t-]+"),
 	PATTERNS("html", "^[ \t]*(<[Hh][1-6]([ \t].*)?>.*)$", "[^<>= \t]+"),
-	PATTERNS("java",
-		 "!^[ \t]*(catch|do|for|if|instanceof|new|return|switch|throw|while)\n"
-		 "^[ \t]*(([A-Za-z_][A-Za-z_0-9]*[ \t]+)+[A-Za-z_][A-Za-z_0-9]*[ \t]*\\([^;]*)$",
-		 /* -- */
-		 "[a-zA-Z_][a-zA-Z0-9_]*"
-		 "|[-+0-9.e]+[fFlL]?|0[xXbB]?[0-9a-fA-F]+[lL]?"
-		 "|[-+*/<>%&^|=!]="
-		 "|--|\\+\\+|<<=?|>>>?=?|&&|\\|\\|"),
-	PATTERNS("matlab",
-		 "^[[:space:]]*((classdef|function)[[:space:]].*)$|^%%[[:space:]].*$",
-		 "[a-zA-Z_][a-zA-Z0-9_]*|[-+0-9.e]+|[=~<>]=|\\.[*/\\^']|\\|\\||&&"),
-	PATTERNS("objc",
-		 /* Negate C statements that can look like functions */
-		 "!^[ \t]*(do|for|if|else|return|switch|while)\n"
-		 /* Objective-C methods */
-		 "^[ \t]*([-+][ \t]*\\([ \t]*[A-Za-z_][A-Za-z_0-9* \t]*\\)[ \t]*[A-Za-z_].*)$\n"
-		 /* C functions */
-		 "^[ \t]*(([A-Za-z_][A-Za-z_0-9]*[ \t]+)+[A-Za-z_][A-Za-z_0-9]*[ \t]*\\([^;]*)$\n"
-		 /* Objective-C class/protocol definitions */
-		 "^(@(implementation|interface|protocol)[ \t].*)$",
-		 /* -- */
-		 "[a-zA-Z_][a-zA-Z0-9_]*"
-		 "|[-+0-9.e]+[fFlL]?|0[xXbB]?[0-9a-fA-F]+[lL]?"
-		 "|[-+*/<>%&^|=!]=|--|\\+\\+|<<=?|>>=?|&&|\\|\\||::|->"),
+	PATTERNS(
+		"java",
+		"!^[ \t]*(catch|do|for|if|instanceof|new|return|switch|throw|while)\n"
+		"^[ \t]*(([A-Za-z_][A-Za-z_0-9]*[ \t]+)+[A-Za-z_][A-Za-z_0-9]*[ \t]*\\([^;]*)$",
+		/* -- */
+		"[a-zA-Z_][a-zA-Z0-9_]*"
+		"|[-+0-9.e]+[fFlL]?|0[xXbB]?[0-9a-fA-F]+[lL]?"
+		"|[-+*/<>%&^|=!]="
+		"|--|\\+\\+|<<=?|>>>?=?|&&|\\|\\|"),
+	PATTERNS(
+		"matlab",
+		"^[[:space:]]*((classdef|function)[[:space:]].*)$|^%%[[:space:]].*$",
+		"[a-zA-Z_][a-zA-Z0-9_]*|[-+0-9.e]+|[=~<>]=|\\.[*/\\^']|\\|\\||&&"),
+	PATTERNS(
+		"objc",
+		/* Negate C statements that can look like functions */
+		"!^[ \t]*(do|for|if|else|return|switch|while)\n"
+		/* Objective-C methods */
+		"^[ \t]*([-+][ \t]*\\([ \t]*[A-Za-z_][A-Za-z_0-9* \t]*\\)[ \t]*[A-Za-z_].*)$\n"
+		/* C functions */
+		"^[ \t]*(([A-Za-z_][A-Za-z_0-9]*[ \t]+)+[A-Za-z_][A-Za-z_0-9]*[ \t]*\\([^;]*)$\n"
+		/* Objective-C class/protocol definitions */
+		"^(@(implementation|interface|protocol)[ \t].*)$",
+		/* -- */
+		"[a-zA-Z_][a-zA-Z0-9_]*"
+		"|[-+0-9.e]+[fFlL]?|0[xXbB]?[0-9a-fA-F]+[lL]?"
+		"|[-+*/<>%&^|=!]=|--|\\+\\+|<<=?|>>=?|&&|\\|\\||::|->"),
 	PATTERNS("pascal",
 		 "^(((class[ \t]+)?(procedure|function)|constructor|destructor|interface|"
 		 "implementation|initialization|finalization)[ \t]*.*)$"
@@ -130,30 +135,32 @@ static struct userdiff_driver builtin_drivers[] = {
 		 "[={}\"]|[^={}\" \t]+"),
 	PATTERNS("tex", "^(\\\\((sub)*section|chapter|part)\\*{0,1}\\{.*)$",
 		 "\\\\[a-zA-Z@]+|\\\\.|[a-zA-Z0-9\x80-\xff]+"),
-	PATTERNS("cpp",
-		 /* Jump targets or access declarations */
-		 "!^[ \t]*[A-Za-z_][A-Za-z_0-9]*:[[:space:]]*($|/[/*])\n"
-		 /* functions/methods, variables, and compounds at top level */
-		 "^((::[[:space:]]*)?[A-Za-z_].*)$",
-		 /* -- */
-		 "[a-zA-Z_][a-zA-Z0-9_]*"
-		 "|[-+0-9.e]+[fFlL]?|0[xXbB]?[0-9a-fA-F]+[lLuU]*"
-		 "|[-+*/<>%&^|=!]=|--|\\+\\+|<<=?|>>=?|&&|\\|\\||::|->\\*?|\\.\\*"),
-	PATTERNS("csharp",
-		 /* Keywords */
-		 "!^[ \t]*(do|while|for|if|else|instanceof|new|return|switch|case|throw|catch|using)\n"
-		 /* Methods and constructors */
-		 "^[ \t]*(((static|public|internal|private|protected|new|virtual|sealed|override|unsafe)[ \t]+)*[][<>@.~_[:alnum:]]+[ \t]+[<>@._[:alnum:]]+[ \t]*\\(.*\\))[ \t]*$\n"
-		 /* Properties */
-		 "^[ \t]*(((static|public|internal|private|protected|new|virtual|sealed|override|unsafe)[ \t]+)*[][<>@.~_[:alnum:]]+[ \t]+[@._[:alnum:]]+)[ \t]*$\n"
-		 /* Type definitions */
-		 "^[ \t]*(((static|public|internal|private|protected|new|unsafe|sealed|abstract|partial)[ \t]+)*(class|enum|interface|struct)[ \t]+.*)$\n"
-		 /* Namespace */
-		 "^[ \t]*(namespace[ \t]+.*)$",
-		 /* -- */
-		 "[a-zA-Z_][a-zA-Z0-9_]*"
-		 "|[-+0-9.e]+[fFlL]?|0[xXbB]?[0-9a-fA-F]+[lL]?"
-		 "|[-+*/<>%&^|=!]=|--|\\+\\+|<<=?|>>=?|&&|\\|\\||::|->"),
+	PATTERNS(
+		"cpp",
+		/* Jump targets or access declarations */
+		"!^[ \t]*[A-Za-z_][A-Za-z_0-9]*:[[:space:]]*($|/[/*])\n"
+		/* functions/methods, variables, and compounds at top level */
+		"^((::[[:space:]]*)?[A-Za-z_].*)$",
+		/* -- */
+		"[a-zA-Z_][a-zA-Z0-9_]*"
+		"|[-+0-9.e]+[fFlL]?|0[xXbB]?[0-9a-fA-F]+[lLuU]*"
+		"|[-+*/<>%&^|=!]=|--|\\+\\+|<<=?|>>=?|&&|\\|\\||::|->\\*?|\\.\\*"),
+	PATTERNS(
+		"csharp",
+		/* Keywords */
+		"!^[ \t]*(do|while|for|if|else|instanceof|new|return|switch|case|throw|catch|using)\n"
+		/* Methods and constructors */
+		"^[ \t]*(((static|public|internal|private|protected|new|virtual|sealed|override|unsafe)[ \t]+)*[][<>@.~_[:alnum:]]+[ \t]+[<>@._[:alnum:]]+[ \t]*\\(.*\\))[ \t]*$\n"
+		/* Properties */
+		"^[ \t]*(((static|public|internal|private|protected|new|virtual|sealed|override|unsafe)[ \t]+)*[][<>@.~_[:alnum:]]+[ \t]+[@._[:alnum:]]+)[ \t]*$\n"
+		/* Type definitions */
+		"^[ \t]*(((static|public|internal|private|protected|new|unsafe|sealed|abstract|partial)[ \t]+)*(class|enum|interface|struct)[ \t]+.*)$\n"
+		/* Namespace */
+		"^[ \t]*(namespace[ \t]+.*)$",
+		/* -- */
+		"[a-zA-Z_][a-zA-Z0-9_]*"
+		"|[-+0-9.e]+[fFlL]?|0[xXbB]?[0-9a-fA-F]+[lL]?"
+		"|[-+*/<>%&^|=!]=|--|\\+\\+|<<=?|>>=?|&&|\\|\\||::|->"),
 	IPATTERN("css",
 		 "![:;][[:space:]]*$\n"
 		 "^[_a-z0-9].*$",
@@ -171,7 +178,10 @@ static struct userdiff_driver builtin_drivers[] = {
 #undef PATTERNS
 #undef IPATTERN
 
-static struct userdiff_driver driver_true = { "diff=true", NULL, 0, { NULL, 0 } };
+static struct userdiff_driver driver_true = { "diff=true",
+					      NULL,
+					      0,
+					      { NULL, 0 } };
 
 static struct userdiff_driver driver_false = { "!diff", NULL, 1, { NULL, 0 } };
 

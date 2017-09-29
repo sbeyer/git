@@ -19,7 +19,8 @@ struct send_pack_args {
 };
 
 struct option;
-int option_parse_push_signed(const struct option *opt, const char *arg, int unset);
+int option_parse_push_signed(const struct option *opt, const char *arg,
+			     int unset);
 
 int send_pack(struct send_pack_args *args, int fd[], struct child_process *conn,
 	      struct ref *remote_refs, struct oid_array *extra_have);

@@ -88,7 +88,8 @@ const char *rerere_path(const struct rerere_id *id, const char *file)
 	if (id->variant <= 0)
 		return git_path("rr-cache/%s/%s", rerere_id_hex(id), file);
 
-	return git_path("rr-cache/%s/%s.%d", rerere_id_hex(id), file, id->variant);
+	return git_path("rr-cache/%s/%s.%d", rerere_id_hex(id), file,
+			id->variant);
 }
 
 static int is_rr_file(const char *name, const char *filename, int *variant)
@@ -396,7 +397,8 @@ static int is_cmarker(char *buf, int marker_char, int marker_size)
  * normalization may deserve to be documented somewhere, perhaps in
  * Documentation/technical/rerere.txt.
  */
-static int handle_path(unsigned char *sha1, struct rerere_io *io, int marker_size)
+static int
+handle_path(unsigned char *sha1, struct rerere_io *io, int marker_size)
 {
 	git_SHA_CTX ctx;
 	int hunk_no = 0;
@@ -471,7 +473,8 @@ static int handle_path(unsigned char *sha1, struct rerere_io *io, int marker_siz
  * Scan the path for conflicts, do the "handle_path()" thing above, and
  * return the number of conflict hunks found.
  */
-static int handle_file(const char *path, unsigned char *sha1, const char *output)
+static int
+handle_file(const char *path, unsigned char *sha1, const char *output)
 {
 	int hunk_no = 0;
 	struct rerere_io_file io;
@@ -537,8 +540,9 @@ static int check_one_conflict(int i, int *type)
 	if (i + 1 < active_nr) {
 		const struct cache_entry *e2 = active_cache[i];
 		const struct cache_entry *e3 = active_cache[i + 1];
-		if (ce_stage(e2) == 2 && ce_stage(e3) == 3 && ce_same_name(e, e3) &&
-		    S_ISREG(e2->ce_mode) && S_ISREG(e3->ce_mode))
+		if (ce_stage(e2) == 2 && ce_stage(e3) == 3 &&
+		    ce_same_name(e, e3) && S_ISREG(e2->ce_mode) &&
+		    S_ISREG(e3->ce_mode))
 			*type = THREE_STAGED;
 	}
 
@@ -606,7 +610,8 @@ int rerere_remaining(struct string_list *merge_rr)
 			string_list_insert(merge_rr, (const char *)e->name);
 		else if (conflict_type == RESOLVED) {
 			struct string_list_item *it;
-			it = string_list_lookup(merge_rr, (const char *)e->name);
+			it = string_list_lookup(merge_rr,
+						(const char *)e->name);
 			if (it != NULL) {
 				free_rerere_id(it);
 				it->util = RERERE_RESOLVED;
@@ -680,7 +685,8 @@ static int merge(const struct rerere_id *id, const char *path)
 	 * Mark that "postimage" was used to help gc.
 	 */
 	if (utime(rerere_path(id, "postimage"), NULL) < 0)
-		warning_errno("failed utime() on %s", rerere_path(id, "postimage"));
+		warning_errno("failed utime() on %s",
+			      rerere_path(id, "postimage"));
 
 	/* Update "path" with the resolution */
 	f = fopen(path, "w");
@@ -750,7 +756,8 @@ do_rerere_one_path(struct string_list_item *rr_item, struct string_list *update)
 		if (!handle_file(path, NULL, NULL)) {
 			copy_file(rerere_path(id, "postimage"), path, 0666);
 			id->collection->status[variant] |= RR_HAS_POSTIMAGE;
-			fprintf(stderr, "Recorded resolution for '%s'.\n", path);
+			fprintf(stderr, "Recorded resolution for '%s'.\n",
+				path);
 			free_rerere_id(rr_item);
 			rr_item->util = NULL;
 			return;
@@ -949,7 +956,8 @@ static int rerere_mem_getline(struct strbuf *sb, struct rerere_io *io_)
 	return 0;
 }
 
-static int handle_cache(const char *path, unsigned char *sha1, const char *output)
+static int
+handle_cache(const char *path, unsigned char *sha1, const char *output)
 {
 	mmfile_t mmfile[3] = { { NULL } };
 	mmbuffer_t result = { NULL, 0 };
@@ -976,7 +984,8 @@ static int handle_cache(const char *path, unsigned char *sha1, const char *outpu
 			break;
 		i = ce_stage(ce) - 1;
 		if (!mmfile[i].ptr) {
-			mmfile[i].ptr = read_sha1_file(ce->oid.hash, &type, &size);
+			mmfile[i].ptr =
+				read_sha1_file(ce->oid.hash, &type, &size);
 			mmfile[i].size = size;
 		}
 	}
@@ -1044,7 +1053,8 @@ static int rerere_forget_one_path(const char *path, struct string_list *rr)
 		handle_cache(path, sha1, rerere_path(id, "thisimage"));
 		if (read_mmfile(&cur, rerere_path(id, "thisimage"))) {
 			free(cur.ptr);
-			error("Failed to update conflicted state in '%s'", path);
+			error("Failed to update conflicted state in '%s'",
+			      path);
 			goto fail_exit;
 		}
 		cleanly_resolved = !try_merge(id, path, &cur, &result);
@@ -1136,7 +1146,8 @@ static timestamp_t rerere_last_used_at(struct rerere_id *id)
 {
 	struct stat st;
 
-	return stat(rerere_path(id, "postimage"), &st) ? (time_t)0 : st.st_mtime;
+	return stat(rerere_path(id, "postimage"), &st) ? (time_t)0 :
+							 st.st_mtime;
 }
 
 /*
@@ -1181,7 +1192,8 @@ void rerere_gc(struct string_list *rr)
 	if (setup_rerere(rr, 0) < 0)
 		return;
 
-	git_config_get_expiry_in_days("gc.rerereresolved", &cutoff_resolve, now);
+	git_config_get_expiry_in_days("gc.rerereresolved", &cutoff_resolve,
+				      now);
 	git_config_get_expiry_in_days("gc.rerereunresolved", &cutoff_noresolve,
 				      now);
 	git_config(git_default_config, NULL);

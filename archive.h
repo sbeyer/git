@@ -31,8 +31,9 @@ extern void init_tar_archiver(void);
 extern void init_zip_archiver(void);
 
 typedef int (*write_archive_entry_fn_t)(struct archiver_args *args,
-					const unsigned char *sha1, const char *path,
-					size_t pathlen, unsigned int mode);
+					const unsigned char *sha1,
+					const char *path, size_t pathlen,
+					unsigned int mode);
 
 extern int write_archive_entries(struct archiver_args *args,
 				 write_archive_entry_fn_t write_entry);

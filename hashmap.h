@@ -168,8 +168,9 @@ struct hashmap_entry {
  *
  * The `hashmap_cmp_fn_data` entry is the pointer given in the init function.
  */
-typedef int (*hashmap_cmp_fn)(const void *hashmap_cmp_fn_data, const void *entry,
-			      const void *entry_or_key, const void *keydata);
+typedef int (*hashmap_cmp_fn)(const void *hashmap_cmp_fn_data,
+			      const void *entry, const void *entry_or_key,
+			      const void *keydata);
 
 /*
  * struct hashmap is the hash table structure. Members can be used as follows,
@@ -299,8 +300,9 @@ hashmap_get(const struct hashmap *map, const void *key, const void *keydata);
  * `entry_or_key` parameter of `hashmap_cmp_fn` points to a hashmap_entry
  * structure that should not be used in the comparison.
  */
-static inline void *hashmap_get_from_hash(const struct hashmap *map,
-					  unsigned int hash, const void *keydata)
+static inline void *
+hashmap_get_from_hash(const struct hashmap *map, unsigned int hash,
+		      const void *keydata)
 {
 	struct hashmap_entry key;
 	hashmap_entry_init(&key, hash);

@@ -26,7 +26,8 @@ static void cache_credential(struct credential *c, int timeout)
 	e->expiration = time(NULL) + timeout;
 }
 
-static struct credential_cache_entry *lookup_credential(const struct credential *c)
+static struct credential_cache_entry *
+lookup_credential(const struct credential *c)
 {
 	int i;
 	for (i = 0; i < entries_nr; i++) {
@@ -90,8 +91,8 @@ static timestamp_t check_expirations(void)
 	return next - now;
 }
 
-static int
-read_request(FILE *fh, struct credential *c, struct strbuf *action, int *timeout)
+static int read_request(FILE *fh, struct credential *c, struct strbuf *action,
+			int *timeout)
 {
 	static struct strbuf item = STRBUF_INIT;
 	const char *p;
@@ -259,13 +260,15 @@ int cmd_main(int argc, const char **argv)
 	struct tempfile *socket_file;
 	const char *socket_path;
 	int ignore_sighup = 0;
-	static const char *usage[] = { "git-credential-cache--daemon [opts] <socket_path>",
-				       NULL };
+	static const char *usage[] = {
+		"git-credential-cache--daemon [opts] <socket_path>", NULL
+	};
 	int debug = 0;
-	const struct option options[] =
-		{ OPT_BOOL(0, "debug", &debug,
-			   N_("print debugging messages to stderr")),
-		  OPT_END() };
+	const struct option options[] = {
+		OPT_BOOL(0, "debug", &debug,
+			 N_("print debugging messages to stderr")),
+		OPT_END()
+	};
 
 	git_config_get_bool("credentialcache.ignoresighup", &ignore_sighup);
 

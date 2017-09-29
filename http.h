@@ -79,9 +79,12 @@ struct buffer {
 };
 
 /* Curl request read/write callbacks */
-extern size_t fread_buffer(char *ptr, size_t eltsize, size_t nmemb, void *strbuf);
-extern size_t fwrite_buffer(char *ptr, size_t eltsize, size_t nmemb, void *strbuf);
-extern size_t fwrite_null(char *ptr, size_t eltsize, size_t nmemb, void *strbuf);
+extern size_t
+fread_buffer(char *ptr, size_t eltsize, size_t nmemb, void *strbuf);
+extern size_t
+fwrite_buffer(char *ptr, size_t eltsize, size_t nmemb, void *strbuf);
+extern size_t
+fwrite_null(char *ptr, size_t eltsize, size_t nmemb, void *strbuf);
 #ifndef NO_CURL_IOCTL
 extern curlioerr ioctl_buffer(CURL *handle, int cmd, void *clientp);
 #endif
@@ -98,7 +101,8 @@ extern void finish_all_active_slots(void);
  * we do not want to intermingle calls to curl_multi and curl_easy).
  *
  */
-int run_one_slot(struct active_request_slot *slot, struct slot_results *results);
+int run_one_slot(struct active_request_slot *slot,
+		 struct slot_results *results);
 
 #ifdef USE_CURL_MULTI
 extern void fill_active_slots(void);
@@ -106,7 +110,8 @@ extern void add_fill_function(void *data, int (*fill)(void *));
 extern void step_active_slots(void);
 #endif
 
-extern void http_init(struct remote *remote, const char *url, int proactive_auth);
+extern void
+http_init(struct remote *remote, const char *url, int proactive_auth);
 extern void http_cleanup(void);
 extern struct curl_slist *http_copy_default_headers(void);
 
@@ -138,8 +143,9 @@ static inline int missing__target(int code, int result)
 #define missing_target(a) missing__target((a)->http_code, (a)->curl_result)
 
 /* Helpers for modifying and creating URLs */
-extern void append_remote_object_url(struct strbuf *buf, const char *url,
-				     const char *hex, int only_two_digit_prefix);
+extern void
+append_remote_object_url(struct strbuf *buf, const char *url, const char *hex,
+			 int only_two_digit_prefix);
 extern char *get_remote_object_url(const char *url, const char *hex,
 				   int only_two_digit_prefix);
 

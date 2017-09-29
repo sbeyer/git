@@ -106,7 +106,8 @@ preload_index(struct index_state *index, const struct pathspec *pathspec)
 }
 #endif
 
-int read_index_preload(struct index_state *index, const struct pathspec *pathspec)
+int read_index_preload(struct index_state *index,
+		       const struct pathspec *pathspec)
 {
 	int retval = read_index(index);
 

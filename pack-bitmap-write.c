@@ -48,7 +48,8 @@ void bitmap_writer_show_progress(int show)
 /**
  * Build the initial type index for the packfile
  */
-void bitmap_writer_build_type_index(struct pack_idx_entry **index, uint32_t index_nr)
+void bitmap_writer_build_type_index(struct pack_idx_entry **index,
+				    uint32_t index_nr)
 {
 	uint32_t i;
 
@@ -95,7 +96,8 @@ void bitmap_writer_build_type_index(struct pack_idx_entry **index, uint32_t inde
 
 		default:
 			die("Missing type information for %s (%d/%d)",
-			    oid_to_hex(&entry->idx.oid), real_type, entry->type);
+			    oid_to_hex(&entry->idx.oid), real_type,
+			    entry->type);
 		}
 	}
 }
@@ -171,7 +173,8 @@ static int add_to_include_set(struct bitmap *base, struct commit *commit)
 
 	hash_pos = kh_get_sha1(writer.bitmaps, commit->object.oid.hash);
 	if (hash_pos < kh_end(writer.bitmaps)) {
-		struct bitmapped_commit *bc = kh_value(writer.bitmaps, hash_pos);
+		struct bitmapped_commit *bc =
+			kh_value(writer.bitmaps, hash_pos);
 		bitmap_or_ewah(base, bc->bitmap);
 		return 0;
 	}
@@ -254,8 +257,8 @@ void bitmap_writer_build(struct packing_data *to_pack)
 	writer.to_pack = to_pack;
 
 	if (writer.show_progress)
-		writer.progress = start_progress("Building bitmaps",
-						 writer.selected_nr);
+		writer.progress =
+			start_progress("Building bitmaps", writer.selected_nr);
 
 	init_revisions(&revs, NULL);
 	revs.tag_objects = 1;
@@ -294,7 +297,8 @@ void bitmap_writer_build(struct packing_data *to_pack)
 			if (prepare_revision_walk(&revs))
 				die("revision walk setup failed");
 
-			traverse_commit_list(&revs, show_commit, show_object, base);
+			traverse_commit_list(&revs, show_commit, show_object,
+					     base);
 
 			object_array_clear(&revs.pending);
 
@@ -306,7 +310,8 @@ void bitmap_writer_build(struct packing_data *to_pack)
 		if (i >= reuse_after)
 			stored->flags |= BITMAP_FLAG_REUSE;
 
-		hash_pos = kh_put_sha1(writer.bitmaps, object->oid.hash, &hash_ret);
+		hash_pos = kh_put_sha1(writer.bitmaps, object->oid.hash,
+				       &hash_ret);
 		if (hash_ret == 0)
 			die("Duplicate entry when writing index: %s",
 			    oid_to_hex(&object->oid));
@@ -379,7 +384,8 @@ static struct ewah_bitmap *find_reused_bitmap(const unsigned char *sha1)
 }
 
 void bitmap_writer_select_commits(struct commit **indexed_commits,
-				  unsigned int indexed_commits_nr, int max_bitmaps)
+				  unsigned int indexed_commits_nr,
+				  int max_bitmaps)
 {
 	unsigned int i = 0, j, next;
 
@@ -410,15 +416,16 @@ void bitmap_writer_select_commits(struct commit **indexed_commits,
 
 		if (next == 0) {
 			chosen = indexed_commits[i];
-			reused_bitmap = find_reused_bitmap(chosen->object.oid.hash);
+			reused_bitmap =
+				find_reused_bitmap(chosen->object.oid.hash);
 		} else {
 			chosen = indexed_commits[i + next];
 
 			for (j = 0; j <= next; ++j) {
 				struct commit *cm = indexed_commits[i + j];
 
-				reused_bitmap = find_reused_bitmap(
-					cm->object.oid.hash);
+				reused_bitmap =
+					find_reused_bitmap(cm->object.oid.hash);
 				if (reused_bitmap ||
 				    (cm->object.flags & NEEDS_BITMAP) != 0) {
 					chosen = cm;
@@ -515,7 +522,8 @@ void bitmap_writer_finish(struct pack_idx_entry **index, uint32_t index_nr,
 
 	f = sha1fd(fd, tmp_file.buf);
 
-	memcpy(header.magic, BITMAP_IDX_SIGNATURE, sizeof(BITMAP_IDX_SIGNATURE));
+	memcpy(header.magic, BITMAP_IDX_SIGNATURE,
+	       sizeof(BITMAP_IDX_SIGNATURE));
 	header.version = htons(default_version);
 	header.options = htons(flags | options);
 	header.entry_count = htonl(writer.selected_nr);

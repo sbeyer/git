@@ -60,7 +60,8 @@ static int add_rename_dst(struct diff_filespec *two)
 		memmove(rename_dst + first + 1, rename_dst + first,
 			(rename_dst_nr - first - 1) * sizeof(*rename_dst));
 	rename_dst[first].two = alloc_filespec(two->path);
-	fill_filespec(rename_dst[first].two, &two->oid, two->oid_valid, two->mode);
+	fill_filespec(rename_dst[first].two, &two->oid, two->oid_valid,
+		      two->mode);
 	rename_dst[first].pair = NULL;
 	return 0;
 }
@@ -142,7 +143,8 @@ static int estimate_similarity(struct diff_filespec *src,
 	 * match than anything else; the destination does not even
 	 * call into this function in that case.
 	 */
-	unsigned long max_size, delta_size, base_size, src_copied, literal_added;
+	unsigned long max_size, delta_size, base_size, src_copied,
+		literal_added;
 	int score;
 
 	/* We deal only with regular files.  Symlink renames are handled
@@ -289,7 +291,8 @@ static int find_identical_files(struct hashmap *srcs, int dst_index,
 		/* Give higher scores to sources that haven't been used already
 		 */
 		score = !source->rename_used;
-		if (source->rename_used && options->detect_rename != DIFF_DETECT_COPY)
+		if (source->rename_used &&
+		    options->detect_rename != DIFF_DETECT_COPY)
 			continue;
 		score += basename_same(source, target);
 		if (score > best_score) {
@@ -373,7 +376,8 @@ static void record_if_better(struct diff_score m[], struct diff_score *o)
  * 1 if we need to disable inexact rename detection;
  * 2 if we would be under the limit if we were given -C instead of -C -C.
  */
-static int too_many_rename_candidates(int num_create, struct diff_options *options)
+static int
+too_many_rename_candidates(int num_create, struct diff_options *options)
 {
 	int rename_limit = options->rename_limit;
 	int num_src = rename_src_nr;
@@ -396,7 +400,8 @@ static int too_many_rename_candidates(int num_create, struct diff_options *optio
 	    (num_create * num_src <= rename_limit * rename_limit))
 		return 0;
 
-	options->needed_rename_limit = num_src > num_create ? num_src : num_create;
+	options->needed_rename_limit = num_src > num_create ? num_src :
+							      num_create;
 
 	/* Are we running under -C -C? */
 	if (!DIFF_OPT_TST(options, FIND_COPIES_HARDER))
@@ -524,8 +529,9 @@ void diffcore_rename(struct diff_options *options)
 	}
 
 	if (options->show_rename_progress) {
-		progress = start_delayed_progress(_("Performing inexact rename detection"),
-						  rename_dst_nr * rename_src_nr);
+		progress = start_delayed_progress(
+			_("Performing inexact rename detection"),
+			rename_dst_nr * rename_src_nr);
 	}
 
 	mx = xcalloc(st_mult(NUM_CANDIDATE_PER_DST, num_create), sizeof(*mx));
@@ -548,8 +554,8 @@ void diffcore_rename(struct diff_options *options)
 			    diff_unmodified_pair(rename_src[j].p))
 				continue;
 
-			this_src.score = estimate_similarity(one, two,
-							     minimum_score);
+			this_src.score =
+				estimate_similarity(one, two, minimum_score);
 			this_src.name_score = basename_same(one, two);
 			this_src.dst = i;
 			this_src.src = j;
@@ -585,7 +591,8 @@ cleanup:
 
 		if (DIFF_PAIR_UNMERGED(p)) {
 			diff_q(&outq, p);
-		} else if (!DIFF_FILE_VALID(p->one) && DIFF_FILE_VALID(p->two)) {
+		} else if (!DIFF_FILE_VALID(p->one) &&
+			   DIFF_FILE_VALID(p->two)) {
 			/*
 			 * Creation
 			 *
@@ -601,7 +608,8 @@ cleanup:
 				 * record this as a creation.
 				 */
 				diff_q(&outq, p);
-		} else if (DIFF_FILE_VALID(p->one) && !DIFF_FILE_VALID(p->two)) {
+		} else if (DIFF_FILE_VALID(p->one) &&
+			   !DIFF_FILE_VALID(p->two)) {
 			/*
 			 * Deletion
 			 *
@@ -620,8 +628,8 @@ cleanup:
 			 */
 			if (DIFF_PAIR_BROKEN(p)) {
 				/* broken delete */
-				struct diff_rename_dst *dst = locate_rename_dst(
-					p->one);
+				struct diff_rename_dst *dst =
+					locate_rename_dst(p->one);
 				if (dst && dst->pair)
 					/* counterpart is now rename/copy */
 					pair_to_free = p;

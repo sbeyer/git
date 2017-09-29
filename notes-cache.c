@@ -28,7 +28,8 @@ static int notes_cache_match_validity(const char *ref, const char *validity)
 	return ret;
 }
 
-void notes_cache_init(struct notes_cache *c, const char *name, const char *validity)
+void notes_cache_init(struct notes_cache *c, const char *name,
+		      const char *validity)
 {
 	struct strbuf ref = STRBUF_INIT;
 	int flags = NOTES_INIT_WRITABLE;
@@ -47,7 +48,8 @@ int notes_cache_write(struct notes_cache *c)
 {
 	struct object_id tree_oid, commit_oid;
 
-	if (!c || !c->tree.initialized || !c->tree.update_ref || !*c->tree.update_ref)
+	if (!c || !c->tree.initialized || !c->tree.update_ref ||
+	    !*c->tree.update_ref)
 		return -1;
 	if (!c->tree.dirty)
 		return 0;
@@ -64,8 +66,8 @@ int notes_cache_write(struct notes_cache *c)
 	return 0;
 }
 
-char *
-notes_cache_get(struct notes_cache *c, struct object_id *key_oid, size_t *outsize)
+char *notes_cache_get(struct notes_cache *c, struct object_id *key_oid,
+		      size_t *outsize)
 {
 	const struct object_id *value_oid;
 	enum object_type type;

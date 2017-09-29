@@ -51,7 +51,8 @@ static int subtree_pos(struct cache_tree *it, const char *path, int pathlen)
 	while (lo < hi) {
 		int mi = (lo + hi) / 2;
 		struct cache_tree_sub *mdl = down[mi];
-		int cmp = subtree_name_cmp(path, pathlen, mdl->name, mdl->namelen);
+		int cmp = subtree_name_cmp(path, pathlen, mdl->name,
+					   mdl->namelen);
 		if (!cmp)
 			return mi;
 		if (cmp < 0)
@@ -284,7 +285,8 @@ update_one(struct cache_tree *it, struct cache_entry **cache, int entries,
 		if (!sub->cache_tree)
 			sub->cache_tree = cache_tree();
 		subcnt = update_one(sub->cache_tree, cache + i, entries - i,
-				    path, baselen + sublen + 1, &subskip, flags);
+				    path, baselen + sublen + 1, &subskip,
+				    flags);
 		if (subcnt < 0)
 			return subcnt;
 		if (!subcnt)
@@ -340,8 +342,8 @@ update_one(struct cache_tree *it, struct cache_entry **cache, int entries,
 			i++;
 		}
 
-		if (is_null_sha1(sha1) ||
-		    (mode != S_IFGITLINK && !missing_ok && !has_sha1_file(sha1))) {
+		if (is_null_sha1(sha1) || (mode != S_IFGITLINK && !missing_ok &&
+					   !has_sha1_file(sha1))) {
 			strbuf_release(&buffer);
 			if (expected_missing)
 				return -1;
@@ -395,7 +397,8 @@ update_one(struct cache_tree *it, struct cache_entry **cache, int entries,
 			to_invalidate = 1;
 	} else if (dryrun)
 		hash_sha1_file(buffer.buf, buffer.len, tree_type, it->oid.hash);
-	else if (write_sha1_file(buffer.buf, buffer.len, tree_type, it->oid.hash)) {
+	else if (write_sha1_file(buffer.buf, buffer.len, tree_type,
+				 it->oid.hash)) {
 		strbuf_release(&buffer);
 		return -1;
 	}
@@ -562,7 +565,8 @@ struct cache_tree *cache_tree_read(const char *buffer, unsigned long size)
 	return read_one(&buffer, &size);
 }
 
-static struct cache_tree *cache_tree_find(struct cache_tree *it, const char *path)
+static struct cache_tree *
+cache_tree_find(struct cache_tree *it, const char *path)
 {
 	if (!it)
 		return NULL;
@@ -615,7 +619,8 @@ int write_index_as_tree(unsigned char *sha1, struct index_state *index_state,
 			goto out;
 		}
 		if (0 <= newfd) {
-			if (!write_locked_index(index_state, &lock_file, COMMIT_LOCK))
+			if (!write_locked_index(index_state, &lock_file,
+						COMMIT_LOCK))
 				newfd = -1;
 		}
 		/* Not being able to write is fine -- we are only interested
@@ -692,7 +697,8 @@ void prime_cache_tree(struct index_state *istate, struct tree *tree)
  *     above us, and find ourselves in there.
  */
 static struct cache_tree *
-find_cache_tree_from_traversal(struct cache_tree *root, struct traverse_info *info)
+find_cache_tree_from_traversal(struct cache_tree *root,
+			       struct traverse_info *info)
 {
 	struct cache_tree *our_parent;
 
@@ -702,7 +708,8 @@ find_cache_tree_from_traversal(struct cache_tree *root, struct traverse_info *in
 	return cache_tree_find(our_parent, info->name.path);
 }
 
-int cache_tree_matches_traversal(struct cache_tree *root, struct name_entry *ent,
+int cache_tree_matches_traversal(struct cache_tree *root,
+				 struct name_entry *ent,
 				 struct traverse_info *info)
 {
 	struct cache_tree *it;

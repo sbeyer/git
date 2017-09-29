@@ -75,7 +75,8 @@ static struct worktree *get_linked_worktree(const char *id)
 	if (!id)
 		die("Missing linked worktree name");
 
-	strbuf_git_common_path(&path, the_repository, "worktrees/%s/gitdir", id);
+	strbuf_git_common_path(&path, the_repository, "worktrees/%s/gitdir",
+			       id);
 	if (strbuf_read_file(&worktree_path, path.buf, 0) <= 0)
 		/* invalid gitdir file */
 		goto done;
@@ -286,7 +287,8 @@ int is_worktree_being_bisected(const struct worktree *wt, const char *target)
  * bisect). New commands that do similar things should update this
  * function as well.
  */
-const struct worktree *find_shared_symref(const char *symref, const char *target)
+const struct worktree *
+find_shared_symref(const char *symref, const char *target)
 {
 	const struct worktree *existing = NULL;
 	static struct worktree **worktrees;
@@ -317,8 +319,8 @@ const struct worktree *find_shared_symref(const char *symref, const char *target
 		}
 
 		refs = get_worktree_ref_store(wt);
-		symref_target = refs_resolve_ref_unsafe(refs, symref, 0, NULL,
-							&flags);
+		symref_target =
+			refs_resolve_ref_unsafe(refs, symref, 0, NULL, &flags);
 		if ((flags & REF_ISSYMREF) && !strcmp(symref_target, target)) {
 			existing = wt;
 			break;

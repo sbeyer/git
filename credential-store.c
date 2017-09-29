@@ -85,7 +85,8 @@ static void store_credential_file(const char *fn, struct credential *c)
 	strbuf_release(&buf);
 }
 
-static void store_credential(const struct string_list *fns, struct credential *c)
+static void
+store_credential(const struct string_list *fns, struct credential *c)
 {
 	struct string_list_item *fn;
 
@@ -96,7 +97,8 @@ static void store_credential(const struct string_list *fns, struct credential *c
 	 * we have no primary key. And without a username and password,
 	 * we are not actually storing a credential.
 	 */
-	if (!c->protocol || !(c->host || c->path) || !c->username || !c->password)
+	if (!c->protocol || !(c->host || c->path) || !c->username ||
+	    !c->password)
 		return;
 
 	for_each_string_list_item (fn, fns)
@@ -112,7 +114,8 @@ static void store_credential(const struct string_list *fns, struct credential *c
 		store_credential_file(fns->items[0].string, c);
 }
 
-static void remove_credential(const struct string_list *fns, struct credential *c)
+static void
+remove_credential(const struct string_list *fns, struct credential *c)
 {
 	struct string_list_item *fn;
 
@@ -131,7 +134,8 @@ static void remove_credential(const struct string_list *fns, struct credential *
 			rewrite_credential_file(fn->string, c, NULL);
 }
 
-static void lookup_credential(const struct string_list *fns, struct credential *c)
+static void
+lookup_credential(const struct string_list *fns, struct credential *c)
 {
 	struct string_list_item *fn;
 
@@ -142,19 +146,23 @@ static void lookup_credential(const struct string_list *fns, struct credential *
 
 int cmd_main(int argc, const char **argv)
 {
-	const char *const usage[] = { "git credential-store [<options>] <action>",
-				      NULL };
+	const char *const usage[] = {
+		"git credential-store [<options>] <action>", NULL
+	};
 	const char *op;
 	struct credential c = CREDENTIAL_INIT;
 	struct string_list fns = STRING_LIST_INIT_DUP;
 	char *file = NULL;
-	struct option options[] = { OPT_STRING(0, "file", &file, "path",
-					       "fetch and store credentials in <path>"),
-				    OPT_END() };
+	struct option options[] = {
+		OPT_STRING(0, "file", &file, "path",
+			   "fetch and store credentials in <path>"),
+		OPT_END()
+	};
 
 	umask(077);
 
-	argc = parse_options(argc, (const char **)argv, NULL, options, usage, 0);
+	argc = parse_options(argc, (const char **)argv, NULL, options, usage,
+			     0);
 	if (argc != 1)
 		usage_with_options(usage, options);
 	op = argv[0];

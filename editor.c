@@ -29,7 +29,8 @@ const char *git_editor(void)
 	return editor;
 }
 
-int launch_editor(const char *path, struct strbuf *buffer, const char *const *env)
+int launch_editor(const char *path, struct strbuf *buffer,
+		  const char *const *env)
 {
 	const char *editor = git_editor();
 
@@ -56,8 +57,9 @@ int launch_editor(const char *path, struct strbuf *buffer, const char *const *en
 		if (sig == SIGINT || sig == SIGQUIT)
 			raise(sig);
 		if (ret)
-			return error("There was a problem with the editor '%s'.",
-				     editor);
+			return error(
+				"There was a problem with the editor '%s'.",
+				editor);
 	}
 
 	if (!buffer)

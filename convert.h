@@ -55,7 +55,8 @@ struct delayed_checkout {
 
 extern enum eol core_eol;
 extern const char *
-get_cached_convert_stats_ascii(const struct index_state *istate, const char *path);
+get_cached_convert_stats_ascii(const struct index_state *istate,
+			       const char *path);
 extern const char *get_wt_convert_stats_ascii(const char *path);
 extern const char *get_convert_attr_ascii(const char *path);
 
@@ -68,10 +69,11 @@ extern int convert_to_working_tree(const char *path, const char *src,
 extern int
 async_convert_to_working_tree(const char *path, const char *src, size_t len,
 			      struct strbuf *dst, void *dco);
+extern int async_query_available_blobs(const char *cmd,
+				       struct string_list *available_paths);
 extern int
-async_query_available_blobs(const char *cmd, struct string_list *available_paths);
-extern int renormalize_buffer(const struct index_state *istate, const char *path,
-			      const char *src, size_t len, struct strbuf *dst);
+renormalize_buffer(const struct index_state *istate, const char *path,
+		   const char *src, size_t len, struct strbuf *dst);
 static inline int
 would_convert_to_git(const struct index_state *istate, const char *path)
 {

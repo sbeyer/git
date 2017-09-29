@@ -222,8 +222,9 @@ int xopen(const char *path, int oflag, ...)
 			continue;
 
 		if ((oflag & O_RDWR) == O_RDWR)
-			die_errno(_("could not open '%s' for reading and writing"),
-				  path);
+			die_errno(
+				_("could not open '%s' for reading and writing"),
+				path);
 		else if ((oflag & O_WRONLY) == O_WRONLY)
 			die_errno(_("could not open '%s' for writing"), path);
 		else
@@ -393,8 +394,9 @@ FILE *xfopen(const char *path, const char *mode)
 			continue;
 
 		if (*mode && mode[1] == '+')
-			die_errno(_("could not open '%s' for reading and writing"),
-				  path);
+			die_errno(
+				_("could not open '%s' for reading and writing"),
+				path);
 		else if (*mode == 'w' || *mode == 'a')
 			die_errno(_("could not open '%s' for writing"), path);
 		else

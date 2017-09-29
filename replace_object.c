@@ -26,7 +26,8 @@ static int replace_object_pos(const unsigned char *sha1)
 			replace_sha1_access);
 }
 
-static int register_replace_object(struct replace_object *replace, int ignore_dups)
+static int
+register_replace_object(struct replace_object *replace, int ignore_dups)
 {
 	int pos = replace_object_pos(replace->original);
 
@@ -44,13 +45,15 @@ static int register_replace_object(struct replace_object *replace, int ignore_du
 	replace_object_nr++;
 	if (pos < replace_object_nr)
 		memmove(replace_object + pos + 1, replace_object + pos,
-			(replace_object_nr - pos - 1) * sizeof(*replace_object));
+			(replace_object_nr - pos - 1) *
+				sizeof(*replace_object));
 	replace_object[pos] = replace;
 	return 0;
 }
 
-static int register_replace_ref(const char *refname, const struct object_id *oid,
-				int flag, void *cb_data)
+static int
+register_replace_ref(const char *refname, const struct object_id *oid, int flag,
+		     void *cb_data)
 {
 	/* Get sha1 from refname */
 	const char *slash = strrchr(refname, '/');

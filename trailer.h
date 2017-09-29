@@ -72,7 +72,8 @@ struct process_trailer_options {
 		0                    \
 	}
 
-void process_trailers(const char *file, const struct process_trailer_options *opts,
+void process_trailers(const char *file,
+		      const struct process_trailer_options *opts,
 		      struct list_head *new_trailer_head);
 
 void trailer_info_get(struct trailer_info *info, const char *str);

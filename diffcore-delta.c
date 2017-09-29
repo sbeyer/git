@@ -53,7 +53,8 @@ static struct spanhash_top *spanhash_rehash(struct spanhash_top *orig)
 	int osz = 1 << orig->alloc_log2;
 	int sz = osz << 1;
 
-	new = xmalloc(st_add(sizeof(*orig), st_mult(sizeof(struct spanhash), sz)));
+	new = xmalloc(
+		st_add(sizeof(*orig), st_mult(sizeof(struct spanhash), sz)));
 	new->alloc_log2 = orig->alloc_log2 + 1;
 	new->free = INITIAL_FREE(new->alloc_log2);
 	memset(new->data, 0, sizeof(struct spanhash) * sz);
@@ -162,7 +163,8 @@ static struct spanhash_top *hash_chars(struct diff_filespec *one)
 
 int diffcore_count_changes(struct diff_filespec *src, struct diff_filespec *dst,
 			   void **src_count_p, void **dst_count_p,
-			   unsigned long *src_copied, unsigned long *literal_added)
+			   unsigned long *src_copied,
+			   unsigned long *literal_added)
 {
 	struct spanhash *s, *d;
 	struct spanhash_top *src_count, *dst_count;

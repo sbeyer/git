@@ -108,6 +108,7 @@ extern struct sha1file *create_tmp_packfile(char **pack_tmp_name);
 extern void
 finish_tmp_packfile(struct strbuf *name_buffer, const char *pack_tmp_name,
 		    struct pack_idx_entry **written_list, uint32_t nr_written,
-		    struct pack_idx_option *pack_idx_opts, unsigned char sha1[]);
+		    struct pack_idx_option *pack_idx_opts,
+		    unsigned char sha1[]);
 
 #endif

@@ -88,7 +88,8 @@ static struct diff_filespec *noindex_filespec(const char *name, int mode)
 	return s;
 }
 
-static int queue_diff(struct diff_options *o, const char *name1, const char *name2)
+static int
+queue_diff(struct diff_options *o, const char *name1, const char *name2)
 {
 	int mode1 = 0, mode2 = 0;
 
@@ -197,7 +198,8 @@ static int queue_diff(struct diff_options *o, const char *name1, const char *nam
 }
 
 /* append basename of F to D */
-static void append_basename(struct strbuf *path, const char *dir, const char *file)
+static void
+append_basename(struct strbuf *path, const char *dir, const char *file)
 {
 	const char *tail = strrchr(file, '/');
 

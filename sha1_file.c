@@ -217,7 +217,8 @@ retry_fn:
 			strbuf_addstr(&path_copy, path);
 
 		do {
-			scld_result = safe_create_leading_directories(path_copy.buf);
+			scld_result =
+				safe_create_leading_directories(path_copy.buf);
 			if (scld_result == SCLD_OK)
 				goto retry_fn;
 		} while (scld_result == SCLD_VANISHED &&
@@ -329,7 +330,8 @@ static int link_alt_odb_entry(const char *entry, const char *relative_base,
 	strbuf_addstr(&pathbuf, entry);
 
 	if (strbuf_normalize_path(&pathbuf) < 0 && relative_base) {
-		error("unable to normalize alternate object path: %s", pathbuf.buf);
+		error("unable to normalize alternate object path: %s",
+		      pathbuf.buf);
 		strbuf_release(&pathbuf);
 		return -1;
 	}
@@ -408,7 +410,8 @@ static void link_alt_odb_entries(const char *alt, int sep,
 		alt = parse_alt_odb_entry(alt, sep, &entry);
 		if (!entry.len)
 			continue;
-		link_alt_odb_entry(entry.buf, relative_base, depth, objdirbuf.buf);
+		link_alt_odb_entry(entry.buf, relative_base, depth,
+				   objdirbuf.buf);
 	}
 	strbuf_release(&entry);
 	strbuf_release(&objdirbuf);
@@ -480,7 +483,8 @@ void add_to_alternates_file(const char *reference)
 	if (lock) {
 		fprintf_or_die(out, "%s\n", reference);
 		if (commit_lock_file(lock))
-			die_errno("unable to move new alternates file into place");
+			die_errno(
+				"unable to move new alternates file into place");
 		if (alt_odb_tail)
 			link_alt_odb_entries(reference, '\n', NULL, 0);
 	}
@@ -553,13 +557,15 @@ char *compute_alternate_path(const char *path, struct strbuf *err)
 	}
 
 	if (!access(mkpath("%s/shallow", ref_git), F_OK)) {
-		strbuf_addf(err, _("reference repository '%s' is shallow"), path);
+		strbuf_addf(err, _("reference repository '%s' is shallow"),
+			    path);
 		seen_error = 1;
 		goto out;
 	}
 
 	if (!access(mkpath("%s/info/grafts", ref_git), F_OK)) {
-		strbuf_addf(err, _("reference repository '%s' is grafted"), path);
+		strbuf_addf(err, _("reference repository '%s' is grafted"),
+			    path);
 		seen_error = 1;
 		goto out;
 	}
@@ -689,7 +695,8 @@ void *xmmap_gently(void *start, size_t length, int prot, int flags, int fd,
 	return ret;
 }
 
-void *xmmap(void *start, size_t length, int prot, int flags, int fd, off_t offset)
+void *
+xmmap(void *start, size_t length, int prot, int flags, int fd, off_t offset)
 {
 	void *ret = xmmap_gently(start, length, prot, flags, fd, offset);
 	if (ret == MAP_FAILED)
@@ -723,7 +730,9 @@ int check_sha1_signature(const unsigned char *sha1, void *map,
 		return -1;
 
 	/* Generate the header */
-	hdrlen = xsnprintf(hdr, sizeof(hdr), "%s %lu", typename(obj_type), size) + 1;
+	hdrlen = xsnprintf(hdr, sizeof(hdr), "%s %lu", typename(obj_type),
+			   size) +
+		 1;
 
 	/* Sha1.. */
 	git_SHA1_Init(&c);
@@ -833,8 +842,8 @@ static int open_sha1_file(const unsigned char *sha1, const char **path)
  * Map the loose object at "path" if it is not NULL, or the path found by
  * searching for a loose object named "sha1".
  */
-static void *
-map_sha1_file_1(const char *path, const unsigned char *sha1, unsigned long *size)
+static void *map_sha1_file_1(const char *path, const unsigned char *sha1,
+			     unsigned long *size)
 {
 	void *map;
 	int fd;
@@ -882,9 +891,11 @@ static int unpack_sha1_short_header(git_zstream *stream, unsigned char *map,
 }
 
 int unpack_sha1_header(git_zstream *stream, unsigned char *map,
-		       unsigned long mapsize, void *buffer, unsigned long bufsiz)
+		       unsigned long mapsize, void *buffer,
+		       unsigned long bufsiz)
 {
-	int status = unpack_sha1_short_header(stream, map, mapsize, buffer, bufsiz);
+	int status =
+		unpack_sha1_short_header(stream, map, mapsize, buffer, bufsiz);
 
 	if (status < Z_OK)
 		return status;
@@ -895,9 +906,10 @@ int unpack_sha1_header(git_zstream *stream, unsigned char *map,
 	return 0;
 }
 
-static int unpack_sha1_header_to_strbuf(git_zstream *stream, unsigned char *map,
-					unsigned long mapsize, void *buffer,
-					unsigned long bufsiz, struct strbuf *header)
+static int
+unpack_sha1_header_to_strbuf(git_zstream *stream, unsigned char *map,
+			     unsigned long mapsize, void *buffer,
+			     unsigned long bufsiz, struct strbuf *header)
 {
 	int status;
 
@@ -924,7 +936,8 @@ static int unpack_sha1_header_to_strbuf(git_zstream *stream, unsigned char *map,
 		status = git_inflate(stream, 0);
 		strbuf_add(header, buffer,
 			   stream->next_out - (unsigned char *)buffer);
-		if (memchr(buffer, '\0', stream->next_out - (unsigned char *)buffer))
+		if (memchr(buffer, '\0',
+			   stream->next_out - (unsigned char *)buffer))
 			return 0;
 		stream->next_out = buffer;
 		stream->avail_out = bufsiz;
@@ -1095,21 +1108,26 @@ static int sha1_loose_object_info(const unsigned char *sha1,
 	if ((flags & OBJECT_INFO_ALLOW_UNKNOWN_TYPE)) {
 		if (unpack_sha1_header_to_strbuf(&stream, map, mapsize, hdr,
 						 sizeof(hdr), &hdrbuf) < 0)
-			status = error("unable to unpack %s header with --allow-unknown-type",
-				       sha1_to_hex(sha1));
-	} else if (unpack_sha1_header(&stream, map, mapsize, hdr, sizeof(hdr)) < 0)
+			status = error(
+				"unable to unpack %s header with --allow-unknown-type",
+				sha1_to_hex(sha1));
+	} else if (unpack_sha1_header(&stream, map, mapsize, hdr, sizeof(hdr)) <
+		   0)
 		status = error("unable to unpack %s header", sha1_to_hex(sha1));
 	if (status < 0)
 		; /* Do nothing */
 	else if (hdrbuf.len) {
-		if ((status = parse_sha1_header_extended(hdrbuf.buf, oi, flags)) < 0)
-			status = error("unable to parse %s header with --allow-unknown-type",
-				       sha1_to_hex(sha1));
+		if ((status = parse_sha1_header_extended(hdrbuf.buf, oi,
+							 flags)) < 0)
+			status = error(
+				"unable to parse %s header with --allow-unknown-type",
+				sha1_to_hex(sha1));
 	} else if ((status = parse_sha1_header_extended(hdr, oi, flags)) < 0)
 		status = error("unable to parse %s header", sha1_to_hex(sha1));
 
 	if (status >= 0 && oi->contentp)
-		*oi->contentp = unpack_sha1_rest(&stream, hdr, *oi->sizep, sha1);
+		*oi->contentp =
+			unpack_sha1_rest(&stream, hdr, *oi->sizep, sha1);
 	else
 		git_inflate_end(&stream);
 
@@ -1185,8 +1203,8 @@ int sha1_object_info_extended(const unsigned char *sha1, struct object_info *oi,
 	} else if (oi->whence == OI_PACKED) {
 		oi->u.packed.offset = e.offset;
 		oi->u.packed.pack = e.p;
-		oi->u.packed.is_delta = (rtype == OBJ_REF_DELTA ||
-					 rtype == OBJ_OFS_DELTA);
+		oi->u.packed.is_delta =
+			(rtype == OBJ_REF_DELTA || rtype == OBJ_OFS_DELTA);
 	}
 
 	return 0;
@@ -1200,7 +1218,8 @@ int sha1_object_info(const unsigned char *sha1, unsigned long *sizep)
 
 	oi.typep = &type;
 	oi.sizep = sizep;
-	if (sha1_object_info_extended(sha1, &oi, OBJECT_INFO_LOOKUP_REPLACE) < 0)
+	if (sha1_object_info_extended(sha1, &oi, OBJECT_INFO_LOOKUP_REPLACE) <
+	    0)
 		return -1;
 	return type;
 }
@@ -1249,8 +1268,8 @@ void *read_sha1_file_extended(const unsigned char *sha1, enum object_type *type,
 	const struct packed_git *p;
 	const char *path;
 	struct stat st;
-	const unsigned char *repl = lookup_replace ? lookup_replace_object(sha1) :
-						     sha1;
+	const unsigned char *repl =
+		lookup_replace ? lookup_replace_object(sha1) : sha1;
 
 	errno = 0;
 	data = read_object(repl, type, size);
@@ -1468,8 +1487,9 @@ static int write_loose_object(const unsigned char *sha1, char *hdr, int hdrlen,
 	fd = create_tmpfile(&tmp_file, filename);
 	if (fd < 0) {
 		if (errno == EACCES)
-			return error("insufficient permission for adding an object to repository database %s",
-				     get_object_directory());
+			return error(
+				"insufficient permission for adding an object to repository database %s",
+				get_object_directory());
 		else
 			return error_errno("unable to create temporary file");
 	}
@@ -1494,17 +1514,20 @@ static int write_loose_object(const unsigned char *sha1, char *hdr, int hdrlen,
 		unsigned char *in0 = stream.next_in;
 		ret = git_deflate(&stream, Z_FINISH);
 		git_SHA1_Update(&c, in0, stream.next_in - in0);
-		if (write_buffer(fd, compressed, stream.next_out - compressed) < 0)
+		if (write_buffer(fd, compressed, stream.next_out - compressed) <
+		    0)
 			die("unable to write sha1 file");
 		stream.next_out = compressed;
 		stream.avail_out = sizeof(compressed);
 	} while (ret == Z_OK);
 
 	if (ret != Z_STREAM_END)
-		die("unable to deflate new object %s (%d)", sha1_to_hex(sha1), ret);
+		die("unable to deflate new object %s (%d)", sha1_to_hex(sha1),
+		    ret);
 	ret = git_deflate_end_gently(&stream);
 	if (ret != Z_OK)
-		die("deflateEnd on object %s failed (%d)", sha1_to_hex(sha1), ret);
+		die("deflateEnd on object %s failed (%d)", sha1_to_hex(sha1),
+		    ret);
 	git_SHA1_Final(parano_sha1, &c);
 	if (hashcmp(sha1, parano_sha1) != 0)
 		die("confused by unstable object source data for %s",
@@ -1556,8 +1579,9 @@ int write_sha1_file(const void *buf, unsigned long len, const char *type,
 	return write_loose_object(sha1, hdr, hdrlen, buf, len, 0);
 }
 
-int hash_sha1_file_literally(const void *buf, unsigned long len, const char *type,
-			     struct object_id *oid, unsigned flags)
+int hash_sha1_file_literally(const void *buf, unsigned long len,
+			     const char *type, struct object_id *oid,
+			     unsigned flags)
 {
 	char *header;
 	int hdrlen, status = 0;
@@ -1660,7 +1684,8 @@ static int index_mem(unsigned char *sha1, void *buf, size_t size,
 	if ((type == OBJ_BLOB) && path) {
 		struct strbuf nbuf = STRBUF_INIT;
 		if (convert_to_git(&the_index, path, buf, size, &nbuf,
-				   write_object ? safe_crlf : SAFE_CRLF_FALSE)) {
+				   write_object ? safe_crlf :
+						  SAFE_CRLF_FALSE)) {
 			buf = strbuf_detach(&nbuf, &size);
 			re_allocated = 1;
 		}
@@ -1697,9 +1722,11 @@ static int index_stream_convert_blob(unsigned char *sha1, int fd,
 				 write_object ? safe_crlf : SAFE_CRLF_FALSE);
 
 	if (write_object)
-		ret = write_sha1_file(sbuf.buf, sbuf.len, typename(OBJ_BLOB), sha1);
+		ret = write_sha1_file(sbuf.buf, sbuf.len, typename(OBJ_BLOB),
+				      sha1);
 	else
-		ret = hash_sha1_file(sbuf.buf, sbuf.len, typename(OBJ_BLOB), sha1);
+		ret = hash_sha1_file(sbuf.buf, sbuf.len, typename(OBJ_BLOB),
+				     sha1);
 	strbuf_release(&sbuf);
 	return ret;
 }
@@ -1800,7 +1827,8 @@ int index_path(struct object_id *oid, const char *path, struct stat *st,
 		if (fd < 0)
 			return error_errno("open(\"%s\")", path);
 		if (index_fd(oid, fd, st, OBJ_BLOB, path, flags) < 0)
-			return error("%s: failed to insert into database", path);
+			return error("%s: failed to insert into database",
+				     path);
 		break;
 	case S_IFLNK:
 		if (strbuf_readlink(&sb, path, st->st_size))
@@ -1913,7 +1941,8 @@ int for_each_file_in_obj_subdir(unsigned int subdir_nr, struct strbuf *path,
 int for_each_loose_file_in_objdir_buf(struct strbuf *path,
 				      each_loose_object_fn obj_cb,
 				      each_loose_cruft_fn cruft_cb,
-				      each_loose_subdir_fn subdir_cb, void *data)
+				      each_loose_subdir_fn subdir_cb,
+				      void *data)
 {
 	int r = 0;
 	int i;
@@ -1948,7 +1977,8 @@ struct loose_alt_odb_data {
 	void *data;
 };
 
-static int loose_from_alt_odb(struct alternate_object_database *alt, void *vdata)
+static int
+loose_from_alt_odb(struct alternate_object_database *alt, void *vdata)
 {
 	struct loose_alt_odb_data *data = vdata;
 	struct strbuf buf = STRBUF_INIT;
@@ -2002,7 +2032,8 @@ check_stream_sha1(git_zstream *stream, const char *hdr, unsigned long size,
 	 * This size comparison must be "<=" to read the final zlib packets;
 	 * see the comment in unpack_sha1_rest for details.
 	 */
-	while (total_read <= size && (status == Z_OK || status == Z_BUF_ERROR)) {
+	while (total_read <= size &&
+	       (status == Z_OK || status == Z_BUF_ERROR)) {
 		stream->next_out = buf;
 		stream->avail_out = sizeof(buf);
 		if (size - total_read < stream->avail_out)
@@ -2034,7 +2065,8 @@ check_stream_sha1(git_zstream *stream, const char *hdr, unsigned long size,
 }
 
 int read_loose_object(const char *path, const unsigned char *expected_sha1,
-		      enum object_type *type, unsigned long *size, void **contents)
+		      enum object_type *type, unsigned long *size,
+		      void **contents)
 {
 	int ret = -1;
 	void *map = NULL;
@@ -2063,10 +2095,12 @@ int read_loose_object(const char *path, const unsigned char *expected_sha1,
 	}
 
 	if (*type == OBJ_BLOB) {
-		if (check_stream_sha1(&stream, hdr, *size, path, expected_sha1) < 0)
+		if (check_stream_sha1(&stream, hdr, *size, path,
+				      expected_sha1) < 0)
 			goto out;
 	} else {
-		*contents = unpack_sha1_rest(&stream, hdr, *size, expected_sha1);
+		*contents =
+			unpack_sha1_rest(&stream, hdr, *size, expected_sha1);
 		if (!*contents) {
 			error("unable to unpack contents of %s", path);
 			git_inflate_end(&stream);

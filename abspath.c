@@ -78,7 +78,8 @@ static void get_root_part(struct strbuf *resolved, struct strbuf *remaining)
  * informative error message if there is a problem.  Otherwise, return
  * NULL on errors (without generating any output).
  */
-char *strbuf_realpath(struct strbuf *resolved, const char *path, int die_on_error)
+char *
+strbuf_realpath(struct strbuf *resolved, const char *path, int die_on_error)
 {
 	struct strbuf remaining = STRBUF_INIT;
 	struct strbuf next = STRBUF_INIT;
@@ -101,7 +102,8 @@ char *strbuf_realpath(struct strbuf *resolved, const char *path, int die_on_erro
 		/* relative path; can use CWD as the initial resolved path */
 		if (strbuf_getcwd(resolved)) {
 			if (die_on_error)
-				die_errno("unable to get current working directory");
+				die_errno(
+					"unable to get current working directory");
 			else
 				goto error_out;
 		}
@@ -150,7 +152,8 @@ char *strbuf_realpath(struct strbuf *resolved, const char *path, int die_on_erro
 					goto error_out;
 			}
 
-			len = strbuf_readlink(&symlink, resolved->buf, st.st_size);
+			len = strbuf_readlink(&symlink, resolved->buf,
+					      st.st_size);
 			if (len < 0) {
 				if (die_on_error)
 					die_errno("Invalid symlink '%s'",

@@ -11,7 +11,8 @@
 #include "sha1-array.h"
 #include "packfile.h"
 
-static int get_oid_oneline(const char *, struct object_id *, struct commit_list *);
+static int
+get_oid_oneline(const char *, struct object_id *, struct commit_list *);
 
 typedef int (*disambiguate_hint_fn)(const struct object_id *, void *);
 
@@ -31,8 +32,8 @@ struct disambiguate_state {
 	unsigned always_call_fn : 1;
 };
 
-static void
-update_candidates(struct disambiguate_state *ds, const struct object_id *current)
+static void update_candidates(struct disambiguate_state *ds,
+			      const struct object_id *current)
 {
 	if (ds->always_call_fn) {
 		ds->ambiguous = ds->fn(current, ds->cb_data) ? 1 : 0;
@@ -113,7 +114,8 @@ static void find_short_object_filename(struct disambiguate_state *ds)
 		if (!alt->loose_objects_subdir_seen[subdir_nr]) {
 			struct strbuf *buf = alt_scratch_buf(alt);
 			for_each_file_in_obj_subdir(subdir_nr, buf,
-						    append_loose_object, NULL, NULL,
+						    append_loose_object, NULL,
+						    NULL,
 						    &alt->loose_objects_cache);
 			alt->loose_objects_subdir_seen[subdir_nr] = 1;
 		}
@@ -132,7 +134,8 @@ static void find_short_object_filename(struct disambiguate_state *ds)
 	}
 }
 
-static int match_sha(unsigned len, const unsigned char *a, const unsigned char *b)
+static int
+match_sha(unsigned len, const unsigned char *a, const unsigned char *b)
 {
 	do {
 		if (*a != *b)
@@ -199,8 +202,8 @@ static void find_short_packed_object(struct disambiguate_state *ds)
 #define SHORT_NAME_NOT_FOUND (-1)
 #define SHORT_NAME_AMBIGUOUS (-2)
 
-static int
-finish_object_disambiguation(struct disambiguate_state *ds, struct object_id *oid)
+static int finish_object_disambiguation(struct disambiguate_state *ds,
+					struct object_id *oid)
 {
 	if (ds->ambiguous)
 		return SHORT_NAME_AMBIGUOUS;
@@ -259,7 +262,8 @@ disambiguate_committish_only(const struct object_id *oid, void *cb_data_unused)
 	return 0;
 }
 
-static int disambiguate_tree_only(const struct object_id *oid, void *cb_data_unused)
+static int
+disambiguate_tree_only(const struct object_id *oid, void *cb_data_unused)
 {
 	int kind = sha1_object_info(oid->hash, NULL);
 	return kind == OBJ_TREE;
@@ -284,7 +288,8 @@ disambiguate_treeish_only(const struct object_id *oid, void *cb_data_unused)
 	return 0;
 }
 
-static int disambiguate_blob_only(const struct object_id *oid, void *cb_data_unused)
+static int
+disambiguate_blob_only(const struct object_id *oid, void *cb_data_unused)
 {
 	int kind = sha1_object_info(oid->hash, NULL);
 	return kind == OBJ_BLOB;
@@ -547,13 +552,15 @@ static int ambiguous_path(const char *path, int len)
 	return slash;
 }
 
-static inline int at_mark(const char *string, int len, const char **suffix, int nr)
+static inline int
+at_mark(const char *string, int len, const char **suffix, int nr)
 {
 	int i;
 
 	for (i = 0; i < nr; i++) {
 		int suffix_len = strlen(suffix[i]);
-		if (suffix_len <= len && !strncasecmp(string, suffix[i], suffix_len))
+		if (suffix_len <= len &&
+		    !strncasecmp(string, suffix[i], suffix_len))
 			return suffix_len;
 	}
 	return 0;
@@ -576,8 +583,8 @@ static int get_oid_1(const char *name, int len, struct object_id *oid,
 static int
 interpret_nth_prior_checkout(const char *name, int namelen, struct strbuf *buf);
 
-static int
-get_oid_basic(const char *str, int len, struct object_id *oid, unsigned int flags)
+static int get_oid_basic(const char *str, int len, struct object_id *oid,
+			 unsigned int flags)
 {
 	static const char *warn_msg = "refname '%.*s' is ambiguous.";
 	static const char *object_name_msg = N_(
@@ -597,11 +604,13 @@ get_oid_basic(const char *str, int len, struct object_id *oid, unsigned int flag
 
 	if (len == GIT_SHA1_HEXSZ && !get_oid_hex(str, oid)) {
 		if (warn_ambiguous_refs && warn_on_object_refname_ambiguity) {
-			refs_found = dwim_ref(str, len, tmp_oid.hash, &real_ref);
+			refs_found =
+				dwim_ref(str, len, tmp_oid.hash, &real_ref);
 			if (refs_found > 0) {
 				warning(warn_msg, len, str);
 				if (advice_object_name_warning)
-					fprintf(stderr, "%s\n", _(object_name_msg));
+					fprintf(stderr, "%s\n",
+						_(object_name_msg));
 			}
 			free(real_ref);
 		}
@@ -659,7 +668,8 @@ get_oid_basic(const char *str, int len, struct object_id *oid, unsigned int flag
 		return -1;
 
 	if (warn_ambiguous_refs && !(flags & GET_OID_QUIETLY) &&
-	    (refs_found > 1 || !get_short_oid(str, len, &tmp_oid, GET_OID_QUIETLY)))
+	    (refs_found > 1 ||
+	     !get_short_oid(str, len, &tmp_oid, GET_OID_QUIETLY)))
 		warning(warn_msg, len, str);
 
 	if (reflog_len) {
@@ -725,7 +735,8 @@ get_oid_basic(const char *str, int len, struct object_id *oid, unsigned int flag
 	return 0;
 }
 
-static int get_parent(const char *name, int len, struct object_id *result, int idx)
+static int
+get_parent(const char *name, int len, struct object_id *result, int idx)
 {
 	struct object_id oid;
 	int ret = get_oid_1(name, len, &oid, GET_OID_COMMITTISH);
@@ -918,8 +929,8 @@ static int get_describe_name(const char *name, int len, struct object_id *oid)
 	return -1;
 }
 
-static int
-get_oid_1(const char *name, int len, struct object_id *oid, unsigned lookup_flags)
+static int get_oid_1(const char *name, int len, struct object_id *oid,
+		     unsigned lookup_flags)
 {
 	int ret, has_suffix;
 	const char *cp;
@@ -1059,9 +1070,10 @@ struct grab_nth_branch_switch_cbdata {
 	struct strbuf buf;
 };
 
-static int grab_nth_branch_switch(struct object_id *ooid, struct object_id *noid,
-				  const char *email, timestamp_t timestamp,
-				  int tz, const char *message, void *cb_data)
+static int
+grab_nth_branch_switch(struct object_id *ooid, struct object_id *noid,
+		       const char *email, timestamp_t timestamp, int tz,
+		       const char *message, void *cb_data)
 {
 	struct grab_nth_branch_switch_cbdata *cb = cb_data;
 	const char *match = NULL, *target = NULL;
@@ -1110,7 +1122,8 @@ interpret_nth_prior_checkout(const char *name, int namelen, struct strbuf *buf)
 	strbuf_init(&cb.buf, 20);
 
 	retval = 0;
-	if (0 < for_each_reflog_ent_reverse("HEAD", grab_nth_branch_switch, &cb)) {
+	if (0 <
+	    for_each_reflog_ent_reverse("HEAD", grab_nth_branch_switch, &cb)) {
 		strbuf_reset(buf);
 		strbuf_addbuf(buf, &cb.buf);
 		retval = brace - name + 1;
@@ -1305,7 +1318,8 @@ int interpret_branch_name(const char *name, int namelen, struct strbuf *buf,
 			return len;
 
 		len = interpret_branch_mark(name, namelen, at - name, buf,
-					    push_mark, branch_get_push, allowed);
+					    push_mark, branch_get_push,
+					    allowed);
 		if (len > 0)
 			return len;
 	}
@@ -1383,9 +1397,10 @@ int get_oid_blob(const char *name, struct object_id *oid)
 }
 
 /* Must be called only when object_name:filename doesn't exist. */
-static void diagnose_invalid_oid_path(const char *prefix, const char *filename,
-				      const struct object_id *tree_oid,
-				      const char *object_name, int object_name_len)
+static void
+diagnose_invalid_oid_path(const char *prefix, const char *filename,
+			  const struct object_id *tree_oid,
+			  const char *object_name, int object_name_len)
 {
 	struct object_id oid;
 	unsigned mode;
@@ -1399,7 +1414,8 @@ static void diagnose_invalid_oid_path(const char *prefix, const char *filename,
 	if (is_missing_file_error(errno)) {
 		char *fullname = xstrfmt("%s%s", prefix, filename);
 
-		if (!get_tree_entry(tree_oid->hash, fullname, oid.hash, &mode)) {
+		if (!get_tree_entry(tree_oid->hash, fullname, oid.hash,
+				    &mode)) {
 			die("Path '%s' exists, but not '%s'.\n"
 			    "Did you mean '%.*s:%s' aka '%.*s:./%s'?",
 			    fullname, filename, object_name_len, object_name,
@@ -1452,7 +1468,8 @@ diagnose_invalid_index_path(int stage, const char *prefix, const char *filename)
 	}
 
 	if (file_exists(filename))
-		die("Path '%s' exists on disk, but not in the index.", filename);
+		die("Path '%s' exists on disk, but not in the index.",
+		    filename);
 	if (is_missing_file_error(errno))
 		die("Path '%s' does not exist (neither on disk nor in the index).",
 		    filename);
@@ -1469,9 +1486,9 @@ static char *resolve_relative_path(const char *rel)
 		die("relative path syntax can't be used outside working tree.");
 
 	/* die() inside prefix_path() if resolved path is outside worktree */
-	return prefix_path(startup_info->prefix,
-			   startup_info->prefix ? strlen(startup_info->prefix) : 0,
-			   rel);
+	return prefix_path(
+		startup_info->prefix,
+		startup_info->prefix ? strlen(startup_info->prefix) : 0, rel);
 }
 
 static int
@@ -1511,7 +1528,8 @@ get_oid_with_context_1(const char *name, unsigned flags, const char *prefix,
 			commit_list_sort_by_date(&list);
 			return get_oid_oneline(name + 2, oid, list);
 		}
-		if (namelen < 3 || name[2] != ':' || name[1] < '0' || '3' < name[1])
+		if (namelen < 3 || name[2] != ':' || name[1] < '0' ||
+		    '3' < name[1])
 			cp = name + 1;
 		else {
 			stage = name[1] - '0';
@@ -1582,7 +1600,8 @@ get_oid_with_context_1(const char *name, unsigned flags, const char *prefix,
 				ret = get_tree_entry(tree_oid.hash, filename,
 						     oid->hash, &oc->mode);
 				if (ret && only_to_die) {
-					diagnose_invalid_oid_path(prefix, filename,
+					diagnose_invalid_oid_path(prefix,
+								  filename,
 								  &tree_oid,
 								  name, len);
 				}

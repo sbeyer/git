@@ -109,8 +109,8 @@ struct fmt_merge_msg_opts {
 	int shortlog_len;
 };
 
-extern int
-fmt_merge_msg(struct strbuf *in, struct strbuf *out, struct fmt_merge_msg_opts *);
+extern int fmt_merge_msg(struct strbuf *in, struct strbuf *out,
+			 struct fmt_merge_msg_opts *);
 
 /**
  * If a built-in has DELAY_PAGER_CONFIG set, the built-in should call this early
@@ -141,7 +141,8 @@ extern int cmd_checkout_index(int argc, const char **argv, const char *prefix);
 extern int cmd_check_attr(int argc, const char **argv, const char *prefix);
 extern int cmd_check_ignore(int argc, const char **argv, const char *prefix);
 extern int cmd_check_mailmap(int argc, const char **argv, const char *prefix);
-extern int cmd_check_ref_format(int argc, const char **argv, const char *prefix);
+extern int
+cmd_check_ref_format(int argc, const char **argv, const char *prefix);
 extern int cmd_cherry(int argc, const char **argv, const char *prefix);
 extern int cmd_cherry_pick(int argc, const char **argv, const char *prefix);
 extern int cmd_clone(int argc, const char **argv, const char *prefix);
@@ -166,13 +167,15 @@ extern int cmd_for_each_ref(int argc, const char **argv, const char *prefix);
 extern int cmd_format_patch(int argc, const char **argv, const char *prefix);
 extern int cmd_fsck(int argc, const char **argv, const char *prefix);
 extern int cmd_gc(int argc, const char **argv, const char *prefix);
-extern int cmd_get_tar_commit_id(int argc, const char **argv, const char *prefix);
+extern int
+cmd_get_tar_commit_id(int argc, const char **argv, const char *prefix);
 extern int cmd_grep(int argc, const char **argv, const char *prefix);
 extern int cmd_hash_object(int argc, const char **argv, const char *prefix);
 extern int cmd_help(int argc, const char **argv, const char *prefix);
 extern int cmd_index_pack(int argc, const char **argv, const char *prefix);
 extern int cmd_init_db(int argc, const char **argv, const char *prefix);
-extern int cmd_interpret_trailers(int argc, const char **argv, const char *prefix);
+extern int
+cmd_interpret_trailers(int argc, const char **argv, const char *prefix);
 extern int cmd_log(int argc, const char **argv, const char *prefix);
 extern int cmd_log_reflog(int argc, const char **argv, const char *prefix);
 extern int cmd_ls_files(int argc, const char **argv, const char *prefix);
@@ -219,7 +222,8 @@ extern int cmd_show(int argc, const char **argv, const char *prefix);
 extern int cmd_show_branch(int argc, const char **argv, const char *prefix);
 extern int cmd_status(int argc, const char **argv, const char *prefix);
 extern int cmd_stripspace(int argc, const char **argv, const char *prefix);
-extern int cmd_submodule__helper(int argc, const char **argv, const char *prefix);
+extern int
+cmd_submodule__helper(int argc, const char **argv, const char *prefix);
 extern int cmd_symbolic_ref(int argc, const char **argv, const char *prefix);
 extern int cmd_tag(int argc, const char **argv, const char *prefix);
 extern int cmd_tar_tree(int argc, const char **argv, const char *prefix);
@@ -227,7 +231,8 @@ extern int cmd_unpack_file(int argc, const char **argv, const char *prefix);
 extern int cmd_unpack_objects(int argc, const char **argv, const char *prefix);
 extern int cmd_update_index(int argc, const char **argv, const char *prefix);
 extern int cmd_update_ref(int argc, const char **argv, const char *prefix);
-extern int cmd_update_server_info(int argc, const char **argv, const char *prefix);
+extern int
+cmd_update_server_info(int argc, const char **argv, const char *prefix);
 extern int cmd_upload_archive(int argc, const char **argv, const char *prefix);
 extern int
 cmd_upload_archive_writer(int argc, const char **argv, const char *prefix);

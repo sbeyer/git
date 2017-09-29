@@ -158,7 +158,8 @@ static void select_getanyfile(struct strbuf *hdr)
 		forbidden(hdr, "Unsupported service: getanyfile");
 }
 
-static void send_strbuf(struct strbuf *hdr, const char *type, struct strbuf *buf)
+static void
+send_strbuf(struct strbuf *hdr, const char *type, struct strbuf *buf)
 {
 	hdr_int(hdr, content_length, buf->len);
 	hdr_str(hdr, content_type, type);
@@ -354,7 +355,8 @@ static void inflate_request(const char *prog_name, int out, int buffer_input)
 
 			ret = git_inflate(&stream, Z_NO_FLUSH);
 			if (ret != Z_OK && ret != Z_STREAM_END)
-				die("zlib error inflating request, result %d", ret);
+				die("zlib error inflating request, result %d",
+				    ret);
 
 			n = stream.total_out - cnt;
 			if (write_in_full(out, out_buf, n) < 0)
@@ -454,11 +456,13 @@ static void get_info_refs(struct strbuf *hdr, char *arg)
 	hdr_nocache(hdr);
 
 	if (service_name) {
-		const char *argv[] = { NULL /* service name */, "--stateless-rpc",
-				       "--advertise-refs", ".", NULL };
+		const char *argv[] = { NULL /* service name */,
+				       "--stateless-rpc", "--advertise-refs",
+				       ".", NULL };
 		struct rpc_service *svc = select_service(hdr, service_name);
 
-		strbuf_addf(&buf, "application/x-git-%s-advertisement", svc->name);
+		strbuf_addf(&buf, "application/x-git-%s-advertisement",
+			    svc->name);
 		hdr_str(hdr, content_type, buf.buf);
 		end_headers(hdr);
 
@@ -482,9 +486,8 @@ static int show_head_ref(const char *refname, const struct object_id *oid,
 	struct strbuf *buf = cb_data;
 
 	if (flag & REF_ISSYMREF) {
-		const char *target = resolve_ref_unsafe(refname,
-							RESOLVE_REF_READING,
-							NULL, NULL);
+		const char *target = resolve_ref_unsafe(
+			refname, RESOLVE_REF_READING, NULL, NULL);
 
 		if (target)
 			strbuf_addf(buf, "ref: %s\n", strip_namespace(target));
@@ -522,7 +525,8 @@ static void get_info_packs(struct strbuf *hdr, char *arg)
 	strbuf_grow(&buf, cnt * 53 + 2);
 	for (p = packed_git; p; p = p->next) {
 		if (p->pack_local)
-			strbuf_addf(&buf, "P %s\n", p->pack_name + objdirlen + 6);
+			strbuf_addf(&buf, "P %s\n",
+				    p->pack_name + objdirlen + 6);
 	}
 	strbuf_addch(&buf, '\n');
 
@@ -621,17 +625,19 @@ static struct service_cmd {
 	const char *method;
 	const char *pattern;
 	void (*imp)(struct strbuf *, char *);
-} services[] = { { "GET", "/HEAD$", get_head },
-		 { "GET", "/info/refs$", get_info_refs },
-		 { "GET", "/objects/info/alternates$", get_text_file },
-		 { "GET", "/objects/info/http-alternates$", get_text_file },
-		 { "GET", "/objects/info/packs$", get_info_packs },
-		 { "GET", "/objects/[0-9a-f]{2}/[0-9a-f]{38}$", get_loose_object },
-		 { "GET", "/objects/pack/pack-[0-9a-f]{40}\\.pack$", get_pack_file },
-		 { "GET", "/objects/pack/pack-[0-9a-f]{40}\\.idx$", get_idx_file },
+} services[] = {
+	{ "GET", "/HEAD$", get_head },
+	{ "GET", "/info/refs$", get_info_refs },
+	{ "GET", "/objects/info/alternates$", get_text_file },
+	{ "GET", "/objects/info/http-alternates$", get_text_file },
+	{ "GET", "/objects/info/packs$", get_info_packs },
+	{ "GET", "/objects/[0-9a-f]{2}/[0-9a-f]{38}$", get_loose_object },
+	{ "GET", "/objects/pack/pack-[0-9a-f]{40}\\.pack$", get_pack_file },
+	{ "GET", "/objects/pack/pack-[0-9a-f]{40}\\.idx$", get_idx_file },
 
-		 { "POST", "/git-upload-pack$", service_rpc },
-		 { "POST", "/git-receive-pack$", service_rpc } };
+	{ "POST", "/git-upload-pack$", service_rpc },
+	{ "POST", "/git-receive-pack$", service_rpc }
+};
 
 static int bad_request(struct strbuf *hdr, const struct service_cmd *c)
 {
@@ -694,7 +700,8 @@ int cmd_main(int argc, const char **argv)
 	setup_path();
 	if (!enter_repo(dir, 0))
 		not_found(&hdr, "Not a git repository: '%s'", dir);
-	if (!getenv("GIT_HTTP_EXPORT_ALL") && access("git-daemon-export-ok", F_OK))
+	if (!getenv("GIT_HTTP_EXPORT_ALL") &&
+	    access("git-daemon-export-ok", F_OK))
 		not_found(&hdr, "Repository not exported: '%s'", dir);
 
 	http_config();

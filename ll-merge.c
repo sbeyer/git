@@ -18,7 +18,8 @@ typedef int (*ll_merge_fn)(const struct ll_merge_driver *, mmbuffer_t *result,
 			   const char *path, mmfile_t *orig,
 			   const char *orig_name, mmfile_t *src1,
 			   const char *name1, mmfile_t *src2, const char *name2,
-			   const struct ll_merge_options *opts, int marker_size);
+			   const struct ll_merge_options *opts,
+			   int marker_size);
 
 struct ll_merge_driver {
 	const char *name;
@@ -84,7 +85,8 @@ static int ll_xdl_merge(const struct ll_merge_driver *drv_unused,
 	assert(opts);
 
 	if (orig->size > MAX_XDIFF_SIZE || src1->size > MAX_XDIFF_SIZE ||
-	    src2->size > MAX_XDIFF_SIZE || buffer_is_binary(orig->ptr, orig->size) ||
+	    src2->size > MAX_XDIFF_SIZE ||
+	    buffer_is_binary(orig->ptr, orig->size) ||
 	    buffer_is_binary(src1->ptr, src1->size) ||
 	    buffer_is_binary(src2->ptr, src2->size)) {
 		return ll_binary_merge(drv_unused, result, path, orig,
@@ -288,7 +290,8 @@ static void initialize_ll_merge(void)
 	git_config(read_merge_config, NULL);
 }
 
-static const struct ll_merge_driver *find_ll_merge_driver(const char *merge_attr)
+static const struct ll_merge_driver *
+find_ll_merge_driver(const char *merge_attr)
 {
 	struct ll_merge_driver *fn;
 	const char *name;
@@ -368,8 +371,9 @@ int ll_merge(mmbuffer_t *result_buf, const char *path, mmfile_t *ancestor,
 			driver = find_ll_merge_driver(driver->recursive);
 		marker_size += 2;
 	}
-	return driver->fn(driver, result_buf, path, ancestor, ancestor_label, ours,
-			  our_label, theirs, their_label, opts, marker_size);
+	return driver->fn(driver, result_buf, path, ancestor, ancestor_label,
+			  ours, our_label, theirs, their_label, opts,
+			  marker_size);
 }
 
 int ll_merge_marker_size(const char *path)

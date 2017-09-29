@@ -34,7 +34,8 @@ int recv_sideband(const char *me, int in_stream, int out)
 	while (!retval) {
 		const char *b, *brk;
 		int band, len;
-		len = packet_read(in_stream, NULL, NULL, buf, LARGE_PACKET_MAX, 0);
+		len = packet_read(in_stream, NULL, NULL, buf, LARGE_PACKET_MAX,
+				  0);
 		if (len == 0)
 			break;
 		if (len < 1) {
@@ -89,7 +90,8 @@ int recv_sideband(const char *me, int in_stream, int out)
 			write_or_die(out, buf + 1, len);
 			break;
 		default:
-			strbuf_addf(&outbuf, "%s%s: protocol error: bad band #%d",
+			strbuf_addf(&outbuf,
+				    "%s%s: protocol error: bad band #%d",
 				    outbuf.len ? "\n" : "", me, band);
 			retval = SIDEBAND_PROTOCOL_ERROR;
 			break;
@@ -108,7 +110,8 @@ int recv_sideband(const char *me, int in_stream, int out)
  * fd is connected to the remote side; send the sideband data
  * over multiplexed packet stream.
  */
-void send_sideband(int fd, int band, const char *data, ssize_t sz, int packet_max)
+void send_sideband(int fd, int band, const char *data, ssize_t sz,
+		   int packet_max)
 {
 	const char *p = data;
 

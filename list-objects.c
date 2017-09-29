@@ -213,7 +213,8 @@ void traverse_commit_list(struct rev_info *revs, show_commit_fn show_commit,
 				     &base, path, data);
 			continue;
 		}
-		die("unknown pending object %s (%s)", oid_to_hex(&obj->oid), name);
+		die("unknown pending object %s (%s)", oid_to_hex(&obj->oid),
+		    name);
 	}
 	object_array_clear(&revs->pending);
 	strbuf_release(&base);

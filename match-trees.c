@@ -63,8 +63,8 @@ fill_tree_desc_strict(struct tree_desc *desc, const struct object_id *hash)
 	return buffer;
 }
 
-static int
-base_name_entries_compare(const struct name_entry *a, const struct name_entry *b)
+static int base_name_entries_compare(const struct name_entry *a,
+				     const struct name_entry *b)
 {
 	return base_name_compare(a->path, tree_entry_len(a), a->mode, b->path,
 				 tree_entry_len(b), b->mode);
@@ -73,7 +73,8 @@ base_name_entries_compare(const struct name_entry *a, const struct name_entry *b
 /*
  * Inspect two trees, and give a score that tells how similar they are.
  */
-static int score_trees(const struct object_id *hash1, const struct object_id *hash2)
+static int
+score_trees(const struct object_id *hash1, const struct object_id *hash2)
 {
 	struct tree_desc one;
 	struct tree_desc two;
@@ -262,7 +263,8 @@ void shift_tree(const struct object_id *hash1, const struct object_id *hash2,
 		if (!*del_prefix)
 			return;
 
-		if (get_tree_entry(hash2->hash, del_prefix, shifted->hash, &mode))
+		if (get_tree_entry(hash2->hash, del_prefix, shifted->hash,
+				   &mode))
 			die("cannot find path %s in tree %s", del_prefix,
 			    oid_to_hex(hash2));
 		return;
@@ -323,7 +325,8 @@ void shift_tree_by(const struct object_id *hash1, const struct object_id *hash2,
 		 * shift tree2 down by adding shift_prefix above it
 		 * to match tree1.
 		 */
-		splice_tree(hash1->hash, shift_prefix, hash2->hash, shifted->hash);
+		splice_tree(hash1->hash, shift_prefix, hash2->hash,
+			    shifted->hash);
 	else
 		/*
 		 * shift tree2 up by removing shift_prefix from it

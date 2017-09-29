@@ -118,8 +118,9 @@ int cmd_main(int argc, const char *argv[])
    encoding, it doesn't look like one in the BIG5, BIG5-HKSCS, GBK, GB18030,
    SHIFT_JIS, JOHAB encodings, because \xe0\x7d is a single character in these
    encodings.  */
-static void find_variables(const char *string,
-			   void (*callback)(const char *var_ptr, size_t var_len))
+static void
+find_variables(const char *string,
+	       void (*callback)(const char *var_ptr, size_t var_len))
 {
 	for (; *string != '\0';)
 		if (*string++ == '$') {
@@ -315,7 +316,8 @@ static void subst_from_stdin(void)
 				do {
 					if (buflen >= bufmax) {
 						bufmax = 2 * bufmax + 10;
-						buffer = xrealloc(buffer, bufmax);
+						buffer = xrealloc(buffer,
+								  bufmax);
 					}
 					buffer[buflen++] = c;
 
@@ -342,15 +344,16 @@ static void subst_from_stdin(void)
 					 */
 					if (buflen >= bufmax) {
 						bufmax = 2 * bufmax + 10;
-						buffer = xrealloc(buffer, bufmax);
+						buffer = xrealloc(buffer,
+								  bufmax);
 					}
 					buffer[buflen] = '\0';
 
 					/* Test whether the variable shall be
 					 * substituted.  */
 					if (!all_variables &&
-					    !sorted_string_list_member(&variables_set,
-								       buffer))
+					    !sorted_string_list_member(
+						    &variables_set, buffer))
 						valid = 0;
 				}
 

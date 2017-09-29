@@ -103,7 +103,8 @@ static int should_break(struct diff_filespec *src, struct diff_filespec *dst,
 	 * not really a rewrite.
 	 */
 	if ((src->size * break_score < src_removed * MAX_SCORE) &&
-	    (literal_added * 20 < src_removed) && (literal_added * 20 < src_copied))
+	    (literal_added * 20 < src_removed) &&
+	    (literal_added * 20 < src_copied))
 		return 0;
 
 	return 1;
@@ -265,7 +266,8 @@ void diffcore_merge_broken(void)
 		if (!p)
 			/* we already merged this with its peer */
 			continue;
-		else if (p->broken_pair && !strcmp(p->one->path, p->two->path)) {
+		else if (p->broken_pair &&
+			 !strcmp(p->one->path, p->two->path)) {
 			/* If the peer also survived rename/copy, then
 			 * we merge them back together.
 			 */

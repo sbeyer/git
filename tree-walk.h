@@ -14,7 +14,8 @@ struct tree_desc {
 };
 
 static inline const struct object_id *
-tree_entry_extract(struct tree_desc *desc, const char **pathp, unsigned int *modep)
+tree_entry_extract(struct tree_desc *desc, const char **pathp,
+		   unsigned int *modep)
 {
 	*pathp = desc->entry.path;
 	*modep = desc->entry.mode;
@@ -33,7 +34,8 @@ static inline int tree_entry_len(const struct name_entry *ne)
 
 void update_tree_entry(struct tree_desc *);
 int update_tree_entry_gently(struct tree_desc *);
-void init_tree_desc(struct tree_desc *desc, const void *buf, unsigned long size);
+void init_tree_desc(struct tree_desc *desc, const void *buf,
+		    unsigned long size);
 int init_tree_desc_gently(struct tree_desc *desc, const void *buf,
 			  unsigned long size);
 
@@ -48,7 +50,8 @@ void *fill_tree_descriptor(struct tree_desc *desc, const struct object_id *oid);
 
 struct traverse_info;
 typedef int (*traverse_callback_t)(int n, unsigned long mask,
-				   unsigned long dirmask, struct name_entry *entry,
+				   unsigned long dirmask,
+				   struct name_entry *entry,
 				   struct traverse_info *);
 int traverse_trees(int n, struct tree_desc *t, struct traverse_info *info);
 

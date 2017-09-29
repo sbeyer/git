@@ -162,7 +162,8 @@ get_remote_heads(int in, char *src_buf, size_t src_len, struct ref **list,
 
 		if (len < GIT_SHA1_HEXSZ + 2 || get_oid_hex(buffer, &old_oid) ||
 		    buffer[GIT_SHA1_HEXSZ] != ' ')
-			die("protocol error: expected sha/ref, got '%s'", buffer);
+			die("protocol error: expected sha/ref, got '%s'",
+			    buffer);
 		name = buffer + GIT_SHA1_HEXSZ + 1;
 
 		name_len = strlen(name);
@@ -396,7 +397,8 @@ static int git_tcp_connect_sock(char *host, int flags)
 			port);
 
 	for (ai0 = ai; ai; ai = ai->ai_next, cnt++) {
-		sockfd = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
+		sockfd =
+			socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
 		if ((sockfd < 0) ||
 		    (connect(sockfd, ai->ai_addr, ai->ai_addrlen) < 0)) {
 			strbuf_addf(&error_message, "%s[%d: %s]: errno=%s\n",
@@ -511,7 +513,8 @@ static void git_tcp_connect(int fd[2], char *host, int flags)
 
 static char *git_proxy_command;
 
-static int git_proxy_command_options(const char *var, const char *value, void *cb)
+static int
+git_proxy_command_options(const char *var, const char *value, void *cb)
 {
 	if (!strcmp(var, "core.gitproxy")) {
 		const char *for_pos;
@@ -848,7 +851,8 @@ git_connect(int fd[2], const char *url, const char *prog, int flags)
 
 			if (flags & CONNECT_DIAG_URL) {
 				printf("Diag: url=%s\n", url ? url : "NULL");
-				printf("Diag: protocol=%s\n", prot_name(protocol));
+				printf("Diag: protocol=%s\n",
+				       prot_name(protocol));
 				printf("Diag: userandhost=%s\n",
 				       ssh_host ? ssh_host : "NULL");
 				printf("Diag: port=%s\n", port ? port : "NONE");
@@ -892,7 +896,8 @@ git_connect(int fd[2], const char *url, const char *prog, int flags)
 			if (needs_batch)
 				argv_array_push(&conn->args, "-batch");
 			if (port) {
-				argv_array_pushf(&conn->args, "-%c", port_option);
+				argv_array_pushf(&conn->args, "-%c",
+						 port_option);
 				argv_array_push(&conn->args, port);
 			}
 			argv_array_push(&conn->args, ssh_host);

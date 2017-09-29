@@ -57,9 +57,9 @@
 
 #if GIT_GNUC_PREREQ(3, 1)
 /* &arr[0] degrades to a pointer: a different type from an array */
-#define BARF_UNLESS_AN_ARRAY(arr)                                           \
-	BUILD_ASSERT_OR_ZERO(!__builtin_types_compatible_p(__typeof__(arr), \
-							   __typeof__(&(arr)[0])))
+#define BARF_UNLESS_AN_ARRAY(arr)                           \
+	BUILD_ASSERT_OR_ZERO(!__builtin_types_compatible_p( \
+		__typeof__(arr), __typeof__(&(arr)[0])))
 #else
 #define BARF_UNLESS_AN_ARRAY(arr) 0
 #endif
@@ -412,17 +412,18 @@ struct strbuf;
 /* General helper functions */
 extern void vreportf(const char *prefix, const char *err, va_list params);
 extern NORETURN void usage(const char *err);
-extern NORETURN void
-usagef(const char *err, ...) __attribute__((format(printf, 1, 2)));
-extern NORETURN void
-die(const char *err, ...) __attribute__((format(printf, 1, 2)));
-extern NORETURN void
-die_errno(const char *err, ...) __attribute__((format(printf, 1, 2)));
+extern NORETURN void usagef(const char *err, ...)
+	__attribute__((format(printf, 1, 2)));
+extern NORETURN void die(const char *err, ...)
+	__attribute__((format(printf, 1, 2)));
+extern NORETURN void die_errno(const char *err, ...)
+	__attribute__((format(printf, 1, 2)));
 extern int error(const char *err, ...) __attribute__((format(printf, 1, 2)));
-extern int error_errno(const char *err, ...) __attribute__((format(printf, 1, 2)));
+extern int error_errno(const char *err, ...)
+	__attribute__((format(printf, 1, 2)));
 extern void warning(const char *err, ...) __attribute__((format(printf, 1, 2)));
-extern void
-warning_errno(const char *err, ...) __attribute__((format(printf, 1, 2)));
+extern void warning_errno(const char *err, ...)
+	__attribute__((format(printf, 1, 2)));
 
 #ifndef NO_OPENSSL
 #ifdef APPLE_COMMON_CRYPTO
@@ -476,7 +477,8 @@ extern int starts_with(const char *str, const char *prefix);
  *   [skip prefix if present, otherwise use whole string]
  *   skip_prefix(name, "refs/heads/", &name);
  */
-static inline int skip_prefix(const char *str, const char *prefix, const char **out)
+static inline int
+skip_prefix(const char *str, const char *prefix, const char **out)
 {
 	do {
 		if (!*prefix) {
@@ -491,8 +493,9 @@ static inline int skip_prefix(const char *str, const char *prefix, const char **
  * Like skip_prefix, but promises never to read past "len" bytes of the input
  * buffer, and returns the remaining number of bytes in "out" via "outlen".
  */
-static inline int skip_prefix_mem(const char *buf, size_t len, const char *prefix,
-				  const char **out, size_t *outlen)
+static inline int
+skip_prefix_mem(const char *buf, size_t len, const char *prefix,
+		const char **out, size_t *outlen)
 {
 	size_t prefix_len = strlen(prefix);
 	if (prefix_len <= len && !memcmp(buf, prefix, prefix_len)) {
@@ -507,7 +510,8 @@ static inline int skip_prefix_mem(const char *buf, size_t len, const char *prefi
  * If buf ends with suffix, return 1 and subtract the length of the suffix
  * from *len. Otherwise, return 0 and leave *len untouched.
  */
-static inline int strip_suffix_mem(const char *buf, size_t *len, const char *suffix)
+static inline int
+strip_suffix_mem(const char *buf, size_t *len, const char *suffix)
 {
 	size_t suflen = strlen(suffix);
 	if (*len < suflen || memcmp(buf + (*len - suflen), suffix, suflen))
@@ -535,15 +539,16 @@ static inline int ends_with(const char *str, const char *suffix)
 	return strip_suffix(str, suffix, &len);
 }
 
-#define SWAP(a, b)                                                                \
-	do {                                                                      \
-		void *_swap_a_ptr = &(a);                                         \
-		void *_swap_b_ptr = &(b);                                         \
-		unsigned char _swap_buffer[sizeof(a)];                            \
-		memcpy(_swap_buffer, _swap_a_ptr, sizeof(a));                     \
-		memcpy(_swap_a_ptr, _swap_b_ptr,                                  \
-		       sizeof(a) + BUILD_ASSERT_OR_ZERO(sizeof(a) == sizeof(b))); \
-		memcpy(_swap_b_ptr, _swap_buffer, sizeof(a));                     \
+#define SWAP(a, b)                                                            \
+	do {                                                                  \
+		void *_swap_a_ptr = &(a);                                     \
+		void *_swap_b_ptr = &(b);                                     \
+		unsigned char _swap_buffer[sizeof(a)];                        \
+		memcpy(_swap_buffer, _swap_a_ptr, sizeof(a));                 \
+		memcpy(_swap_a_ptr, _swap_b_ptr,                              \
+		       sizeof(a) +                                            \
+			       BUILD_ASSERT_OR_ZERO(sizeof(a) == sizeof(b))); \
+		memcpy(_swap_b_ptr, _swap_buffer, sizeof(a));                 \
 	} while (0)
 
 #if defined(NO_MMAP) || defined(USE_WIN32_MMAP)

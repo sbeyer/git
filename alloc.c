@@ -75,7 +75,8 @@ void *alloc_tag_node(void)
 static struct alloc_state object_state;
 void *alloc_object_node(void)
 {
-	struct object *obj = alloc_node(&object_state, sizeof(union any_object));
+	struct object *obj =
+		alloc_node(&object_state, sizeof(union any_object));
 	obj->type = OBJ_NONE;
 	return obj;
 }
@@ -102,8 +103,9 @@ static void report(const char *name, unsigned int count, size_t size)
 		(uintmax_t)size);
 }
 
-#define REPORT(name, type) \
-	report(#name, name##_state.count, name##_state.count * sizeof(type) >> 10)
+#define REPORT(name, type)                \
+	report(#name, name##_state.count, \
+	       name##_state.count * sizeof(type) >> 10)
 
 void alloc_report(void)
 {

@@ -195,8 +195,8 @@ static void *add_to_trie(struct trie *root, const char *key, void *value)
 
 		child->len = root->len - i - 1;
 		if (child->len) {
-			child->contents = xstrndup(root->contents + i + 1,
-						   child->len);
+			child->contents =
+				xstrndup(root->contents + i + 1, child->len);
 		}
 		child->value = root->value;
 		root->value = NULL;
@@ -206,8 +206,8 @@ static void *add_to_trie(struct trie *root, const char *key, void *value)
 		root->children[(unsigned char)root->contents[i]] = child;
 
 		/* This is the newly-added child. */
-		root->children[(unsigned char)key[i]] = make_trie_node(key + i + 1,
-								       value);
+		root->children[(unsigned char)key[i]] =
+			make_trie_node(key + i + 1, value);
 		return NULL;
 	}
 
@@ -253,7 +253,8 @@ typedef int (*match_fn)(const char *unmatched, void *data, void *baton);
  * |-----------------|------------|---------------|--------------|
  *
  */
-static int trie_find(struct trie *root, const char *key, match_fn fn, void *baton)
+static int
+trie_find(struct trie *root, const char *key, match_fn fn, void *baton)
 {
 	int i;
 	int result;
@@ -398,8 +399,9 @@ strbuf_worktree_gitdir(struct strbuf *buf, const struct repository *repo,
 		strbuf_git_common_path(buf, repo, "worktrees/%s", wt->id);
 }
 
-static void do_git_path(const struct repository *repo, const struct worktree *wt,
-			struct strbuf *buf, const char *fmt, va_list args)
+static void
+do_git_path(const struct repository *repo, const struct worktree *wt,
+	    struct strbuf *buf, const char *fmt, va_list args)
 {
 	int gitdir_len;
 	strbuf_worktree_gitdir(buf, repo, wt);
@@ -555,7 +557,8 @@ static int do_submodule_path(struct strbuf *buf, const char *path,
 	strbuf_addbuf(buf, &git_submodule_dir);
 	strbuf_vaddf(buf, fmt, args);
 
-	if (get_common_dir_noenv(&git_submodule_common_dir, git_submodule_dir.buf))
+	if (get_common_dir_noenv(&git_submodule_common_dir,
+				 git_submodule_dir.buf))
 		update_common_dir(buf, git_submodule_dir.len,
 				  git_submodule_common_dir.buf);
 
@@ -594,8 +597,9 @@ int strbuf_git_path_submodule(struct strbuf *buf, const char *path,
 	return err;
 }
 
-static void do_git_common_path(const struct repository *repo,
-			       struct strbuf *buf, const char *fmt, va_list args)
+static void
+do_git_common_path(const struct repository *repo, struct strbuf *buf,
+		   const char *fmt, va_list args)
 {
 	strbuf_addstr(buf, repo->commondir);
 	if (buf->len && !is_dir_sep(buf->buf[buf->len - 1]))

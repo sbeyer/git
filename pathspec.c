@@ -138,7 +138,8 @@ static char *attr_value_unescape(const char *value)
 	return ret;
 }
 
-static void parse_pathspec_attr_match(struct pathspec_item *item, const char *value)
+static void
+parse_pathspec_attr_match(struct pathspec_item *item, const char *value)
 {
 	struct string_list_item *si;
 	struct string_list list = STRING_LIST_INIT_DUP;
@@ -260,7 +261,8 @@ static int get_global_magic(int element_magic)
 	if (get_icase_global())
 		global_magic |= PATHSPEC_ICASE;
 
-	if ((global_magic & PATHSPEC_LITERAL) && (global_magic & ~PATHSPEC_LITERAL))
+	if ((global_magic & PATHSPEC_LITERAL) &&
+	    (global_magic & ~PATHSPEC_LITERAL))
 		die(_("global 'literal' pathspec setting is incompatible "
 		      "with all other global pathspec settings"));
 
@@ -278,8 +280,9 @@ static int get_global_magic(int element_magic)
  * if prefix magic is used, save the prefix length in 'prefix_len'
  * returns the position in 'elem' after all magic has been parsed
  */
-static const char *parse_long_magic(unsigned *magic, int *prefix_len,
-				    struct pathspec_item *item, const char *elem)
+static const char *
+parse_long_magic(unsigned *magic, int *prefix_len, struct pathspec_item *item,
+		 const char *elem)
 {
 	const char *pos;
 	const char *nextat;
@@ -326,7 +329,8 @@ static const char *parse_long_magic(unsigned *magic, int *prefix_len,
 	}
 
 	if (*pos != ')')
-		die(_("Missing ')' at the end of pathspec magic in '%s'"), elem);
+		die(_("Missing ')' at the end of pathspec magic in '%s'"),
+		    elem);
 	pos++;
 
 	return pos;
@@ -373,8 +377,9 @@ static const char *parse_short_magic(unsigned *magic, const char *elem)
 	return pos;
 }
 
-static const char *parse_element_magic(unsigned *magic, int *prefix_len,
-				       struct pathspec_item *item, const char *elem)
+static const char *
+parse_element_magic(unsigned *magic, int *prefix_len,
+		    struct pathspec_item *item, const char *elem)
 {
 	if (elem[0] != ':' || get_literal_global())
 		return elem; /* nothing to do */
@@ -389,8 +394,9 @@ static const char *parse_element_magic(unsigned *magic, int *prefix_len,
 /*
  * Perform the initialization of a pathspec_item based on a pathspec element.
  */
-static void init_pathspec_item(struct pathspec_item *item, unsigned flags,
-			       const char *prefix, int prefixlen, const char *elt)
+static void
+init_pathspec_item(struct pathspec_item *item, unsigned flags,
+		   const char *prefix, int prefixlen, const char *elt)
 {
 	unsigned magic = 0, element_magic = 0;
 	const char *copyfrom = elt;
@@ -427,7 +433,8 @@ static void init_pathspec_item(struct pathspec_item *item, unsigned flags,
 		match = xstrdup(copyfrom);
 		prefixlen = 0;
 	} else {
-		match = prefix_path_gently(prefix, prefixlen, &prefixlen, copyfrom);
+		match = prefix_path_gently(prefix, prefixlen, &prefixlen,
+					   copyfrom);
 		if (!match)
 			die(_("%s: '%s' is outside repository"), elt, copyfrom);
 	}
@@ -554,8 +561,9 @@ void parse_pathspec(struct pathspec *pathspec, unsigned magic_mask,
 	warn_empty_string = 1;
 	while (argv[n]) {
 		if (*argv[n] == '\0' && warn_empty_string) {
-			warning(_("empty strings as pathspecs will be made invalid in upcoming releases. "
-				  "please use . instead if you meant to match all paths"));
+			warning(_(
+				"empty strings as pathspecs will be made invalid in upcoming releases. "
+				"please use . instead if you meant to match all paths"));
 			warn_empty_string = 0;
 		}
 		n++;
@@ -578,7 +586,8 @@ void parse_pathspec(struct pathspec *pathspec, unsigned magic_mask,
 
 		if ((flags & PATHSPEC_SYMLINK_LEADING_PATH) &&
 		    has_symlink_leading_path(item[i].match, item[i].len)) {
-			die(_("pathspec '%s' is beyond a symbolic link"), entry);
+			die(_("pathspec '%s' is beyond a symbolic link"),
+			    entry);
 		}
 
 		if (item[i].nowildcard_len < item[i].len)

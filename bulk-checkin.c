@@ -59,7 +59,8 @@ clear_exit:
 	reprepare_packed_git();
 }
 
-static int already_written(struct bulk_checkin_state *state, unsigned char sha1[])
+static int
+already_written(struct bulk_checkin_state *state, unsigned char sha1[])
 {
 	int i;
 
@@ -91,9 +92,10 @@ static int already_written(struct bulk_checkin_state *state, unsigned char sha1[
  * status before calling us just in case we ask it to call us again
  * with a new pack.
  */
-static int stream_to_pack(struct bulk_checkin_state *state, git_SHA_CTX *ctx,
-			  off_t *already_hashed_to, int fd, size_t size,
-			  enum object_type type, const char *path, unsigned flags)
+static int
+stream_to_pack(struct bulk_checkin_state *state, git_SHA_CTX *ctx,
+	       off_t *already_hashed_to, int fd, size_t size,
+	       enum object_type type, const char *path, unsigned flags)
 {
 	git_zstream s;
 	unsigned char obuf[16384];
@@ -112,7 +114,8 @@ static int stream_to_pack(struct bulk_checkin_state *state, git_SHA_CTX *ctx,
 		unsigned char ibuf[16384];
 
 		if (size && !s.avail_in) {
-			ssize_t rsize = size < sizeof(ibuf) ? size : sizeof(ibuf);
+			ssize_t rsize = size < sizeof(ibuf) ? size :
+							      sizeof(ibuf);
 			if (read_in_full(fd, ibuf, rsize) != rsize)
 				die("failed to read %d bytes from '%s'",
 				    (int)rsize, path);
@@ -138,7 +141,8 @@ static int stream_to_pack(struct bulk_checkin_state *state, git_SHA_CTX *ctx,
 
 				/* would we bust the size limit? */
 				if (state->nr_written && pack_size_limit_cfg &&
-				    pack_size_limit_cfg < state->offset + written) {
+				    pack_size_limit_cfg <
+					    state->offset + written) {
 					git_deflate_abort(&s);
 					return -1;
 				}
@@ -178,9 +182,10 @@ static void prepare_to_stream(struct bulk_checkin_state *state, unsigned flags)
 		die_errno("unable to write pack header");
 }
 
-static int deflate_to_pack(struct bulk_checkin_state *state,
-			   unsigned char result_sha1[], int fd, size_t size,
-			   enum object_type type, const char *path, unsigned flags)
+static int
+deflate_to_pack(struct bulk_checkin_state *state, unsigned char result_sha1[],
+		int fd, size_t size, enum object_type type, const char *path,
+		unsigned flags)
 {
 	off_t seekback, already_hashed_to;
 	git_SHA_CTX ctx;

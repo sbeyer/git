@@ -62,7 +62,8 @@ static void packet_trace(const char *buf, unsigned int len, int write)
 	/* +32 is just a guess for header + quoting */
 	strbuf_init(&out, len + 32);
 
-	strbuf_addf(&out, "packet: %12s%c ", get_trace_prefix(), write ? '>' : '<');
+	strbuf_addf(&out, "packet: %12s%c ", get_trace_prefix(),
+		    write ? '>' : '<');
 
 	/* XXX we should really handle printable utf8 */
 	for (i = 0; i < len; i++) {
@@ -175,7 +176,8 @@ static int packet_write_gently(const int fd_out, const char *buf, size_t size)
 	size_t packet_size;
 
 	if (size > sizeof(packet_write_buffer) - 4)
-		return error("packet write failed - data exceeds max packet size");
+		return error(
+			"packet write failed - data exceeds max packet size");
 
 	packet_trace(buf, size, 1);
 	packet_size = size + 4;
@@ -296,7 +298,8 @@ int packet_read(int fd, char **src_buf, size_t *src_len, char *buffer,
 	if (ret < 0)
 		return ret;
 
-	if ((options & PACKET_READ_CHOMP_NEWLINE) && len && buffer[len - 1] == '\n')
+	if ((options & PACKET_READ_CHOMP_NEWLINE) && len &&
+	    buffer[len - 1] == '\n')
 		len--;
 
 	buffer[len] = 0;
@@ -321,8 +324,9 @@ char *packet_read_line(int fd, int *len_p)
 
 int packet_read_line_gently(int fd, int *dst_len, char **dst_line)
 {
-	int len = packet_read(fd, NULL, NULL, packet_buffer, sizeof(packet_buffer),
-			      PACKET_READ_CHOMP_NEWLINE | PACKET_READ_GENTLE_ON_EOF);
+	int len = packet_read(
+		fd, NULL, NULL, packet_buffer, sizeof(packet_buffer),
+		PACKET_READ_CHOMP_NEWLINE | PACKET_READ_GENTLE_ON_EOF);
 	if (dst_len)
 		*dst_len = len;
 	if (dst_line)

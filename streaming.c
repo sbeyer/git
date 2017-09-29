@@ -22,14 +22,17 @@ struct stream_vtbl {
 	read_istream_fn read;
 };
 
-#define open_method_decl(name)                                                  \
-	int open_istream_##name(struct git_istream *st, struct object_info *oi, \
-				const unsigned char *sha1, enum object_type *type)
+#define open_method_decl(name)                             \
+	int open_istream_##name(struct git_istream *st,    \
+				struct object_info *oi,    \
+				const unsigned char *sha1, \
+				enum object_type *type)
 
 #define close_method_decl(name) int close_istream_##name(struct git_istream *st)
 
-#define read_method_decl(name) \
-	ssize_t read_istream_##name(struct git_istream *st, char *buf, size_t sz)
+#define read_method_decl(name)                                         \
+	ssize_t read_istream_##name(struct git_istream *st, char *buf, \
+				    size_t sz)
 
 /* forward declaration */
 static open_method_decl(incore);
@@ -300,7 +303,8 @@ static read_method_decl(loose)
 			st->z_state = z_done;
 			break;
 		}
-		if (status != Z_OK && (status != Z_BUF_ERROR || total_read < sz)) {
+		if (status != Z_OK &&
+		    (status != Z_BUF_ERROR || total_read < sz)) {
 			git_inflate_end(&st->z);
 			st->z_state = z_error;
 			return -1;
@@ -327,7 +331,8 @@ static open_method_decl(loose)
 	if (!st->u.loose.mapped)
 		return -1;
 	if ((unpack_sha1_header(&st->z, st->u.loose.mapped, st->u.loose.mapsize,
-				st->u.loose.hdr, sizeof(st->u.loose.hdr)) < 0) ||
+				st->u.loose.hdr,
+				sizeof(st->u.loose.hdr)) < 0) ||
 	    (parse_sha1_header(st->u.loose.hdr, &st->size) < 0)) {
 		git_inflate_end(&st->z);
 		munmap(st->u.loose.mapped, st->u.loose.mapsize);
@@ -454,7 +459,8 @@ static read_method_decl(incore)
 	if (remainder <= read_size)
 		read_size = remainder;
 	if (read_size) {
-		memcpy(buf, st->u.incore.buf + st->u.incore.read_ptr, read_size);
+		memcpy(buf, st->u.incore.buf + st->u.incore.read_ptr,
+		       read_size);
 		st->u.incore.read_ptr += read_size;
 	}
 	return read_size;

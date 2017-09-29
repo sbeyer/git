@@ -93,7 +93,8 @@ static void add_mapping(struct string_list *map, char *new_name,
 	}
 
 	if (old_name == NULL) {
-		debug_mm("mailmap: adding (simple) entry for '%s'\n", old_email);
+		debug_mm("mailmap: adding (simple) entry for '%s'\n",
+			 old_email);
 
 		/* Replace current name and new email for simple entry */
 		if (new_name) {
@@ -105,8 +106,10 @@ static void add_mapping(struct string_list *map, char *new_name,
 			me->email = xstrdup(new_email);
 		}
 	} else {
-		struct mailmap_info *mi = xcalloc(1, sizeof(struct mailmap_info));
-		debug_mm("mailmap: adding (complex) entry for '%s'\n", old_email);
+		struct mailmap_info *mi =
+			xcalloc(1, sizeof(struct mailmap_info));
+		debug_mm("mailmap: adding (complex) entry for '%s'\n",
+			 old_email);
 		mi->name = xstrdup_or_null(new_name);
 		mi->email = xstrdup_or_null(new_email);
 		string_list_insert(&me->namemap, old_name)->util = mi;

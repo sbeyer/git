@@ -405,7 +405,8 @@ static void dump_marks_helper(FILE *, uintmax_t, struct mark_set *);
 
 static void write_crash_report(const char *err)
 {
-	char *loc = git_pathdup("fast_import_crash_%" PRIuMAX, (uintmax_t)getpid());
+	char *loc =
+		git_pathdup("fast_import_crash_%" PRIuMAX, (uintmax_t)getpid());
 	FILE *rpt = fopen(loc, "w");
 	struct branch *b;
 	unsigned long lu;
@@ -424,7 +425,8 @@ static void write_crash_report(const char *err)
 		(uintmax_t)getpid());
 	fprintf(rpt, "    parent process     : %" PRIuMAX "\n",
 		(uintmax_t)getppid());
-	fprintf(rpt, "    at %s\n", show_date(time(NULL), 0, DATE_MODE(ISO8601)));
+	fprintf(rpt, "    at %s\n",
+		show_date(time(NULL), 0, DATE_MODE(ISO8601)));
 	fputc('\n', rpt);
 
 	fputs("fatal: ", rpt);
@@ -689,7 +691,8 @@ static void insert_mark(uintmax_t idnum, struct object_entry *oe)
 		uintmax_t i = idnum >> s->shift;
 		idnum -= i << s->shift;
 		if (!s->data.sets[i]) {
-			s->data.sets[i] = pool_calloc(1, sizeof(struct mark_set));
+			s->data.sets[i] =
+				pool_calloc(1, sizeof(struct mark_set));
 			s->data.sets[i]->shift = s->shift - 10;
 		}
 		s = s->data.sets[i];
@@ -1110,7 +1113,8 @@ store_object(enum object_type type, struct strbuf *dat,
 		return 1;
 	}
 
-	if (last && last->data.buf && last->depth < max_depth && dat->len > 20) {
+	if (last && last->data.buf && last->depth < max_depth &&
+	    dat->len > 20) {
 		delta_count_attempts_by_type[type]++;
 		delta = diff_delta(last->data.buf, last->data.len, dat->buf,
 				   dat->len, &deltalen, dat->len - 20);
@@ -1253,7 +1257,8 @@ static void stream_blob(uintmax_t len, struct object_id *oidout, uintmax_t mark)
 			size_t cnt = in_sz < len ? in_sz : (size_t)len;
 			size_t n = fread(in_buf, 1, cnt, stdin);
 			if (!n && feof(stdin))
-				die("EOF in data (%" PRIuMAX " bytes remaining)",
+				die("EOF in data (%" PRIuMAX
+				    " bytes remaining)",
 				    len);
 
 			git_SHA1_Update(&c, in_buf, n);
@@ -1552,9 +1557,11 @@ static int tree_content_set(struct tree_entry *root, const char *p,
 	t = root->tree;
 	for (i = 0; i < t->entry_count; i++) {
 		e = t->entries[i];
-		if (e->name->str_len == n && !fspathncmp(p, e->name->str_dat, n)) {
+		if (e->name->str_len == n &&
+		    !fspathncmp(p, e->name->str_dat, n)) {
 			if (!*slash1) {
-				if (!S_ISDIR(mode) && e->versions[1].mode == mode &&
+				if (!S_ISDIR(mode) &&
+				    e->versions[1].mode == mode &&
 				    !oidcmp(&e->versions[1].oid, oid))
 					return 0;
 				e->versions[1].mode = mode;
@@ -1588,7 +1595,8 @@ static int tree_content_set(struct tree_entry *root, const char *p,
 			}
 			if (!e->tree)
 				load_tree(e);
-			if (tree_content_set(e, slash1 + 1, oid, mode, subtree)) {
+			if (tree_content_set(e, slash1 + 1, oid, mode,
+					     subtree)) {
 				oidclr(&root->versions[1].oid);
 				return 1;
 			}
@@ -1638,7 +1646,8 @@ static int tree_content_remove(struct tree_entry *root, const char *p,
 	t = root->tree;
 	for (i = 0; i < t->entry_count; i++) {
 		e = t->entries[i];
-		if (e->name->str_len == n && !fspathncmp(p, e->name->str_dat, n)) {
+		if (e->name->str_len == n &&
+		    !fspathncmp(p, e->name->str_dat, n)) {
 			if (*slash1 && !S_ISDIR(e->versions[1].mode))
 				/*
 				 * If p names a file in some subdirectory, and a
@@ -1651,9 +1660,12 @@ static int tree_content_remove(struct tree_entry *root, const char *p,
 				goto del_entry;
 			if (!e->tree)
 				load_tree(e);
-			if (tree_content_remove(e, slash1 + 1, backup_leaf, 0)) {
+			if (tree_content_remove(e, slash1 + 1, backup_leaf,
+						0)) {
 				for (n = 0; n < e->tree->entry_count; n++) {
-					if (e->tree->entries[n]->versions[1].mode) {
+					if (e->tree->entries[n]
+						    ->versions[1]
+						    .mode) {
 						oidclr(&root->versions[1].oid);
 						return 1;
 					}
@@ -1702,7 +1714,8 @@ static int tree_content_get(struct tree_entry *root, const char *p,
 	t = root->tree;
 	for (i = 0; i < t->entry_count; i++) {
 		e = t->entries[i];
-		if (e->name->str_len == n && !fspathncmp(p, e->name->str_dat, n)) {
+		if (e->name->str_len == n &&
+		    !fspathncmp(p, e->name->str_dat, n)) {
 			if (!*slash1)
 				goto found_entry;
 			if (!S_ISDIR(e->versions[1].mode))
@@ -1824,7 +1837,8 @@ static void dump_marks_helper(FILE *f, uintmax_t base, struct mark_set *m)
 		for (k = 0; k < 1024; k++) {
 			if (m->data.marked[k])
 				fprintf(f, ":%" PRIuMAX " %s\n", base + k,
-					oid_to_hex(&m->data.marked[k]->idx.oid));
+					oid_to_hex(
+						&m->data.marked[k]->idx.oid));
 		}
 	}
 }
@@ -1834,7 +1848,8 @@ static void dump_marks(void)
 	static struct lock_file mark_lock;
 	FILE *f;
 
-	if (!export_marks_file || (import_marks_file && !import_marks_file_done))
+	if (!export_marks_file ||
+	    (import_marks_file && !import_marks_file_done))
 		return;
 
 	if (hold_lock_file_for_update(&mark_lock, export_marks_file, 0) < 0) {
@@ -1886,7 +1901,8 @@ static void read_marks(void)
 			die("corrupt mark line: %s", line);
 		e = find_object(&oid);
 		if (!e) {
-			enum object_type type = sha1_object_info(oid.hash, NULL);
+			enum object_type type =
+				sha1_object_info(oid.hash, NULL);
 			if (type < 0)
 				die("object not found: %s", oid_to_hex(&oid));
 			e = insert_object(&oid);
@@ -2081,7 +2097,8 @@ static char *parse_ident(const char *buf)
 		break;
 	case WHENSPEC_RFC2822:
 		if (parse_date(ltgt, &ident) < 0)
-			die("Invalid rfc2822 date \"%s\" in ident: %s", ltgt, buf);
+			die("Invalid rfc2822 date \"%s\" in ident: %s", ltgt,
+			    buf);
 		break;
 	case WHENSPEC_NOW:
 		if (strcmp("now", ltgt))
@@ -2121,7 +2138,8 @@ static void parse_new_blob(void)
 
 static void unload_one_branch(void)
 {
-	while (cur_active_branches && cur_active_branches >= max_active_branches) {
+	while (cur_active_branches &&
+	       cur_active_branches >= max_active_branches) {
 		uintmax_t min_commit = ULONG_MAX;
 		struct branch *e, *l = NULL, *p = NULL;
 
@@ -2170,8 +2188,8 @@ static unsigned char convert_num_notes_to_fanout(uintmax_t num_notes)
 	return fanout;
 }
 
-static void
-construct_path_with_fanout(const char *hex_sha1, unsigned char fanout, char *path)
+static void construct_path_with_fanout(const char *hex_sha1,
+				       unsigned char fanout, char *path)
 {
 	unsigned int i = 0, j = 0;
 	if (fanout >= 20)
@@ -2220,7 +2238,8 @@ do_change_note_fanout(struct tree_entry *orig_root, struct tree_entry *root,
 			continue;
 
 		/* This _may_ be a note entry, or a subdir containing notes */
-		memcpy(hex_oid + hex_oid_len, e->name->str_dat, e->name->str_len);
+		memcpy(hex_oid + hex_oid_len, e->name->str_dat,
+		       e->name->str_len);
 		if (tmp_fullpath_len)
 			fullpath[tmp_fullpath_len++] = '/';
 		memcpy(fullpath + tmp_fullpath_len, e->name->str_dat,
@@ -2246,15 +2265,14 @@ do_change_note_fanout(struct tree_entry *orig_root, struct tree_entry *root,
 			/* Rename fullpath to realpath */
 			if (!tree_content_remove(orig_root, fullpath, &leaf, 0))
 				die("Failed to remove path %s", fullpath);
-			tree_content_set(orig_root, realpath, &leaf.versions[1].oid,
+			tree_content_set(orig_root, realpath,
+					 &leaf.versions[1].oid,
 					 leaf.versions[1].mode, leaf.tree);
 		} else if (S_ISDIR(e->versions[1].mode)) {
 			/* This is a subdir that may contain note entries */
-			num_notes += do_change_note_fanout(orig_root, e, hex_oid,
-							   tmp_hex_oid_len,
-							   fullpath,
-							   tmp_fullpath_len,
-							   fanout);
+			num_notes += do_change_note_fanout(
+				orig_root, e, hex_oid, tmp_hex_oid_len,
+				fullpath, tmp_fullpath_len, fanout);
 		}
 
 		/* The above may have reallocated the current tree_content */
@@ -2263,7 +2281,8 @@ do_change_note_fanout(struct tree_entry *orig_root, struct tree_entry *root,
 	return num_notes;
 }
 
-static uintmax_t change_note_fanout(struct tree_entry *root, unsigned char fanout)
+static uintmax_t
+change_note_fanout(struct tree_entry *root, unsigned char fanout)
 {
 	/*
 	 * The size of path is due to one slash between every two hex digits,
@@ -2543,8 +2562,8 @@ note_change_n(const char *p, struct branch *b, unsigned char *old_fanout)
 		oidcpy(&commit_oid, &commit_oe->idx.oid);
 	} else if (!get_oid(p, &commit_oid)) {
 		unsigned long size;
-		char *buf = read_object_with_reference(commit_oid.hash, commit_type,
-						       &size, commit_oid.hash);
+		char *buf = read_object_with_reference(
+			commit_oid.hash, commit_type, &size, commit_oid.hash);
 		if (!buf || size < 46)
 			die("Not a valid commit: %s", p);
 		free(buf);
@@ -2600,7 +2619,8 @@ static void parse_from_commit(struct branch *b, char *buf, unsigned long size)
 	if (memcmp("tree ", buf, 5) ||
 	    get_oid_hex(buf + 5, &b->branch_tree.versions[1].oid))
 		die("The commit %s is corrupt", oid_to_hex(&b->oid));
-	oidcpy(&b->branch_tree.versions[0].oid, &b->branch_tree.versions[1].oid);
+	oidcpy(&b->branch_tree.versions[0].oid,
+	       &b->branch_tree.versions[1].oid);
 }
 
 static void parse_from_existing(struct branch *b)
@@ -2660,7 +2680,8 @@ static int parse_from(struct branch *b)
 	} else
 		die("Invalid ref name or SHA1 expression: %s", from);
 
-	if (b->branch_tree.tree && oidcmp(&oid, &b->branch_tree.versions[1].oid)) {
+	if (b->branch_tree.tree &&
+	    oidcmp(&oid, &b->branch_tree.versions[1].oid)) {
 		release_tree_content_recursive(b->branch_tree.tree);
 		b->branch_tree.tree = NULL;
 	}
@@ -2689,9 +2710,8 @@ static struct hash_list *parse_merge(unsigned int *count)
 			oidcpy(&n->oid, &oe->idx.oid);
 		} else if (!get_oid(from, &n->oid)) {
 			unsigned long size;
-			char *buf = read_object_with_reference(n->oid.hash,
-							       commit_type, &size,
-							       n->oid.hash);
+			char *buf = read_object_with_reference(
+				n->oid.hash, commit_type, &size, n->oid.hash);
 			if (!buf || size < 46)
 				die("Not a valid commit: %s", from);
 			free(buf);
@@ -2778,7 +2798,8 @@ static void parse_new_commit(const char *arg)
 
 	/* build the tree and the commit */
 	store_tree(&b->branch_tree);
-	oidcpy(&b->branch_tree.versions[0].oid, &b->branch_tree.versions[1].oid);
+	oidcpy(&b->branch_tree.versions[0].oid,
+	       &b->branch_tree.versions[1].oid);
 
 	strbuf_reset(&new_data);
 	strbuf_addf(&new_data, "tree %s\n",
@@ -2787,7 +2808,8 @@ static void parse_new_commit(const char *arg)
 		strbuf_addf(&new_data, "parent %s\n", oid_to_hex(&b->oid));
 	while (merge_list) {
 		struct hash_list *next = merge_list->next;
-		strbuf_addf(&new_data, "parent %s\n", oid_to_hex(&merge_list->oid));
+		strbuf_addf(&new_data, "parent %s\n",
+			    oid_to_hex(&merge_list->oid));
 		free(merge_list);
 		merge_list = next;
 	}
@@ -2942,7 +2964,8 @@ static void cat_blob(struct object_entry *oe, struct object_id *oid)
 		die("Object %s is a %s but a blob was expected.",
 		    oid_to_hex(oid), typename(type));
 	strbuf_reset(&line);
-	strbuf_addf(&line, "%s %s %lu\n", oid_to_hex(oid), typename(type), size);
+	strbuf_addf(&line, "%s %s %lu\n", oid_to_hex(oid), typename(type),
+		    size);
 	cat_blob_write(line.buf, line.len);
 	strbuf_release(&line);
 	cat_blob_write(buf, size);
@@ -3060,7 +3083,8 @@ static struct object_entry *parse_treeish_dataref(const char **p)
 			die("Invalid dataref: %s", command_buf.buf);
 		e = find_object(&oid);
 		if (*(*p)++ != ' ')
-			die("Missing space after tree-ish: %s", command_buf.buf);
+			die("Missing space after tree-ish: %s",
+			    command_buf.buf);
 	}
 
 	while (!e || e->type != OBJ_TREE)
@@ -3319,7 +3343,8 @@ static void parse_feature(const char *feature)
 	if (parse_one_feature(feature, 1))
 		return;
 
-	die("This version of fast-import does not support feature %s.", feature);
+	die("This version of fast-import does not support feature %s.",
+	    feature);
 }
 
 static void parse_option(const char *option)
@@ -3487,7 +3512,8 @@ int cmd_main(int argc, const char **argv)
 		fprintf(stderr, "%s statistics:\n", argv[0]);
 		fprintf(stderr,
 			"---------------------------------------------------------------------\n");
-		fprintf(stderr, "Alloc'd objects: %10" PRIuMAX "\n", alloc_count);
+		fprintf(stderr, "Alloc'd objects: %10" PRIuMAX "\n",
+			alloc_count);
 		fprintf(stderr,
 			"Total objects:   %10" PRIuMAX " (%10" PRIuMAX
 			" duplicates                  )\n",
@@ -3529,10 +3555,12 @@ int cmd_main(int argc, const char **argv)
 		fprintf(stderr,
 			"      marks:     %10" PRIuMAX " (%10" PRIuMAX
 			" unique    )\n",
-			(((uintmax_t)1) << marks->shift) * 1024, marks_set_count);
+			(((uintmax_t)1) << marks->shift) * 1024,
+			marks_set_count);
 		fprintf(stderr, "      atoms:     %10u\n", atom_cnt);
 		fprintf(stderr, "Memory total:    %10" PRIuMAX " KiB\n",
-			(total_allocd + alloc_count * sizeof(struct object_entry)) /
+			(total_allocd +
+			 alloc_count * sizeof(struct object_entry)) /
 				1024);
 		fprintf(stderr, "       pools:    %10lu KiB\n",
 			(unsigned long)(total_allocd / 1024));

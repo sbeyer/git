@@ -135,7 +135,8 @@ static int match_string_spaces(const char *line1, int len1, const char *line2,
 		len2--;
 		if (XDL_ISSPACE(line1[len1]) || XDL_ISSPACE(line2[len2])) {
 			if ((flags & XDF_IGNORE_WHITESPACE_CHANGE) &&
-			    (!XDL_ISSPACE(line1[len1]) || !XDL_ISSPACE(line2[len2])))
+			    (!XDL_ISSPACE(line1[len1]) ||
+			     !XDL_ISSPACE(line2[len2])))
 				return 0;
 
 			for (; len1 > 0 && XDL_ISSPACE(line1[len1]); len1--)
@@ -208,7 +209,8 @@ coalesce_lines(struct lline *base, int *lenbase, struct lline *new, int lennew,
 	for (i = 1, baseend = base; i < origbaselen + 1; i++) {
 		for (j = 1, newend = new; j < lennew + 1; j++) {
 			if (match_string_spaces(baseend->line, baseend->len,
-						newend->line, newend->len, flags)) {
+						newend->line, newend->len,
+						flags)) {
 				lcs[i][j] = lcs[i - 1][j - 1] + 1;
 				directions[i][j] = MATCH;
 			} else if (lcs[i][j - 1] >= lcs[i - 1][j]) {
@@ -373,8 +375,8 @@ static void consume_line(void *state_, char *line, unsigned long len)
 			state->lost_bucket = &state->sline[state->nb - 1];
 		}
 		if (!state->sline[state->nb - 1].p_lno)
-			state->sline[state->nb - 1].p_lno =
-				xcalloc(state->num_parent, sizeof(unsigned long));
+			state->sline[state->nb - 1].p_lno = xcalloc(
+				state->num_parent, sizeof(unsigned long));
 		state->sline[state->nb - 1].p_lno[state->n] = state->ob;
 		return;
 	}
@@ -422,7 +424,8 @@ combine_diff(const struct object_id *parent, unsigned int mode,
 
 	if (xdi_diff_outf(&parent_file, result_file, consume_line, &state, &xpp,
 			  &xecfg))
-		die("unable to generate combined diff for %s", oid_to_hex(parent));
+		die("unable to generate combined diff for %s",
+		    oid_to_hex(parent));
 	free(parent_file.ptr);
 
 	/* Assign line numbers for this parent.
@@ -470,8 +473,9 @@ static int interesting(struct sline *sline, unsigned long all_mask)
 	return ((sline->flag & all_mask) || sline->lost);
 }
 
-static unsigned long adjust_hunk_tail(struct sline *sline, unsigned long all_mask,
-				      unsigned long hunk_begin, unsigned long i)
+static unsigned long
+adjust_hunk_tail(struct sline *sline, unsigned long all_mask,
+		 unsigned long hunk_begin, unsigned long i)
 {
 	/* i points at the first uninteresting line.  If the last line
 	 * of the hunk was interesting only because it has some
@@ -926,7 +930,8 @@ show_combined_header(struct combine_diff_path *elem, int num_parent, int dense,
 			       elem->mode);
 		else {
 			if (deleted)
-				printf("%s%sdeleted file ", line_prefix, c_meta);
+				printf("%s%sdeleted file ", line_prefix,
+				       c_meta);
 			printf("mode ");
 			for (i = 0; i < num_parent; i++) {
 				printf("%s%06o", i ? "," : "",
@@ -955,8 +960,9 @@ show_combined_header(struct combine_diff_path *elem, int num_parent, int dense,
 				 c_meta, c_reset);
 }
 
-static void show_patch_diff(struct combine_diff_path *elem, int num_parent,
-			    int dense, int working_tree_file, struct rev_info *rev)
+static void
+show_patch_diff(struct combine_diff_path *elem, int num_parent, int dense,
+		int working_tree_file, struct rev_info *rev)
 {
 	struct diff_options *opt = &rev->diffopt;
 	unsigned long result_size, cnt, lno;
@@ -1002,7 +1008,8 @@ static void show_patch_diff(struct combine_diff_path *elem, int num_parent,
 			elem->mode = canon_mode(st.st_mode);
 		} else if (S_ISDIR(st.st_mode)) {
 			struct object_id oid;
-			if (resolve_gitlink_ref(elem->path, "HEAD", oid.hash) < 0)
+			if (resolve_gitlink_ref(elem->path, "HEAD", oid.hash) <
+			    0)
 				result = grab_blob(&elem->oid, elem->mode,
 						   &result_size, NULL, NULL);
 			else
@@ -1042,8 +1049,9 @@ static void show_patch_diff(struct combine_diff_path *elem, int num_parent,
 			if (is_file) {
 				struct strbuf buf = STRBUF_INIT;
 
-				if (convert_to_git(&the_index, elem->path, result,
-						   len, &buf, safe_crlf)) {
+				if (convert_to_git(&the_index, elem->path,
+						   result, len, &buf,
+						   safe_crlf)) {
 					free(result);
 					result = strbuf_detach(&buf, &len);
 					result_size = len;
@@ -1078,7 +1086,8 @@ static void show_patch_diff(struct combine_diff_path *elem, int num_parent,
 			char *buf;
 			unsigned long size;
 			buf = grab_blob(&elem->parent[i].oid,
-					elem->parent[i].mode, &size, NULL, NULL);
+					elem->parent[i].mode, &size, NULL,
+					NULL);
 			if (buffer_is_binary(buf, size))
 				is_binary = 1;
 			free(buf);
@@ -1110,7 +1119,8 @@ static void show_patch_diff(struct combine_diff_path *elem, int num_parent,
 		}
 	}
 	if (result_size && result[result_size - 1] != '\n')
-		sline[cnt - 1].len = result_size - (sline[cnt - 1].bol - result);
+		sline[cnt - 1].len =
+			result_size - (sline[cnt - 1].bol - result);
 
 	result_file.ptr = result;
 	result_file.size = result_size;
@@ -1126,7 +1136,8 @@ static void show_patch_diff(struct combine_diff_path *elem, int num_parent,
 	for (i = 0; i < num_parent; i++) {
 		int j;
 		for (j = 0; j < i; j++) {
-			if (!oidcmp(&elem->parent[i].oid, &elem->parent[j].oid)) {
+			if (!oidcmp(&elem->parent[i].oid,
+				    &elem->parent[j].oid)) {
 				reuse_combine_diff(sline, cnt, i, j);
 				break;
 			}
@@ -1479,7 +1490,8 @@ void diff_tree_combined(const struct object_id *oid,
 			   (DIFF_FORMAT_NUMSTAT | DIFF_FORMAT_DIFFSTAT))
 			needsep = 1;
 		else if (opt->output_format & DIFF_FORMAT_CALLBACK)
-			handle_combined_callback(opt, paths, num_parent, num_paths);
+			handle_combined_callback(opt, paths, num_parent,
+						 num_paths);
 
 		if (opt->output_format & DIFF_FORMAT_PATCH) {
 			if (needsep)

@@ -59,7 +59,8 @@ static void spawn_daemon(const char *socket)
 	close(daemon.out);
 }
 
-static void do_cache(const char *socket, const char *action, int timeout, int flags)
+static void
+do_cache(const char *socket, const char *action, int timeout, int flags)
 {
 	struct strbuf buf = STRBUF_INIT;
 
@@ -100,13 +101,16 @@ int cmd_main(int argc, const char **argv)
 	char *socket_path = NULL;
 	int timeout = 900;
 	const char *op;
-	const char *const usage[] = { "git credential-cache [<options>] <action>",
-				      NULL };
-	struct option options[] = { OPT_INTEGER(0, "timeout", &timeout,
-						"number of seconds to cache credentials"),
-				    OPT_STRING(0, "socket", &socket_path, "path",
-					       "path of cache-daemon socket"),
-				    OPT_END() };
+	const char *const usage[] = {
+		"git credential-cache [<options>] <action>", NULL
+	};
+	struct option options[] = {
+		OPT_INTEGER(0, "timeout", &timeout,
+			    "number of seconds to cache credentials"),
+		OPT_STRING(0, "socket", &socket_path, "path",
+			   "path of cache-daemon socket"),
+		OPT_END()
+	};
 
 	argc = parse_options(argc, argv, NULL, options, usage, 0);
 	if (!argc)

@@ -43,7 +43,8 @@ unsigned parse_whitespace_rule(const char *string)
 		if (!len)
 			break;
 		for (i = 0; i < ARRAY_SIZE(whitespace_rule_names); i++) {
-			if (strncmp(whitespace_rule_names[i].rule_name, string, len))
+			if (strncmp(whitespace_rule_names[i].rule_name, string,
+				    len))
 				continue;
 			if (negated)
 				rule &= ~whitespace_rule_names[i].rule_bits;
@@ -86,7 +87,8 @@ unsigned whitespace_rule(const char *pathname)
 			for (i = 0; i < ARRAY_SIZE(whitespace_rule_names); i++)
 				if (!whitespace_rule_names[i].loosens_error &&
 				    !whitespace_rule_names[i].exclude_default)
-					all_rule |= whitespace_rule_names[i].rule_bits;
+					all_rule |= whitespace_rule_names[i]
+							    .rule_bits;
 			return all_rule;
 		} else if (ATTR_FALSE(value)) {
 			/* false (-whitespace) */
@@ -346,7 +348,8 @@ void ws_fix_copy(struct strbuf *dst, const char *src, int len, unsigned ws_rule,
 				strbuf_addch(dst, ch);
 			} else {
 				consecutive_spaces++;
-				if (consecutive_spaces == ws_tab_width(ws_rule)) {
+				if (consecutive_spaces ==
+				    ws_tab_width(ws_rule)) {
 					strbuf_addch(dst, '\t');
 					consecutive_spaces = 0;
 				}

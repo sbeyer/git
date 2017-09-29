@@ -186,8 +186,9 @@ static uint32_t clamp32(uintmax_t n)
 	return (n < max) ? n : max;
 }
 
-static void *zlib_deflate_raw(void *data, unsigned long size,
-			      int compression_level, unsigned long *compressed_size)
+static void *
+zlib_deflate_raw(void *data, unsigned long size, int compression_level,
+		 unsigned long *compressed_size)
 {
 	git_zstream stream;
 	unsigned long maxsize;
@@ -218,8 +219,9 @@ static void *zlib_deflate_raw(void *data, unsigned long size,
 	return buffer;
 }
 
-static void write_zip_data_desc(unsigned long size,
-				unsigned long compressed_size, unsigned long crc)
+static void
+write_zip_data_desc(unsigned long size, unsigned long compressed_size,
+		    unsigned long crc)
 {
 	if (size >= 0xffffffff || compressed_size >= 0xffffffff) {
 		struct zip64_data_desc trailer;
@@ -272,8 +274,9 @@ static int entry_is_binary(const char *path, const void *buffer, size_t size)
 
 #define STREAM_BUFFER_SIZE (1024 * 16)
 
-static int write_zip_entry(struct archiver_args *args, const unsigned char *sha1,
-			   const char *path, size_t pathlen, unsigned int mode)
+static int
+write_zip_entry(struct archiver_args *args, const unsigned char *sha1,
+		const char *path, size_t pathlen, unsigned int mode)
 {
 	struct zip_local_header header;
 	uintmax_t offset = zip_offset;
@@ -342,7 +345,8 @@ static int write_zip_entry(struct archiver_args *args, const unsigned char *sha1
 			buffer = sha1_file_to_archive(args, path, sha1, mode,
 						      &type, &size);
 			if (!buffer)
-				return error("cannot read %s", sha1_to_hex(sha1));
+				return error("cannot read %s",
+					     sha1_to_hex(sha1));
 			crc = crc32(crc, buffer, size);
 			is_binary = entry_is_binary(path_without_prefix, buffer,
 						    size);
@@ -572,7 +576,8 @@ static void write_zip_trailer(const unsigned char *sha1)
 	copy_le32(trailer.magic, 0x06054b50);
 	copy_le16(trailer.disk, 0);
 	copy_le16(trailer.directory_start_disk, 0);
-	copy_le16_clamp(trailer.entries_on_this_disk, zip_dir_entries, &clamped);
+	copy_le16_clamp(trailer.entries_on_this_disk, zip_dir_entries,
+			&clamped);
 	copy_le16_clamp(trailer.entries, zip_dir_entries, &clamped);
 	copy_le32(trailer.size, zip_dir.len);
 	copy_le32_clamp(trailer.offset, zip_offset, &clamped);
@@ -592,7 +597,8 @@ static void dos_time(timestamp_t *timestamp, int *dos_date, int *dos_time)
 	struct tm *t;
 
 	if (date_overflows(*timestamp))
-		die("timestamp too large for this system: %" PRItime, *timestamp);
+		die("timestamp too large for this system: %" PRItime,
+		    *timestamp);
 	time = (time_t)*timestamp;
 	t = localtime(&time);
 	*timestamp = time;
@@ -607,7 +613,8 @@ static int archive_zip_config(const char *var, const char *value, void *data)
 	return userdiff_config(var, value);
 }
 
-static int write_zip_archive(const struct archiver *ar, struct archiver_args *args)
+static int
+write_zip_archive(const struct archiver *ar, struct archiver_args *args)
 {
 	int err;
 

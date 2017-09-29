@@ -32,7 +32,8 @@ int commit_format_is_empty(enum cmit_fmt fmt)
 	return fmt == CMIT_FMT_USERFORMAT && !*user_format;
 }
 
-static void save_user_format(struct rev_info *rev, const char *cp, int is_tformat)
+static void
+save_user_format(struct rev_info *rev, const char *cp, int is_tformat)
 {
 	free(user_format);
 	user_format = xstrdup(cp);
@@ -41,7 +42,8 @@ static void save_user_format(struct rev_info *rev, const char *cp, int is_tforma
 	rev->commit_format = CMIT_FMT_USERFORMAT;
 }
 
-static int git_pretty_formats_config(const char *var, const char *value, void *cb)
+static int
+git_pretty_formats_config(const char *var, const char *value, void *cb)
 {
 	struct cmt_fmt_map *commit_format = NULL;
 	const char *name;
@@ -89,15 +91,16 @@ static int git_pretty_formats_config(const char *var, const char *value, void *c
 
 static void setup_commit_formats(void)
 {
-	struct cmt_fmt_map builtin_formats[] =
-		{ { "raw", CMIT_FMT_RAW, 0, 0 },
-		  { "medium", CMIT_FMT_MEDIUM, 0, 8 },
-		  { "short", CMIT_FMT_SHORT, 0, 0 },
-		  { "email", CMIT_FMT_EMAIL, 0, 0 },
-		  { "mboxrd", CMIT_FMT_MBOXRD, 0, 0 },
-		  { "fuller", CMIT_FMT_FULLER, 0, 8 },
-		  { "full", CMIT_FMT_FULL, 0, 8 },
-		  { "oneline", CMIT_FMT_ONELINE, 1, 0 } };
+	struct cmt_fmt_map builtin_formats[] = {
+		{ "raw", CMIT_FMT_RAW, 0, 0 },
+		{ "medium", CMIT_FMT_MEDIUM, 0, 8 },
+		{ "short", CMIT_FMT_SHORT, 0, 0 },
+		{ "email", CMIT_FMT_EMAIL, 0, 0 },
+		{ "mboxrd", CMIT_FMT_MBOXRD, 0, 0 },
+		{ "fuller", CMIT_FMT_FULLER, 0, 8 },
+		{ "full", CMIT_FMT_FULL, 0, 8 },
+		{ "oneline", CMIT_FMT_ONELINE, 1, 0 }
+	};
 	commit_formats_len = ARRAY_SIZE(builtin_formats);
 	builtin_formats_len = commit_formats_len;
 	ALLOC_GROW(commit_formats, commit_formats_len, commit_formats_alloc);
@@ -134,8 +137,8 @@ find_commit_format_recursive(const char *sought, const char *original,
 	}
 
 	if (found && found->is_alias) {
-		found = find_commit_format_recursive(found->user_format, original,
-						     num_redirections + 1);
+		found = find_commit_format_recursive(
+			found->user_format, original, num_redirections + 1);
 	}
 
 	return found;
@@ -335,7 +338,8 @@ static int is_rfc2047_special(char ch, enum rfc2047_type type)
 		 ch == '-' || ch == '/');
 }
 
-static int needs_rfc2047_encoding(const char *line, int len, enum rfc2047_type type)
+static int
+needs_rfc2047_encoding(const char *line, int len, enum rfc2047_type type)
 {
 	int i;
 
@@ -717,7 +721,8 @@ static size_t format_person_part(struct strbuf *sb, char part, const char *msg,
 		strbuf_addstr(sb, show_ident_date(&s, DATE_MODE(ISO8601)));
 		return placeholder_len;
 	case 'I': /* date, ISO 8601 strict */
-		strbuf_addstr(sb, show_ident_date(&s, DATE_MODE(ISO8601_STRICT)));
+		strbuf_addstr(sb,
+			      show_ident_date(&s, DATE_MODE(ISO8601_STRICT)));
 		return placeholder_len;
 	}
 
@@ -894,7 +899,8 @@ rewrap_message_tail(struct strbuf *sb, struct format_commit_context *c,
 	    c->indent2 == new_indent2)
 		return;
 	if (c->wrap_start < sb->len)
-		strbuf_wrap(sb, c->wrap_start, c->width, c->indent1, c->indent2);
+		strbuf_wrap(sb, c->wrap_start, c->width, c->indent1,
+			    c->indent2);
 	c->wrap_start = sb->len;
 	c->width = new_width;
 	c->indent1 = new_indent1;
@@ -917,8 +923,9 @@ format_reflog_person(struct strbuf *sb, char part, struct reflog_walk_info *log,
 	return format_person_part(sb, part, ident, strlen(ident), dmode);
 }
 
-static size_t parse_color(struct strbuf *sb, /* in UTF-8 */
-			  const char *placeholder, struct format_commit_context *c)
+static size_t
+parse_color(struct strbuf *sb, /* in UTF-8 */
+	    const char *placeholder, struct format_commit_context *c)
 {
 	const char *rest = placeholder;
 	const char *basic_color = NULL;
@@ -968,8 +975,9 @@ static size_t parse_color(struct strbuf *sb, /* in UTF-8 */
 	return rest - placeholder;
 }
 
-static size_t parse_padding_placeholder(struct strbuf *sb, const char *placeholder,
-					struct format_commit_context *c)
+static size_t
+parse_padding_placeholder(struct strbuf *sb, const char *placeholder,
+			  struct format_commit_context *c)
 {
 	const char *ch = placeholder;
 	enum flush_type flush_type;
@@ -1163,14 +1171,16 @@ static size_t format_commit_one(struct strbuf *sb, /* in UTF-8 */
 		case 'd': /* reflog selector */
 		case 'D':
 			if (c->pretty_ctx->reflog_info)
-				get_reflog_selector(sb, c->pretty_ctx->reflog_info,
-						    &c->pretty_ctx->date_mode,
-						    c->pretty_ctx->date_mode_explicit,
-						    (placeholder[1] == 'd'));
+				get_reflog_selector(
+					sb, c->pretty_ctx->reflog_info,
+					&c->pretty_ctx->date_mode,
+					c->pretty_ctx->date_mode_explicit,
+					(placeholder[1] == 'd'));
 			return 2;
 		case 's': /* reflog message */
 			if (c->pretty_ctx->reflog_info)
-				get_reflog_message(sb, c->pretty_ctx->reflog_info);
+				get_reflog_message(sb,
+						   c->pretty_ctx->reflog_info);
 			return 2;
 		case 'n':
 		case 'N':
@@ -1191,11 +1201,13 @@ static size_t format_commit_one(struct strbuf *sb, /* in UTF-8 */
 
 	if (placeholder[0] == 'G') {
 		if (!c->signature_check.result)
-			check_commit_signature(c->commit, &(c->signature_check));
+			check_commit_signature(c->commit,
+					       &(c->signature_check));
 		switch (placeholder[1]) {
 		case 'G':
 			if (c->signature_check.gpg_output)
-				strbuf_addstr(sb, c->signature_check.gpg_output);
+				strbuf_addstr(sb,
+					      c->signature_check.gpg_output);
 			break;
 		case '?':
 			switch (c->signature_check.result) {
@@ -1235,7 +1247,8 @@ static size_t format_commit_one(struct strbuf *sb, /* in UTF-8 */
 					  &c->pretty_ctx->date_mode);
 	case 'c': /* committer ... */
 		return format_person_part(sb, placeholder[1],
-					  msg + c->committer.off, c->committer.len,
+					  msg + c->committer.off,
+					  c->committer.len,
 					  &c->pretty_ctx->date_mode);
 	case 'e': /* encoding */
 		if (c->commit_encoding)
@@ -1264,7 +1277,8 @@ static size_t format_commit_one(struct strbuf *sb, /* in UTF-8 */
 	}
 
 	if (skip_prefix(placeholder, "(trailers", &arg)) {
-		struct process_trailer_options opts = PROCESS_TRAILER_OPTIONS_INIT;
+		struct process_trailer_options opts =
+			PROCESS_TRAILER_OPTIONS_INIT;
 		while (*arg == ':') {
 			if (skip_prefix(arg, ":only", &arg))
 				opts.only_trailers = 1;
@@ -1469,7 +1483,8 @@ void format_commit_message(const struct commit *commit, const char *format,
 	 * convert a commit message to UTF-8 first
 	 * as far as 'format_commit_item' assumes it in UTF-8
 	 */
-	context.message = logmsg_reencode(commit, &context.commit_encoding, utf8);
+	context.message =
+		logmsg_reencode(commit, &context.commit_encoding, utf8);
 
 	strbuf_expand(sb, format, format_commit_item, &context);
 	rewrap_message_tail(sb, &context, 0, 0, 0);
@@ -1557,13 +1572,15 @@ void pp_title_line(struct pretty_print_context *pp, const char **msg_p,
 	struct strbuf title;
 
 	strbuf_init(&title, 80);
-	*msg_p = format_subject(&title, *msg_p, pp->preserve_subject ? "\n" : " ");
+	*msg_p = format_subject(&title, *msg_p,
+				pp->preserve_subject ? "\n" : " ");
 
 	strbuf_grow(sb, title.len + 1024);
 	if (pp->print_email_subject) {
 		if (pp->rev)
 			fmt_output_email_subject(sb, pp->rev);
-		if (needs_rfc2047_encoding(title.buf, title.len, RFC2047_SUBJECT))
+		if (needs_rfc2047_encoding(title.buf, title.len,
+					   RFC2047_SUBJECT))
 			add_rfc2047(sb, title.buf, title.len, encoding,
 				    RFC2047_SUBJECT);
 		else
@@ -1578,7 +1595,8 @@ void pp_title_line(struct pretty_print_context *pp, const char **msg_p,
 	if (need_8bit_cte == 0) {
 		int i;
 		for (i = 0; i < pp->in_body_headers.nr; i++) {
-			if (has_non_ascii(pp->in_body_headers.items[i].string)) {
+			if (has_non_ascii(
+				    pp->in_body_headers.items[i].string)) {
 				need_8bit_cte = 1;
 				break;
 			}
@@ -1586,9 +1604,10 @@ void pp_title_line(struct pretty_print_context *pp, const char **msg_p,
 	}
 
 	if (need_8bit_cte > 0) {
-		const char *header_fmt = "MIME-Version: 1.0\n"
-					 "Content-Type: text/plain; charset=%s\n"
-					 "Content-Transfer-Encoding: 8bit\n";
+		const char *header_fmt =
+			"MIME-Version: 1.0\n"
+			"Content-Type: text/plain; charset=%s\n"
+			"Content-Transfer-Encoding: 8bit\n";
 		strbuf_addf(sb, header_fmt, encoding);
 	}
 	if (pp->after_subject) {

@@ -89,12 +89,13 @@ struct rev_info {
 		simplify_merges : 1, simplify_by_decoration : 1,
 		single_worktree : 1, tag_objects : 1, tree_objects : 1,
 		blob_objects : 1, verify_objects : 1, edge_hint : 1,
-		edge_hint_aggressive : 1, limited : 1, unpacked : 1, boundary : 2,
-		count : 1, left_right : 1, left_only : 1, right_only : 1,
-		rewrite_parents : 1, print_parents : 1, show_source : 1,
-		show_decorations : 1, reverse : 1, reverse_output_stage : 1,
-		cherry_pick : 1, cherry_mark : 1, bisect : 1, ancestry_path : 1,
-		first_parent_only : 1, line_level_traverse : 1;
+		edge_hint_aggressive : 1, limited : 1, unpacked : 1,
+		boundary : 2, count : 1, left_right : 1, left_only : 1,
+		right_only : 1, rewrite_parents : 1, print_parents : 1,
+		show_source : 1, show_decorations : 1, reverse : 1,
+		reverse_output_stage : 1, cherry_pick : 1, cherry_mark : 1,
+		bisect : 1, ancestry_path : 1, first_parent_only : 1,
+		line_level_traverse : 1;
 
 	/* Diff flags */
 	unsigned int diff : 1, full_diff : 1, show_root_diff : 1,

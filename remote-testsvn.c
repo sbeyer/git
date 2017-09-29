@@ -30,11 +30,12 @@ struct input_command_entry {
 				    batch */
 };
 
-static const struct input_command_entry input_command_list[] =
-	{ { "capabilities", cmd_capabilities, 0 },
-	  { "import", cmd_import, 1 },
-	  { "list", cmd_list, 0 },
-	  { NULL, NULL } };
+static const struct input_command_entry input_command_list[] = {
+	{ "capabilities", cmd_capabilities, 0 },
+	{ "import", cmd_import, 1 },
+	{ "list", cmd_list, 0 },
+	{ NULL, NULL }
+};
 
 static int cmd_capabilities(const char *line)
 {
@@ -291,7 +292,8 @@ int cmd_main(int argc, const char **argv)
 {
 	struct strbuf buf = STRBUF_INIT, url_sb = STRBUF_INIT,
 		      private_ref_sb = STRBUF_INIT,
-		      marksfilename_sb = STRBUF_INIT, notes_ref_sb = STRBUF_INIT;
+		      marksfilename_sb = STRBUF_INIT,
+		      notes_ref_sb = STRBUF_INIT;
 	static struct remote *remote;
 	const char *url_in;
 
@@ -319,8 +321,9 @@ int cmd_main(int argc, const char **argv)
 	strbuf_addf(&notes_ref_sb, "refs/notes/%s/revs", remote->name);
 	notes_ref = notes_ref_sb.buf;
 
-	strbuf_addf(&marksfilename_sb, "%s/info/fast-import/remote-svn/%s.marks",
-		    get_git_dir(), remote->name);
+	strbuf_addf(&marksfilename_sb,
+		    "%s/info/fast-import/remote-svn/%s.marks", get_git_dir(),
+		    remote->name);
 	marksfilename = marksfilename_sb.buf;
 
 	while (1) {

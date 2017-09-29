@@ -29,8 +29,10 @@ typedef int (*combine_notes_fn)(unsigned char *cur_sha1,
 /* Common notes combinators */
 int combine_notes_concatenate(unsigned char *cur_sha1,
 			      const unsigned char *new_sha1);
-int combine_notes_overwrite(unsigned char *cur_sha1, const unsigned char *new_sha1);
-int combine_notes_ignore(unsigned char *cur_sha1, const unsigned char *new_sha1);
+int combine_notes_overwrite(unsigned char *cur_sha1,
+			    const unsigned char *new_sha1);
+int combine_notes_ignore(unsigned char *cur_sha1,
+			 const unsigned char *new_sha1);
 int combine_notes_cat_sort_uniq(unsigned char *cur_sha1,
 				const unsigned char *new_sha1);
 
@@ -208,7 +210,8 @@ int copy_note(struct notes_tree *t, const struct object_id *from_obj,
 typedef int
 each_note_fn(const struct object_id *object_oid,
 	     const struct object_id *note_oid, char *note_path, void *cb_data);
-int for_each_note(struct notes_tree *t, int flags, each_note_fn fn, void *cb_data);
+int for_each_note(struct notes_tree *t, int flags, each_note_fn fn,
+		  void *cb_data);
 
 /*
  * Write the given notes_tree structure to the object database

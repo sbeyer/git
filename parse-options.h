@@ -45,8 +45,8 @@ struct option;
 typedef int parse_opt_cb(const struct option *, const char *arg, int unset);
 
 struct parse_opt_ctx_t;
-typedef int
-parse_opt_ll_cb(struct parse_opt_ctx_t *ctx, const struct option *opt, int unset);
+typedef int parse_opt_ll_cb(struct parse_opt_ctx_t *ctx,
+			    const struct option *opt, int unset);
 
 /*
  * `type`::
@@ -124,9 +124,10 @@ struct option {
 	{                                              \
 		OPTION_GROUP, 0, NULL, NULL, NULL, (h) \
 	}
-#define OPT_BIT(s, l, v, h, b)                                                   \
-	{                                                                        \
-		OPTION_BIT, (s), (l), (v), NULL, (h), PARSE_OPT_NOARG, NULL, (b) \
+#define OPT_BIT(s, l, v, h, b)                                               \
+	{                                                                    \
+		OPTION_BIT, (s), (l), (v), NULL, (h), PARSE_OPT_NOARG, NULL, \
+			(b)                                                  \
 	}
 #define OPT_NEGBIT(s, l, v, h, b)                                         \
 	{                                                                 \
@@ -165,9 +166,10 @@ struct option {
 	{                                              \
 		OPTION_STRING, (s), (l), (v), (a), (h) \
 	}
-#define OPT_STRING_LIST(s, l, v, a, h)                                              \
-	{                                                                           \
-		OPTION_CALLBACK, (s), (l), (v), (a), (h), 0, &parse_opt_string_list \
+#define OPT_STRING_LIST(s, l, v, a, h)                       \
+	{                                                    \
+		OPTION_CALLBACK, (s), (l), (v), (a), (h), 0, \
+			&parse_opt_string_list               \
 	}
 #define OPT_UYN(s, l, v, h)                                                 \
 	{                                                                   \
@@ -253,9 +255,9 @@ struct parse_opt_ctx_t {
 	const char *prefix;
 };
 
-extern void
-parse_options_start(struct parse_opt_ctx_t *ctx, int argc, const char **argv,
-		    const char *prefix, const struct option *options, int flags);
+extern void parse_options_start(struct parse_opt_ctx_t *ctx, int argc,
+				const char **argv, const char *prefix,
+				const struct option *options, int flags);
 
 extern int
 parse_options_step(struct parse_opt_ctx_t *ctx, const struct option *options,
@@ -282,19 +284,20 @@ extern int parse_opt_passthru_argv(const struct option *, const char *, int);
 
 #define OPT__VERBOSE(var, h) OPT_COUNTUP('v', "verbose", (var), (h))
 #define OPT__QUIET(var, h) OPT_COUNTUP('q', "quiet", (var), (h))
-#define OPT__VERBOSITY(var)                                                      \
-	{ OPTION_CALLBACK,                                                       \
-	  'v',                                                                   \
-	  "verbose",                                                             \
-	  (var),                                                                 \
-	  NULL,                                                                  \
-	  N_("be more verbose"),                                                 \
-	  PARSE_OPT_NOARG,                                                       \
-	  &parse_opt_verbosity_cb,                                               \
-	  0 },                                                                   \
-	{                                                                        \
-		OPTION_CALLBACK, 'q', "quiet", (var), NULL, N_("be more quiet"), \
-			PARSE_OPT_NOARG, &parse_opt_verbosity_cb, 0              \
+#define OPT__VERBOSITY(var)                                   \
+	{ OPTION_CALLBACK,                                    \
+	  'v',                                                \
+	  "verbose",                                          \
+	  (var),                                              \
+	  NULL,                                               \
+	  N_("be more verbose"),                              \
+	  PARSE_OPT_NOARG,                                    \
+	  &parse_opt_verbosity_cb,                            \
+	  0 },                                                \
+	{                                                     \
+		OPTION_CALLBACK, 'q', "quiet", (var), NULL,   \
+			N_("be more quiet"), PARSE_OPT_NOARG, \
+			&parse_opt_verbosity_cb, 0            \
 	}
 #define OPT__DRY_RUN(var, h) OPT_BOOL('n', "dry-run", (var), (h))
 #define OPT__FORCE(var, h) OPT_COUNTUP('f', "force", (var), (h))
@@ -310,9 +313,10 @@ extern int parse_opt_passthru_argv(const struct option *, const char *, int);
 		OPTION_CALLBACK, (s), (l), (v), N_("style"), (h),  \
 			PARSE_OPT_OPTARG, parseopt_column_callback \
 	}
-#define OPT_PASSTHRU(s, l, v, a, h, f)                                            \
-	{                                                                         \
-		OPTION_CALLBACK, (s), (l), (v), (a), (h), (f), parse_opt_passthru \
+#define OPT_PASSTHRU(s, l, v, a, h, f)                         \
+	{                                                      \
+		OPTION_CALLBACK, (s), (l), (v), (a), (h), (f), \
+			parse_opt_passthru                     \
 	}
 #define OPT_PASSTHRU_ARGV(s, l, v, a, h, f)                    \
 	{                                                      \
@@ -331,7 +335,8 @@ extern int parse_opt_passthru_argv(const struct option *, const char *, int);
 	_OPT_CONTAINS_OR_WITH("no-contains", v, h, PARSE_OPT_NONEG)
 #define OPT_WITH(v, h) \
 	_OPT_CONTAINS_OR_WITH("with", v, h, PARSE_OPT_HIDDEN | PARSE_OPT_NONEG)
-#define OPT_WITHOUT(v, h) \
-	_OPT_CONTAINS_OR_WITH("without", v, h, PARSE_OPT_HIDDEN | PARSE_OPT_NONEG)
+#define OPT_WITHOUT(v, h)                      \
+	_OPT_CONTAINS_OR_WITH("without", v, h, \
+			      PARSE_OPT_HIDDEN | PARSE_OPT_NONEG)
 
 #endif

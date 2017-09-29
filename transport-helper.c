@@ -172,7 +172,8 @@ static struct child_process *get_helper(struct transport *transport)
 			data->export = 1;
 		else if (!strcmp(capname, "check-connectivity"))
 			data->check_connectivity = 1;
-		else if (!data->refspecs && skip_prefix(capname, "refspec ", &arg)) {
+		else if (!data->refspecs &&
+			 skip_prefix(capname, "refspec ", &arg)) {
 			ALLOC_GROW(refspecs, refspec_nr + 1, refspec_alloc);
 			refspecs[refspec_nr++] = xstrdup(arg);
 		} else if (!strcmp(capname, "connect")) {
@@ -244,7 +245,8 @@ static const char *boolean_options[] = { TRANS_OPT_THIN, TRANS_OPT_KEEP,
 					 TRANS_OPT_FOLLOWTAGS,
 					 TRANS_OPT_DEEPEN_RELATIVE };
 
-static int strbuf_set_helper_option(struct helper_data *data, struct strbuf *buf)
+static int
+strbuf_set_helper_option(struct helper_data *data, struct strbuf *buf)
 {
 	int ret;
 
@@ -265,8 +267,9 @@ static int strbuf_set_helper_option(struct helper_data *data, struct strbuf *buf
 	return ret;
 }
 
-static int string_list_set_helper_option(struct helper_data *data,
-					 const char *name, struct string_list *list)
+static int
+string_list_set_helper_option(struct helper_data *data, const char *name,
+			      struct string_list *list)
 {
 	struct strbuf buf = STRBUF_INIT;
 	int i, ret = 0;
@@ -297,8 +300,8 @@ static int set_helper_option(struct transport *transport, const char *name,
 		return 1;
 
 	if (!strcmp(name, "deepen-not"))
-		return string_list_set_helper_option(data, name,
-						     (struct string_list *)value);
+		return string_list_set_helper_option(
+			data, name, (struct string_list *)value);
 
 	for (i = 0; i < ARRAY_SIZE(unsupported_options); i++) {
 		if (!strcmp(name, unsupported_options[i]))
@@ -361,8 +364,8 @@ static int release_helper(struct transport *transport)
 	return res;
 }
 
-static int
-fetch_with_fetch(struct transport *transport, int nr_heads, struct ref **to_fetch)
+static int fetch_with_fetch(struct transport *transport, int nr_heads,
+			    struct ref **to_fetch)
 {
 	struct helper_data *data = transport->data;
 	int i;
@@ -391,13 +394,16 @@ fetch_with_fetch(struct transport *transport, int nr_heads, struct ref **to_fetc
 			else
 				transport->pack_lockfile = xstrdup(name);
 		} else if (data->check_connectivity &&
-			   data->transport_options.check_self_contained_and_connected &&
+			   data->transport_options
+				   .check_self_contained_and_connected &&
 			   !strcmp(buf.buf, "connectivity-ok"))
-			data->transport_options.self_contained_and_connected = 1;
+			data->transport_options.self_contained_and_connected =
+				1;
 		else if (!buf.len)
 			break;
 		else
-			warning("%s unexpectedly said: '%s'", data->name, buf.buf);
+			warning("%s unexpectedly said: '%s'", data->name,
+				buf.buf);
 	}
 	strbuf_release(&buf);
 	return 0;
@@ -451,7 +457,8 @@ get_exporter(struct transport *transport, struct child_process *fastexport,
 				 data->import_marks);
 
 	for (i = 0; i < revlist_args->nr; i++)
-		argv_array_push(&fastexport->args, revlist_args->items[i].string);
+		argv_array_push(&fastexport->args,
+				revlist_args->items[i].string);
 
 	fastexport->git_cmd = 1;
 	return start_command(fastexport);
@@ -625,7 +632,8 @@ static int connect_helper(struct transport *transport, const char *name,
 	return 0;
 }
 
-static int fetch(struct transport *transport, int nr_heads, struct ref **to_fetch)
+static int
+fetch(struct transport *transport, int nr_heads, struct ref **to_fetch)
 {
 	struct helper_data *data = transport->data;
 	int i, count;
@@ -779,19 +787,21 @@ static int push_update_refs_status(struct helper_data *data,
 	return ret;
 }
 
-static void
-set_common_push_options(struct transport *transport, const char *name, int flags)
+static void set_common_push_options(struct transport *transport,
+				    const char *name, int flags)
 {
 	if (flags & TRANSPORT_PUSH_DRY_RUN) {
 		if (set_helper_option(transport, "dry-run", "true") != 0)
 			die("helper %s does not support dry-run", name);
 	} else if (flags & TRANSPORT_PUSH_CERT_ALWAYS) {
-		if (set_helper_option(transport, TRANS_OPT_PUSH_CERT, "true") != 0)
+		if (set_helper_option(transport, TRANS_OPT_PUSH_CERT, "true") !=
+		    0)
 			die("helper %s does not support --signed", name);
 	} else if (flags & TRANSPORT_PUSH_CERT_IF_ASKED) {
 		if (set_helper_option(transport, TRANS_OPT_PUSH_CERT,
 				      "if-asked") != 0)
-			die("helper %s does not support --signed=if-asked", name);
+			die("helper %s does not support --signed=if-asked",
+			    name);
 	}
 
 	if (flags & TRANSPORT_PUSH_OPTIONS) {
@@ -860,7 +870,8 @@ static int push_refs_with_push(struct transport *transport,
 			struct strbuf cas = STRBUF_INIT;
 			strbuf_addf(&cas, "%s:%s", ref->name,
 				    oid_to_hex(&ref->old_oid_expect));
-			string_list_append(&cas_options, strbuf_detach(&cas, NULL));
+			string_list_append(&cas_options,
+					   strbuf_detach(&cas, NULL));
 		}
 	}
 	if (buf.len == 0) {
@@ -894,7 +905,8 @@ static int push_refs_with_export(struct transport *transport,
 	set_common_push_options(transport, data->name, flags);
 	if (flags & TRANSPORT_PUSH_FORCE) {
 		if (set_helper_option(transport, "force", "true") != 0)
-			warning("helper %s does not support 'force'", data->name);
+			warning("helper %s does not support 'force'",
+				data->name);
 	}
 
 	helper = get_helper(transport);
@@ -923,13 +935,15 @@ static int push_refs_with_export(struct transport *transport,
 
 					/* Follow symbolic refs (mainly for
 					 * HEAD). */
-					name = resolve_ref_unsafe(ref->peer_ref->name,
-								  RESOLVE_REF_READING,
-								  oid.hash, &flag);
+					name = resolve_ref_unsafe(
+						ref->peer_ref->name,
+						RESOLVE_REF_READING, oid.hash,
+						&flag);
 					if (!name || !(flag & REF_ISSYMREF))
 						name = ref->peer_ref->name;
 
-					strbuf_addf(&buf, "%s:%s", name, ref->name);
+					strbuf_addf(&buf, "%s:%s", name,
+						    ref->name);
 				} else
 					strbuf_addf(&buf, ":%s", ref->name);
 
@@ -1184,7 +1198,8 @@ static int udt_do_read(struct unidirectional_transfer *t)
 
 	transfer_debug("%s is readable", t->src_name);
 	bytes = read(t->src, t->buf + t->bufuse, BUFFERSIZE - t->bufuse);
-	if (bytes < 0 && errno != EWOULDBLOCK && errno != EAGAIN && errno != EINTR) {
+	if (bytes < 0 && errno != EWOULDBLOCK && errno != EAGAIN &&
+	    errno != EINTR) {
 		error_errno("read(%s) failed", t->src_name);
 		return -1;
 	} else if (bytes == 0) {
@@ -1234,7 +1249,8 @@ struct bidirectional_transfer_state {
 
 static void *udt_copy_task_routine(void *udt)
 {
-	struct unidirectional_transfer *t = (struct unidirectional_transfer *)udt;
+	struct unidirectional_transfer *t =
+		(struct unidirectional_transfer *)udt;
 	while (t->state != SSTATE_FINISHED) {
 		if (STATE_NEEDS_READING(t->state))
 			if (udt_do_read(t))

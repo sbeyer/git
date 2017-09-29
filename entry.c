@@ -94,12 +94,14 @@ static void *read_blob_entry(const struct cache_entry *ce, unsigned long *size)
 	return NULL;
 }
 
-static int open_output_fd(char *path, const struct cache_entry *ce, int to_tempfile)
+static int
+open_output_fd(char *path, const struct cache_entry *ce, int to_tempfile)
 {
 	int symlink = (ce->ce_mode & S_IFMT) != S_IFREG;
 	if (to_tempfile) {
 		xsnprintf(path, TEMPORARY_FILENAME_LENGTH, "%s",
-			  symlink ? ".merge_link_XXXXXX" : ".merge_file_XXXXXX");
+			  symlink ? ".merge_link_XXXXXX" :
+				    ".merge_file_XXXXXX");
 		return mkstemp(path);
 	} else {
 		return create_file(path, !symlink ? ce->ce_mode : 0666);
@@ -109,17 +111,18 @@ static int open_output_fd(char *path, const struct cache_entry *ce, int to_tempf
 static int fstat_output(int fd, const struct checkout *state, struct stat *st)
 {
 	/* use fstat() only when path == ce->name */
-	if (fstat_is_reliable() && state->refresh_cache && !state->base_dir_len) {
+	if (fstat_is_reliable() && state->refresh_cache &&
+	    !state->base_dir_len) {
 		fstat(fd, st);
 		return 1;
 	}
 	return 0;
 }
 
-static int
-streaming_write_entry(const struct cache_entry *ce, char *path,
-		      struct stream_filter *filter, const struct checkout *state,
-		      int to_tempfile, int *fstat_done, struct stat *statbuf)
+static int streaming_write_entry(const struct cache_entry *ce, char *path,
+				 struct stream_filter *filter,
+				 const struct checkout *state, int to_tempfile,
+				 int *fstat_done, struct stat *statbuf)
 {
 	int result = 0;
 	int fd;
@@ -140,7 +143,8 @@ streaming_write_entry(const struct cache_entry *ce, char *path,
 void enable_delayed_checkout(struct checkout *state)
 {
 	if (!state->delayed_checkout) {
-		state->delayed_checkout = xmalloc(sizeof(*state->delayed_checkout));
+		state->delayed_checkout =
+			xmalloc(sizeof(*state->delayed_checkout));
 		state->delayed_checkout->state = CE_CAN_DELAY;
 		string_list_init(&state->delayed_checkout->filters, 0);
 		string_list_init(&state->delayed_checkout->paths, 0);
@@ -176,7 +180,8 @@ int finish_delayed_checkout(struct checkout *state)
 					  delayed_object_count);
 	while (dco->filters.nr > 0) {
 		for_each_string_list_item (filter, &dco->filters) {
-			struct string_list available_paths = STRING_LIST_INIT_NODUP;
+			struct string_list available_paths =
+				STRING_LIST_INIT_NODUP;
 			display_progress(progress,
 					 delayed_object_count - dco->paths.nr);
 
@@ -203,7 +208,8 @@ int finish_delayed_checkout(struct checkout *state)
 			 * The filter just send us a list of available paths.
 			 * Remove them from the list.
 			 */
-			filter_string_list(&dco->paths, 0, &remove_available_paths,
+			filter_string_list(&dco->paths, 0,
+					   &remove_available_paths,
 					   &available_paths);
 
 			for_each_string_list_item (path, &available_paths) {
@@ -224,11 +230,13 @@ int finish_delayed_checkout(struct checkout *state)
 					filter->string = "";
 					continue;
 				}
-				ce = index_file_exists(state->istate, path->string,
+				ce = index_file_exists(state->istate,
+						       path->string,
 						       strlen(path->string), 0);
 				if (ce) {
 					errs |= checkout_entry(ce, state, NULL);
-					filtered_bytes += ce->ce_stat_data.sd_size;
+					filtered_bytes +=
+						ce->ce_stat_data.sd_size;
 					display_throughput(progress,
 							   filtered_bytes);
 				} else
@@ -267,10 +275,11 @@ static int write_entry(struct cache_entry *ce, char *path,
 	const struct submodule *sub;
 
 	if (ce_mode_s_ifmt == S_IFREG) {
-		struct stream_filter *filter = get_stream_filter(ce->name,
-								 ce->oid.hash);
-		if (filter && !streaming_write_entry(ce, path, filter, state,
-						     to_tempfile, &fstat_done, &st))
+		struct stream_filter *filter =
+			get_stream_filter(ce->name, ce->oid.hash);
+		if (filter &&
+		    !streaming_write_entry(ce, path, filter, state, to_tempfile,
+					   &fstat_done, &st))
 			goto finish;
 	}
 
@@ -286,8 +295,8 @@ static int write_entry(struct cache_entry *ce, char *path,
 			ret = symlink(new, path);
 			free(new);
 			if (ret)
-				return error_errno("unable to create symlink %s",
-						   path);
+				return error_errno(
+					"unable to create symlink %s", path);
 			break;
 		}
 
@@ -302,9 +311,8 @@ static int write_entry(struct cache_entry *ce, char *path,
 					new = NULL;
 					size = 0;
 				}
-				ret = async_convert_to_working_tree(ce->name,
-								    new, size,
-								    &buf, dco);
+				ret = async_convert_to_working_tree(
+					ce->name, new, size, &buf, dco);
 				if (ret && string_list_has_string(&dco->paths,
 								  ce->name)) {
 					free(new);
@@ -342,9 +350,11 @@ static int write_entry(struct cache_entry *ce, char *path,
 		break;
 	case S_IFGITLINK:
 		if (to_tempfile)
-			return error("cannot create temporary submodule %s", path);
+			return error("cannot create temporary submodule %s",
+				     path);
 		if (mkdir(path, 0777) < 0)
-			return error("cannot create submodule directory %s", path);
+			return error("cannot create submodule directory %s",
+				     path);
 		sub = submodule_from_ce(ce);
 		if (sub)
 			return submodule_move_head(
@@ -392,7 +402,8 @@ static int check_path(const char *path, int len, struct stat *st, int skiplen)
  * its name is returned in topath[], which must be able to hold at
  * least TEMPORARY_FILENAME_LENGTH bytes long.
  */
-int checkout_entry(struct cache_entry *ce, const struct checkout *state, char *topath)
+int checkout_entry(struct cache_entry *ce, const struct checkout *state,
+		   char *topath)
 {
 	static struct strbuf path = STRBUF_INIT;
 	struct stat st;
@@ -430,15 +441,17 @@ int checkout_entry(struct cache_entry *ce, const struct checkout *state, char *t
 			} else
 				return submodule_move_head(
 					ce->name, "HEAD", oid_to_hex(&ce->oid),
-					state->force ? SUBMODULE_MOVE_HEAD_FORCE :
-						       0);
+					state->force ?
+						SUBMODULE_MOVE_HEAD_FORCE :
+						0);
 		}
 
 		if (!changed)
 			return 0;
 		if (!state->force) {
 			if (!state->quiet)
-				fprintf(stderr, "%s already exists, no checkout\n",
+				fprintf(stderr,
+					"%s already exists, no checkout\n",
 					path.buf);
 			return -1;
 		}
@@ -457,7 +470,8 @@ int checkout_entry(struct cache_entry *ce, const struct checkout *state, char *t
 				return error("%s is a directory", path.buf);
 			remove_subtree(&path);
 		} else if (unlink(path.buf))
-			return error_errno("unable to unlink old '%s'", path.buf);
+			return error_errno("unable to unlink old '%s'",
+					   path.buf);
 	} else if (state->not_new)
 		return 0;
 

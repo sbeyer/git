@@ -95,7 +95,8 @@ char *prefix_path_gently(const char *prefix, int len, int *remaining_prefix,
 		sanitized = xmallocz(strlen(path));
 		if (remaining_prefix)
 			*remaining_prefix = 0;
-		if (normalize_path_copy_len(sanitized, path, remaining_prefix)) {
+		if (normalize_path_copy_len(sanitized, path,
+					    remaining_prefix)) {
 			free(sanitized);
 			return NULL;
 		}
@@ -107,7 +108,8 @@ char *prefix_path_gently(const char *prefix, int len, int *remaining_prefix,
 		sanitized = xstrfmt("%.*s%s", len, len ? prefix : "", path);
 		if (remaining_prefix)
 			*remaining_prefix = len;
-		if (normalize_path_copy_len(sanitized, sanitized, remaining_prefix)) {
+		if (normalize_path_copy_len(sanitized, sanitized,
+					    remaining_prefix)) {
 			free(sanitized);
 			return NULL;
 		}
@@ -143,7 +145,8 @@ int check_filename(const char *prefix, const char *arg)
 		if (!*arg) /* ":/" is root dir, always exists */
 			return 1;
 		prefix = NULL;
-	} else if (skip_prefix(arg, ":!", &arg) || skip_prefix(arg, ":^", &arg)) {
+	} else if (skip_prefix(arg, ":!", &arg) ||
+		   skip_prefix(arg, ":^", &arg)) {
 		if (!*arg) /* excluding everything is silly, but allowed */
 			return 1;
 	}
@@ -223,7 +226,8 @@ static int looks_like_pathspec(const char *arg)
  * diagnose_misspelt_rev == 0 for the next ones (because we already
  * saw a filename, there's not ambiguity anymore).
  */
-void verify_filename(const char *prefix, const char *arg, int diagnose_misspelt_rev)
+void verify_filename(const char *prefix, const char *arg,
+		     int diagnose_misspelt_rev)
 {
 	if (*arg == '-')
 		die("bad flag '%s' used after filename", arg);
@@ -617,8 +621,8 @@ cleanup_return:
 	return error_code ? NULL : path;
 }
 
-static const char *
-setup_explicit_git_dir(const char *gitdirenv, struct strbuf *cwd, int *nongit_ok)
+static const char *setup_explicit_git_dir(const char *gitdirenv,
+					  struct strbuf *cwd, int *nongit_ok)
 {
 	const char *work_tree_env = getenv(GIT_WORK_TREE_ENVIRONMENT);
 	const char *worktree;
@@ -712,8 +716,9 @@ setup_explicit_git_dir(const char *gitdirenv, struct strbuf *cwd, int *nongit_ok
 	return NULL;
 }
 
-static const char *setup_discovered_git_dir(const char *gitdir, struct strbuf *cwd,
-					    int offset, int *nongit_ok)
+static const char *
+setup_discovered_git_dir(const char *gitdir, struct strbuf *cwd, int offset,
+			 int *nongit_ok)
 {
 	if (check_repository_format_gently(gitdir, nongit_ok))
 		return NULL;
@@ -802,7 +807,8 @@ static const char *setup_nongit(const char *cwd, int *nongit_ok)
 	return NULL;
 }
 
-static dev_t get_device_or_die(const char *path, const char *prefix, int prefix_len)
+static dev_t
+get_device_or_die(const char *path, const char *prefix, int prefix_len)
 {
 	struct stat buf;
 	if (stat(path, &buf)) {
@@ -819,7 +825,8 @@ static dev_t get_device_or_die(const char *path, const char *prefix, int prefix_
  * GIT_CEILING_DIRECTORIES turns off canonicalization for all
  * subsequent entries.
  */
-static int canonicalize_ceiling_entry(struct string_list_item *item, void *cb_data)
+static int
+canonicalize_ceiling_entry(struct string_list_item *item, void *cb_data)
 {
 	int *empty_entry_found = cb_data;
 	char *ceil = item->string;
@@ -874,7 +881,8 @@ setup_git_directory_gently_1(struct strbuf *dir, struct strbuf *gitdir,
 	const char *env_ceiling_dirs = getenv(CEILING_DIRECTORIES_ENVIRONMENT);
 	struct string_list ceiling_dirs = STRING_LIST_INIT_DUP;
 	const char *gitdirenv;
-	int ceil_offset = -1, min_offset = has_dos_drive_prefix(dir->buf) ? 3 : 1;
+	int ceil_offset = -1,
+	    min_offset = has_dos_drive_prefix(dir->buf) ? 3 : 1;
 	dev_t current_device = 0;
 	int one_filesystem = 1;
 
@@ -892,7 +900,8 @@ setup_git_directory_gently_1(struct strbuf *dir, struct strbuf *gitdir,
 	if (env_ceiling_dirs) {
 		int empty_entry_found = 0;
 
-		string_list_split(&ceiling_dirs, env_ceiling_dirs, PATH_SEP, -1);
+		string_list_split(&ceiling_dirs, env_ceiling_dirs, PATH_SEP,
+				  -1);
 		filter_string_list(&ceiling_dirs, 0, canonicalize_ceiling_entry,
 				   &empty_entry_found);
 		ceil_offset = longest_ancestor_length(dir->buf, &ceiling_dirs);
@@ -922,8 +931,8 @@ setup_git_directory_gently_1(struct strbuf *dir, struct strbuf *gitdir,
 		if (offset > min_offset)
 			strbuf_addch(dir, '/');
 		strbuf_addstr(dir, DEFAULT_GIT_DIR_ENVIRONMENT);
-		gitdirenv = read_gitfile_gently(dir->buf,
-						die_on_error ? NULL : &error_code);
+		gitdirenv = read_gitfile_gently(
+			dir->buf, die_on_error ? NULL : &error_code);
 		if (!gitdirenv) {
 			if (die_on_error ||
 			    error_code == READ_GITFILE_ERR_NOT_A_FILE) {
@@ -980,7 +989,8 @@ int discover_git_directory(struct strbuf *commondir, struct strbuf *gitdir)
 	 * The returned gitdir is relative to dir, and if dir does not reflect
 	 * the current working directory, we simply make the gitdir absolute.
 	 */
-	if (dir.len < cwd_len && !is_absolute_path(gitdir->buf + gitdir_offset)) {
+	if (dir.len < cwd_len &&
+	    !is_absolute_path(gitdir->buf + gitdir_offset)) {
 		/* Avoid a trailing "/." */
 		if (!strcmp(".", gitdir->buf + gitdir_offset))
 			strbuf_setlen(gitdir, gitdir_offset);

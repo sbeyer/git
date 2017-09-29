@@ -195,9 +195,10 @@ static int write_directory(struct archiver_context *c)
 	return ret ? -1 : 0;
 }
 
-static int queue_or_write_archive_entry(const unsigned char *sha1,
-					struct strbuf *base, const char *filename,
-					unsigned mode, int stage, void *context)
+static int
+queue_or_write_archive_entry(const unsigned char *sha1, struct strbuf *base,
+			     const char *filename, unsigned mode, int stage,
+			     void *context)
 {
 	struct archiver_context *c = context;
 
@@ -328,18 +329,21 @@ static int path_exists(struct tree *tree, const char *path)
 	return ret != 0;
 }
 
-static void parse_pathspec_arg(const char **pathspec, struct archiver_args *ar_args)
+static void
+parse_pathspec_arg(const char **pathspec, struct archiver_args *ar_args)
 {
 	/*
 	 * must be consistent with parse_pathspec in path_exists()
 	 * Also if pathspec patterns are dependent, we're in big
 	 * trouble as we test each one separately
 	 */
-	parse_pathspec(&ar_args->pathspec, 0, PATHSPEC_PREFER_FULL, "", pathspec);
+	parse_pathspec(&ar_args->pathspec, 0, PATHSPEC_PREFER_FULL, "",
+		       pathspec);
 	ar_args->pathspec.recursive = 1;
 	if (pathspec) {
 		while (*pathspec) {
-			if (**pathspec && !path_exists(ar_args->tree, *pathspec))
+			if (**pathspec &&
+			    !path_exists(ar_args->tree, *pathspec))
 				die(_("pathspec '%s' did not match any files"),
 				    *pathspec);
 			pathspec++;
@@ -416,7 +420,8 @@ static void parse_treeish_arg(const char **argv, struct archiver_args *ar_args,
 
 static int
 parse_archive_args(int argc, const char **argv, const struct archiver **ar,
-		   struct archiver_args *args, const char *name_hint, int is_remote)
+		   struct archiver_args *args, const char *name_hint,
+		   int is_remote)
 {
 	const char *format = NULL;
 	const char *base = NULL;
@@ -430,7 +435,8 @@ parse_archive_args(int argc, const char **argv, const struct archiver **ar,
 	int worktree_attributes = 0;
 	struct option opts[] = {
 		OPT_GROUP(""),
-		OPT_STRING(0, "format", &format, N_("fmt"), N_("archive format")),
+		OPT_STRING(0, "format", &format, N_("fmt"),
+			   N_("archive format")),
 		OPT_STRING(0, "prefix", &base, N_("prefix"),
 			   N_("prepend prefix to each pathname in the archive")),
 		OPT_STRING('o', "output", &output, N_("file"),
@@ -449,10 +455,12 @@ parse_archive_args(int argc, const char **argv, const struct archiver **ar,
 		OPT__COMPR_HIDDEN('8', &compression_level, 8),
 		OPT__COMPR('9', &compression_level, N_("compress better"), 9),
 		OPT_GROUP(""),
-		OPT_BOOL('l', "list", &list, N_("list supported archive formats")),
+		OPT_BOOL('l', "list", &list,
+			 N_("list supported archive formats")),
 		OPT_GROUP(""),
-		OPT_STRING(0, "remote", &remote, N_("repo"),
-			   N_("retrieve the archive from remote repository <repo>")),
+		OPT_STRING(
+			0, "remote", &remote, N_("repo"),
+			N_("retrieve the archive from remote repository <repo>")),
 		OPT_STRING(0, "exec", &exec, N_("command"),
 			   N_("path to the remote git-upload-archive command")),
 		OPT_END()

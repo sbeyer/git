@@ -31,7 +31,8 @@ static void diffgrep_consume(void *priv, char *line, unsigned long len)
 		 * caller early.
 		 */
 		return;
-	data->hit = !regexec_buf(data->regexp, line + 1, len - 1, 1, &regmatch, 0);
+	data->hit =
+		!regexec_buf(data->regexp, line + 1, len - 1, 1, &regmatch, 0);
 }
 
 static int diff_grep(mmfile_t *one, mmfile_t *two, struct diff_options *o,
@@ -43,9 +44,11 @@ static int diff_grep(mmfile_t *one, mmfile_t *two, struct diff_options *o,
 	xdemitconf_t xecfg;
 
 	if (!one)
-		return !regexec_buf(regexp, two->ptr, two->size, 1, &regmatch, 0);
+		return !regexec_buf(regexp, two->ptr, two->size, 1, &regmatch,
+				    0);
 	if (!two)
-		return !regexec_buf(regexp, one->ptr, one->size, 1, &regmatch, 0);
+		return !regexec_buf(regexp, one->ptr, one->size, 1, &regmatch,
+				    0);
 
 	/*
 	 * We have both sides; need to run textual diff and see if
@@ -219,7 +222,8 @@ void diffcore_pickaxe(struct diff_options *o)
 			cflags |= REG_ICASE;
 		regcomp_or_die(&regex, needle, cflags);
 		regexp = &regex;
-	} else if (DIFF_OPT_TST(o, PICKAXE_IGNORE_CASE) && has_non_ascii(needle)) {
+	} else if (DIFF_OPT_TST(o, PICKAXE_IGNORE_CASE) &&
+		   has_non_ascii(needle)) {
 		struct strbuf sb = STRBUF_INIT;
 		int cflags = REG_NEWLINE | REG_ICASE;
 

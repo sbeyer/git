@@ -115,7 +115,8 @@ extern int refs_init_db(struct strbuf *err);
  * Symbolic references are considered unpeelable, even if they
  * ultimately resolve to a peelable tag.
  */
-int refs_peel_ref(struct ref_store *refs, const char *refname, unsigned char *sha1);
+int refs_peel_ref(struct ref_store *refs, const char *refname,
+		  unsigned char *sha1);
 int peel_ref(const char *refname, unsigned char *sha1);
 
 /**
@@ -275,15 +276,19 @@ int refs_head_ref(struct ref_store *refs, each_ref_fn fn, void *cb_data);
 int refs_for_each_ref(struct ref_store *refs, each_ref_fn fn, void *cb_data);
 int refs_for_each_ref_in(struct ref_store *refs, const char *prefix,
 			 each_ref_fn fn, void *cb_data);
-int refs_for_each_tag_ref(struct ref_store *refs, each_ref_fn fn, void *cb_data);
-int refs_for_each_branch_ref(struct ref_store *refs, each_ref_fn fn, void *cb_data);
-int refs_for_each_remote_ref(struct ref_store *refs, each_ref_fn fn, void *cb_data);
+int refs_for_each_tag_ref(struct ref_store *refs, each_ref_fn fn,
+			  void *cb_data);
+int refs_for_each_branch_ref(struct ref_store *refs, each_ref_fn fn,
+			     void *cb_data);
+int refs_for_each_remote_ref(struct ref_store *refs, each_ref_fn fn,
+			     void *cb_data);
 
 int head_ref(each_ref_fn fn, void *cb_data);
 int for_each_ref(each_ref_fn fn, void *cb_data);
 int for_each_ref_in(const char *prefix, each_ref_fn fn, void *cb_data);
 int refs_for_each_fullref_in(struct ref_store *refs, const char *prefix,
-			     each_ref_fn fn, void *cb_data, unsigned int broken);
+			     each_ref_fn fn, void *cb_data,
+			     unsigned int broken);
 int for_each_fullref_in(const char *prefix, each_ref_fn fn, void *cb_data,
 			unsigned int broken);
 int for_each_tag_ref(each_ref_fn fn, void *cb_data);
@@ -345,7 +350,8 @@ int refs_pack_refs(struct ref_store *refs, unsigned int flags);
  */
 int refs_create_reflog(struct ref_store *refs, const char *refname,
 		       int force_create, struct strbuf *err);
-int safe_create_reflog(const char *refname, int force_create, struct strbuf *err);
+int safe_create_reflog(const char *refname, int force_create,
+		       struct strbuf *err);
 
 /** Reads log for the value of ref during at_time. **/
 int read_ref_at(const char *refname, unsigned int flags, timestamp_t at_time,
@@ -364,8 +370,9 @@ int reflog_exists(const char *refname);
  * be NULL_SHA1. msg and flags are passed through to
  * ref_transaction_delete().
  */
-int refs_delete_ref(struct ref_store *refs, const char *msg, const char *refname,
-		    const unsigned char *old_sha1, unsigned int flags);
+int refs_delete_ref(struct ref_store *refs, const char *msg,
+		    const char *refname, const unsigned char *old_sha1,
+		    unsigned int flags);
 int delete_ref(const char *msg, const char *refname,
 	       const unsigned char *old_sha1, unsigned int flags);
 
@@ -377,7 +384,8 @@ int delete_ref(const char *msg, const char *refname,
  */
 int refs_delete_refs(struct ref_store *refs, const char *msg,
 		     struct string_list *refnames, unsigned int flags);
-int delete_refs(const char *msg, struct string_list *refnames, unsigned int flags);
+int delete_refs(const char *msg, struct string_list *refnames,
+		unsigned int flags);
 
 /** Delete a reflog */
 int refs_delete_reflog(struct ref_store *refs, const char *refname);
@@ -391,9 +399,11 @@ each_reflog_ent_fn(struct object_id *old_oid, struct object_id *new_oid,
 
 int refs_for_each_reflog_ent(struct ref_store *refs, const char *refname,
 			     each_reflog_ent_fn fn, void *cb_data);
-int refs_for_each_reflog_ent_reverse(struct ref_store *refs, const char *refname,
-				     each_reflog_ent_fn fn, void *cb_data);
-int for_each_reflog_ent(const char *refname, each_reflog_ent_fn fn, void *cb_data);
+int refs_for_each_reflog_ent_reverse(struct ref_store *refs,
+				     const char *refname, each_reflog_ent_fn fn,
+				     void *cb_data);
+int for_each_reflog_ent(const char *refname, each_reflog_ent_fn fn,
+			void *cb_data);
 int for_each_reflog_ent_reverse(const char *refname, each_reflog_ent_fn fn,
 				void *cb_data);
 
@@ -513,9 +523,10 @@ int ref_transaction_update(struct ref_transaction *transaction,
  * See the above comment "Reference transaction updates" for more
  * information.
  */
-int ref_transaction_create(struct ref_transaction *transaction, const char *refname,
-			   const unsigned char *new_sha1, unsigned int flags,
-			   const char *msg, struct strbuf *err);
+int ref_transaction_create(struct ref_transaction *transaction,
+			   const char *refname, const unsigned char *new_sha1,
+			   unsigned int flags, const char *msg,
+			   struct strbuf *err);
 
 /*
  * Add a reference deletion to transaction. If old_sha1 is non-NULL,
@@ -525,9 +536,10 @@ int ref_transaction_create(struct ref_transaction *transaction, const char *refn
  * See the above comment "Reference transaction updates" for more
  * information.
  */
-int ref_transaction_delete(struct ref_transaction *transaction, const char *refname,
-			   const unsigned char *old_sha1, unsigned int flags,
-			   const char *msg, struct strbuf *err);
+int ref_transaction_delete(struct ref_transaction *transaction,
+			   const char *refname, const unsigned char *old_sha1,
+			   unsigned int flags, const char *msg,
+			   struct strbuf *err);
 
 /*
  * Verify, within a transaction, that refname has the value old_sha1,
@@ -572,13 +584,15 @@ int ref_transaction_prepare(struct ref_transaction *transaction,
  * transaction, write an error message to `err`, and return one of the
  * `TRANSACTION_*` constants
  */
-int ref_transaction_commit(struct ref_transaction *transaction, struct strbuf *err);
+int ref_transaction_commit(struct ref_transaction *transaction,
+			   struct strbuf *err);
 
 /*
  * Abort `transaction`, which has been begun and possibly prepared,
  * but not yet committed.
  */
-int ref_transaction_abort(struct ref_transaction *transaction, struct strbuf *err);
+int ref_transaction_abort(struct ref_transaction *transaction,
+			  struct strbuf *err);
 
 /*
  * Like ref_transaction_commit(), but optimized for creating
@@ -607,15 +621,17 @@ void ref_transaction_free(struct ref_transaction *transaction);
  * ref_transaction_update(). Handle errors as requested by the `onerr`
  * argument.
  */
-int refs_update_ref(struct ref_store *refs, const char *msg, const char *refname,
-		    const unsigned char *new_sha1, const unsigned char *old_sha1,
-		    unsigned int flags, enum action_on_err onerr);
+int refs_update_ref(struct ref_store *refs, const char *msg,
+		    const char *refname, const unsigned char *new_sha1,
+		    const unsigned char *old_sha1, unsigned int flags,
+		    enum action_on_err onerr);
 int update_ref(const char *msg, const char *refname,
 	       const unsigned char *new_sha1, const unsigned char *old_sha1,
 	       unsigned int flags, enum action_on_err onerr);
 int update_ref_oid(const char *msg, const char *refname,
-		   const struct object_id *new_oid, const struct object_id *old_oid,
-		   unsigned int flags, enum action_on_err onerr);
+		   const struct object_id *new_oid,
+		   const struct object_id *old_oid, unsigned int flags,
+		   enum action_on_err onerr);
 
 int parse_hide_refs_config(const char *var, const char *value, const char *);
 
@@ -660,8 +676,9 @@ enum expire_reflog_flags {
  * reflog_expiry_cleanup_fn -- Called once before the reference is
  *     unlocked again.
  */
-typedef void reflog_expiry_prepare_fn(const char *refname,
-				      const struct object_id *oid, void *cb_data);
+typedef void
+reflog_expiry_prepare_fn(const char *refname, const struct object_id *oid,
+			 void *cb_data);
 typedef int
 reflog_expiry_should_prune_fn(struct object_id *ooid, struct object_id *noid,
 			      const char *email, timestamp_t timestamp, int tz,
@@ -678,7 +695,8 @@ int refs_reflog_expire(struct ref_store *refs, const char *refname,
 		       const unsigned char *sha1, unsigned int flags,
 		       reflog_expiry_prepare_fn prepare_fn,
 		       reflog_expiry_should_prune_fn should_prune_fn,
-		       reflog_expiry_cleanup_fn cleanup_fn, void *policy_cb_data);
+		       reflog_expiry_cleanup_fn cleanup_fn,
+		       void *policy_cb_data);
 int reflog_expire(const char *refname, const unsigned char *sha1,
 		  unsigned int flags, reflog_expiry_prepare_fn prepare_fn,
 		  reflog_expiry_should_prune_fn should_prune_fn,

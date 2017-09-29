@@ -176,10 +176,12 @@ extern int grep_config(const char *var, const char *value, void *);
 extern void grep_init(struct grep_opt *, const char *prefix);
 void grep_commit_pattern_type(enum grep_pattern_type, struct grep_opt *opt);
 
-extern void append_grep_pat(struct grep_opt *opt, const char *pat, size_t patlen,
-			    const char *origin, int no, enum grep_pat_token t);
-extern void append_grep_pattern(struct grep_opt *opt, const char *pat,
-				const char *origin, int no, enum grep_pat_token t);
+extern void
+append_grep_pat(struct grep_opt *opt, const char *pat, size_t patlen,
+		const char *origin, int no, enum grep_pat_token t);
+extern void
+append_grep_pattern(struct grep_opt *opt, const char *pat, const char *origin,
+		    int no, enum grep_pat_token t);
 extern void append_header_grep_pattern(struct grep_opt *,
 				       enum grep_header_field, const char *);
 extern void compile_grep_patterns(struct grep_opt *opt);
@@ -204,7 +206,8 @@ struct grep_source {
 };
 
 void grep_source_init(struct grep_source *gs, enum grep_source_type type,
-		      const char *name, const char *path, const void *identifier);
+		      const char *name, const char *path,
+		      const void *identifier);
 void grep_source_clear_data(struct grep_source *gs);
 void grep_source_clear(struct grep_source *gs);
 void grep_source_load_driver(struct grep_source *gs);

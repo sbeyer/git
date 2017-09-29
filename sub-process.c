@@ -135,7 +135,8 @@ handshake_version(struct child_process *process, const char *welcome_prefix,
 		return error("Unexpected line '%s', expected %s-server",
 			     line ? line : "<flush packet>", welcome_prefix);
 	if (!(line = packet_read_line(process->out, NULL)) ||
-	    !skip_prefix(line, "version=", &p) || strtol_i(p, 10, chosen_version))
+	    !skip_prefix(line, "version=", &p) ||
+	    strtol_i(p, 10, chosen_version))
 		return error("Unexpected line '%s', expected version",
 			     line ? line : "<flush packet>");
 	if ((line = packet_read_line(process->out, NULL)))
@@ -173,7 +174,8 @@ static int handshake_capabilities(struct child_process *process,
 			continue;
 
 		for (i = 0;
-		     capabilities[i].name && strcmp(p, capabilities[i].name); i++)
+		     capabilities[i].name && strcmp(p, capabilities[i].name);
+		     i++)
 			;
 		if (capabilities[i].name) {
 			if (supported_capabilities)
@@ -187,8 +189,9 @@ static int handshake_capabilities(struct child_process *process,
 	return 0;
 }
 
-int subprocess_handshake(struct subprocess_entry *entry, const char *welcome_prefix,
-			 int *versions, int *chosen_version,
+int subprocess_handshake(struct subprocess_entry *entry,
+			 const char *welcome_prefix, int *versions,
+			 int *chosen_version,
 			 struct subprocess_capability *capabilities,
 			 unsigned int *supported_capabilities)
 {

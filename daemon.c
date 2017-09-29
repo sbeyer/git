@@ -201,17 +201,20 @@ static const char *path_ok(const char *directory, struct hostinfo *hi)
 
 		if (*dir != '/') {
 			/* Allow only absolute */
-			logerror("'%s': Non-absolute path denied (interpolated-path active)",
-				 dir);
+			logerror(
+				"'%s': Non-absolute path denied (interpolated-path active)",
+				dir);
 			return NULL;
 		}
 
 		strbuf_expand(&expanded_path, interpolated_path, expand_path,
 			      &context);
 
-		rlen = strlcpy(interp_path, expanded_path.buf, sizeof(interp_path));
+		rlen = strlcpy(interp_path, expanded_path.buf,
+			       sizeof(interp_path));
 		if (rlen >= sizeof(interp_path)) {
-			logerror("interpolated path too large: %s", interp_path);
+			logerror("interpolated path too large: %s",
+				 interp_path);
 			return NULL;
 		}
 
@@ -222,8 +225,9 @@ static const char *path_ok(const char *directory, struct hostinfo *hi)
 	} else if (base_path) {
 		if (*dir != '/') {
 			/* Allow only absolute */
-			logerror("'%s': Non-absolute path denied (base-path active)",
-				 dir);
+			logerror(
+				"'%s': Non-absolute path denied (base-path active)",
+				dir);
 			return NULL;
 		}
 		rlen = snprintf(rpath, sizeof(rpath), "%s%s", base_path, dir);
@@ -321,7 +325,8 @@ static int run_access_hook(struct daemon_service *service, const char *dir,
 	child.no_stderr = 1;
 	child.out = -1;
 	if (start_command(&child)) {
-		logerror("daemon access hook '%s' failed to start", access_hook);
+		logerror("daemon access hook '%s' failed to start",
+			 access_hook);
 		goto error_return;
 	}
 	if (strbuf_read(&buf, child.out, 0) < 0) {
@@ -356,8 +361,8 @@ error_return:
 	return -1;
 }
 
-static int
-run_service(const char *dir, struct daemon_service *service, struct hostinfo *hi)
+static int run_service(const char *dir, struct daemon_service *service,
+		       struct hostinfo *hi)
 {
 	const char *path;
 	int enabled = service->enabled;
@@ -397,7 +402,8 @@ run_service(const char *dir, struct daemon_service *service, struct hostinfo *hi
 		strbuf_release(&var);
 	}
 	if (!enabled) {
-		logerror("'%s': service not enabled for '%s'", service->name, path);
+		logerror("'%s': service not enabled for '%s'", service->name,
+			 path);
 		errno = EACCES;
 		return daemon_error(dir, "service not enabled");
 	}
@@ -623,7 +629,8 @@ static void lookup_hostname(struct hostinfo *hi)
 				sanitize_client(&hi->canon_hostname,
 						ai->ai_canonname);
 			else
-				strbuf_addbuf(&hi->canon_hostname, &hi->ip_address);
+				strbuf_addbuf(&hi->canon_hostname,
+					      &hi->ip_address);
 
 			freeaddrinfo(ai);
 		}
@@ -841,7 +848,8 @@ static void handle(int incoming, struct sockaddr *addr, socklen_t addrlen)
 	if (addr->sa_family == AF_INET) {
 		char buf[128] = "";
 		struct sockaddr_in *sin_addr = (void *)addr;
-		inet_ntop(addr->sa_family, &sin_addr->sin_addr, buf, sizeof(buf));
+		inet_ntop(addr->sa_family, &sin_addr->sin_addr, buf,
+			  sizeof(buf));
 		argv_array_pushf(&cld.env_array, "REMOTE_ADDR=%s", buf);
 		argv_array_pushf(&cld.env_array, "REMOTE_PORT=%d",
 				 ntohs(sin_addr->sin_port));
@@ -907,7 +915,8 @@ static const char *ip2str(int family, struct sockaddr *sin, socklen_t len)
 		break;
 #endif
 	case AF_INET:
-		inet_ntop(family, &((struct sockaddr_in *)sin)->sin_addr, ip, len);
+		inet_ntop(family, &((struct sockaddr_in *)sin)->sin_addr, ip,
+			  len);
 		break;
 	default:
 		xsnprintf(ip, sizeof(ip), "<unknown>");
@@ -917,8 +926,8 @@ static const char *ip2str(int family, struct sockaddr *sin, socklen_t len)
 
 #ifndef NO_IPV6
 
-static int
-setup_named_sock(char *listen_addr, int listen_port, struct socketlist *socklist)
+static int setup_named_sock(char *listen_addr, int listen_port,
+			    struct socketlist *socklist)
 {
 	int socknum = 0;
 	char pbuf[NI_MAXSERV];
@@ -943,7 +952,8 @@ setup_named_sock(char *listen_addr, int listen_port, struct socketlist *socklist
 	for (ai = ai0; ai; ai = ai->ai_next) {
 		int sockfd;
 
-		sockfd = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
+		sockfd =
+			socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
 		if (sockfd < 0)
 			continue;
 		if (sockfd >= FD_SETSIZE) {
@@ -962,7 +972,8 @@ setup_named_sock(char *listen_addr, int listen_port, struct socketlist *socklist
 #endif
 
 		if (set_reuse_addr(sockfd)) {
-			logerror("Could not set SO_REUSEADDR: %s", strerror(errno));
+			logerror("Could not set SO_REUSEADDR: %s",
+				 strerror(errno));
 			close(sockfd);
 			continue;
 		}
@@ -971,14 +982,16 @@ setup_named_sock(char *listen_addr, int listen_port, struct socketlist *socklist
 
 		if (bind(sockfd, ai->ai_addr, ai->ai_addrlen) < 0) {
 			logerror("Could not bind to %s: %s",
-				 ip2str(ai->ai_family, ai->ai_addr, ai->ai_addrlen),
+				 ip2str(ai->ai_family, ai->ai_addr,
+					ai->ai_addrlen),
 				 strerror(errno));
 			close(sockfd);
 			continue; /* not fatal */
 		}
 		if (listen(sockfd, 5) < 0) {
 			logerror("Could not listen to %s: %s",
-				 ip2str(ai->ai_family, ai->ai_addr, ai->ai_addrlen),
+				 ip2str(ai->ai_family, ai->ai_addr,
+					ai->ai_addrlen),
 				 strerror(errno));
 			close(sockfd);
 			continue; /* not fatal */
@@ -1000,8 +1013,8 @@ setup_named_sock(char *listen_addr, int listen_port, struct socketlist *socklist
 
 #else /* NO_IPV6 */
 
-static int
-setup_named_sock(char *listen_addr, int listen_port, struct socketlist *socklist)
+static int setup_named_sock(char *listen_addr, int listen_port,
+			    struct socketlist *socklist)
 {
 	struct sockaddr_in sin;
 	int sockfd;
@@ -1070,9 +1083,10 @@ static void socksetup(struct string_list *listen_addr, int listen_port,
 						   listen_port, socklist);
 
 			if (socknum == 0)
-				logerror("unable to allocate any listen sockets for host %s on port %u",
-					 listen_addr->items[i].string,
-					 listen_port);
+				logerror(
+					"unable to allocate any listen sockets for host %s on port %u",
+					listen_addr->items[i].string,
+					listen_port);
 		}
 	}
 }
@@ -1115,7 +1129,8 @@ static int service_loop(struct socketlist *socklist)
 #endif
 				} ss;
 				socklen_t sslen = sizeof(ss);
-				int incoming = accept(pfd[i].fd, &ss.sa, &sslen);
+				int incoming =
+					accept(pfd[i].fd, &ss.sa, &sslen);
 				if (incoming < 0) {
 					switch (errno) {
 					case EAGAIN:
@@ -1184,8 +1199,8 @@ prepare_credentials(const char *user_name, const char *group_name)
 }
 #endif
 
-static int
-serve(struct string_list *listen_addr, int listen_port, struct credentials *cred)
+static int serve(struct string_list *listen_addr, int listen_port,
+		 struct credentials *cred)
 {
 	struct socketlist socklist = { NULL, 0, 0 };
 

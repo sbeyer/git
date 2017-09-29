@@ -77,7 +77,8 @@ static void finish_object_request(struct object_request *obj_req)
 		return;
 
 	if (obj_req->req->rename == 0)
-		walker_say(obj_req->walker, "got %s\n", sha1_to_hex(obj_req->sha1));
+		walker_say(obj_req->walker, "got %s\n",
+			   sha1_to_hex(obj_req->sha1));
 }
 
 static void process_object_response(void *callback_data)
@@ -168,7 +169,8 @@ static int is_alternate_allowed(const char *url)
 
 	for (i = 0; i < ARRAY_SIZE(protocols); i++) {
 		const char *end;
-		if (skip_prefix(url, protocols[i], &end) && starts_with(end, "://"))
+		if (skip_prefix(url, protocols[i], &end) &&
+		    starts_with(end, "://"))
 			break;
 	}
 
@@ -186,7 +188,8 @@ static int is_alternate_allowed(const char *url)
 
 static void process_alternates_response(void *callback_data)
 {
-	struct alternates_request *alt_req = (struct alternates_request *)callback_data;
+	struct alternates_request *alt_req =
+		(struct alternates_request *)callback_data;
 	struct walker *walker = alt_req->walker;
 	struct walker_data *cdata = walker->data;
 	struct active_request_slot *slot = alt_req->slot;
@@ -271,7 +274,8 @@ static void process_alternates_response(void *callback_data)
 				 */
 				i += 3;
 				serverlen = strlen(base);
-				while (i + 2 < posn && !memcmp(data + i, "../", 3)) {
+				while (i + 2 < posn &&
+				       !memcmp(data + i, "../", 3)) {
 					do {
 						serverlen--;
 					} while (serverlen &&
@@ -302,7 +306,8 @@ static void process_alternates_response(void *callback_data)
 						target.buf);
 					newalt = xmalloc(sizeof(*newalt));
 					newalt->next = NULL;
-					newalt->base = strbuf_detach(&target, NULL);
+					newalt->base =
+						strbuf_detach(&target, NULL);
 					newalt->got_indices = 0;
 					newalt->packs = NULL;
 
@@ -403,8 +408,8 @@ static int fetch_indices(struct walker *walker, struct alt_base *repo)
 	return ret;
 }
 
-static int
-http_fetch_pack(struct walker *walker, struct alt_base *repo, unsigned char *sha1)
+static int http_fetch_pack(struct walker *walker, struct alt_base *repo,
+			   unsigned char *sha1)
 {
 	struct packed_git *target;
 	int ret;
@@ -520,9 +525,10 @@ static int fetch_object(struct walker *walker, unsigned char *sha1)
 		if (missing_target(req))
 			ret = -1; /* Be silent, it is probably in a pack. */
 		else
-			ret = error("%s (curl_result = %d, http_code = %ld, sha1 = %s)",
-				    req->errorstr, req->curl_result,
-				    req->http_code, hex);
+			ret = error(
+				"%s (curl_result = %d, http_code = %ld, sha1 = %s)",
+				req->errorstr, req->curl_result, req->http_code,
+				hex);
 	} else if (req->zret != Z_STREAM_END) {
 		walker->corrupt_object_found++;
 		ret = error("File %s (%s) corrupt", hex, req->url);

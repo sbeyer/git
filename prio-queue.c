@@ -74,7 +74,8 @@ void *prio_queue_get(struct prio_queue *queue)
 	/* Push down the one at the root */
 	for (ix = 0; ix * 2 + 1 < queue->nr; ix = child) {
 		child = ix * 2 + 1; /* left */
-		if (child + 1 < queue->nr && compare(queue, child, child + 1) >= 0)
+		if (child + 1 < queue->nr &&
+		    compare(queue, child, child + 1) >= 0)
 			child++; /* use right child */
 
 		if (compare(queue, ix, child) <= 0)

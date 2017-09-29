@@ -161,8 +161,9 @@ struct lock_file {
  * timeout_ms is -1, retry indefinitely. The flags argument and error
  * handling are described above.
  */
-extern int hold_lock_file_for_update_timeout(struct lock_file *lk, const char *path,
-					     int flags, long timeout_ms);
+extern int
+hold_lock_file_for_update_timeout(struct lock_file *lk, const char *path,
+				  int flags, long timeout_ms);
 
 /*
  * Attempt to create a lockfile for the file at `path` and return a
@@ -188,7 +189,8 @@ static inline int is_lock_file_locked(struct lock_file *lk)
  * of `hold_lock_file_for_update()` to lock `path`. `err` should be the
  * `errno` set by the failing call.
  */
-extern void unable_to_lock_message(const char *path, int err, struct strbuf *buf);
+extern void
+unable_to_lock_message(const char *path, int err, struct strbuf *buf);
 
 /*
  * Emit an appropriate error message and `die()` following the failure

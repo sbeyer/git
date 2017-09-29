@@ -122,7 +122,8 @@ int parse_opt_ref_sorting(const struct option *opt, const char *arg, int unset);
 /*  Default sort option based on refname */
 struct ref_sorting *ref_default_sorting(void);
 /*  Function to parse --merged and --no-merged options */
-int parse_opt_merge_filter(const struct option *opt, const char *arg, int unset);
+int parse_opt_merge_filter(const struct option *opt, const char *arg,
+			   int unset);
 /*  Get the current HEAD's description */
 char *get_head_description(void);
 /*  Set up translated strings in the output. */

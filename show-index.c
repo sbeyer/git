@@ -39,7 +39,8 @@ int cmd_main(int argc, const char **argv)
 			if (fread(entry, 4 + 20, 1, stdin) != 1)
 				die("unable to read entry %u/%u", i, nr);
 			offset = ntohl(entry[0]);
-			printf("%u %s\n", offset, sha1_to_hex((void *)(entry + 1)));
+			printf("%u %s\n", offset,
+			       sha1_to_hex((void *)(entry + 1)));
 		}
 	} else {
 		unsigned off64_nr = 0;

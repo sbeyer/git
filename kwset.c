@@ -157,8 +157,8 @@ const char *kwsincr(kwset_t kws, char const *text, size_t len)
 		   this trie node, so build a new trie node and install
 		   a link in the current trie node's tree. */
 		if (!link) {
-			link = (struct tree *)obstack_alloc(&kwset->obstack,
-							    sizeof(struct tree));
+			link = (struct tree *)obstack_alloc(
+				&kwset->obstack, sizeof(struct tree));
 			if (!link)
 				return "memory exhausted";
 			link->llink = NULL;
@@ -217,9 +217,10 @@ const char *kwsincr(kwset_t kws, char const *text, size_t len)
 						l->balance = t->balance != 1 ?
 								     0 :
 								     -1;
-						r->balance = t->balance != (char)-1 ?
-								     0 :
-								     1;
+						r->balance =
+							t->balance != (char)-1 ?
+								0 :
+								1;
 						t->balance = 0;
 						break;
 					default:
@@ -243,9 +244,10 @@ const char *kwsincr(kwset_t kws, char const *text, size_t len)
 						l->balance = t->balance != 1 ?
 								     0 :
 								     -1;
-						r->balance = t->balance != (char)-1 ?
-								     0 :
-								     1;
+						r->balance =
+							t->balance != (char)-1 ?
+								0 :
+								1;
 						t->balance = 0;
 						break;
 					default:
@@ -339,7 +341,8 @@ static void treedelta(register struct tree const *tree,
 }
 
 /* Return true if A has every label in B. */
-static int hasevery(register struct tree const *a, register struct tree const *b)
+static int
+hasevery(register struct tree const *a, register struct tree const *b)
 {
 	if (!b)
 		return 1;
@@ -438,7 +441,8 @@ const char *kwsprep(kwset_t kws)
 				   fail should be no larger than the difference
 				   of their depths. */
 				if (!hasevery(fail->links, curr->links))
-					if (curr->depth - fail->depth < fail->shift)
+					if (curr->depth - fail->depth <
+					    fail->shift)
 						fail->shift = curr->depth -
 							      fail->depth;
 
@@ -448,7 +452,8 @@ const char *kwsprep(kwset_t kws)
 				   depths. */
 				if (curr->accepting &&
 				    fail->maxshift > curr->depth - fail->depth)
-					fail->maxshift = curr->depth - fail->depth;
+					fail->maxshift =
+						curr->depth - fail->depth;
 			}
 		}
 
@@ -471,7 +476,8 @@ const char *kwsprep(kwset_t kws)
 			for (i = 0; i < NCHAR; ++i)
 				kwset->next[i] = next[U(trans[i])];
 		else
-			memcpy(kwset->next, next, NCHAR * sizeof(struct trie *));
+			memcpy(kwset->next, next,
+			       NCHAR * sizeof(struct trie *));
 	}
 
 	/* Fix things up for any translation table. */
@@ -535,7 +541,8 @@ static size_t bmexec(kwset_t kws, char const *text, size_t size)
 			break;
 		found:
 			if (U(tp[-2]) == gc) {
-				for (i = 3; i <= len && U(tp[-i]) == U(sp[-i]); ++i)
+				for (i = 3; i <= len && U(tp[-i]) == U(sp[-i]);
+				     ++i)
 					;
 				if (i > len)
 					return tp - len - text;

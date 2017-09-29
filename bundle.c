@@ -21,8 +21,8 @@ static void add_to_ref_list(const struct object_id *oid, const char *name,
 	list->nr++;
 }
 
-static int
-parse_bundle_header(int fd, struct bundle_header *header, const char *report_path)
+static int parse_bundle_header(int fd, struct bundle_header *header,
+			       const char *report_path)
 {
 	struct strbuf buf = STRBUF_INIT;
 	int status = 0;
@@ -65,9 +65,11 @@ parse_bundle_header(int fd, struct bundle_header *header, const char *report_pat
 			break;
 		} else {
 			if (is_prereq)
-				add_to_ref_list(&oid, "", &header->prerequisites);
+				add_to_ref_list(&oid, "",
+						&header->prerequisites);
 			else
-				add_to_ref_list(&oid, p + 1, &header->references);
+				add_to_ref_list(&oid, p + 1,
+						&header->references);
 		}
 	}
 
@@ -197,9 +199,10 @@ int verify_bundle(struct bundle_header *header, int verbose)
 		if (!r->nr) {
 			printf_ln(_("The bundle records a complete history."));
 		} else {
-			printf_ln(Q_("The bundle requires this ref:",
-				     "The bundle requires these %d refs:", r->nr),
-				  r->nr);
+			printf_ln(
+				Q_("The bundle requires this ref:",
+				   "The bundle requires these %d refs:", r->nr),
+				r->nr);
 			list_refs(r, 0, NULL);
 		}
 	}
@@ -291,13 +294,14 @@ static int compute_and_write_prerequisites(int bundle_fd, struct rev_info *revs,
 		if (buf.len > 0 && buf.buf[0] == '-') {
 			write_or_die(bundle_fd, buf.buf, buf.len);
 			if (!get_oid_hex(buf.buf + 1, &oid)) {
-				struct object *object = parse_object_or_die(&oid,
-									    buf.buf);
+				struct object *object =
+					parse_object_or_die(&oid, buf.buf);
 				object->flags |= UNINTERESTING;
 				add_pending_object(revs, object, buf.buf);
 			}
 		} else if (!get_oid_hex(buf.buf, &oid)) {
-			struct object *object = parse_object_or_die(&oid, buf.buf);
+			struct object *object =
+				parse_object_or_die(&oid, buf.buf);
 			object->flags |= SHOWN;
 		}
 	}
@@ -333,7 +337,8 @@ static int write_bundle_refs(int bundle_fd, struct rev_info *revs)
 			continue;
 		if (dwim_ref(e->name, strlen(e->name), oid.hash, &ref) != 1)
 			goto skip_write_ref;
-		if (read_ref_full(e->name, RESOLVE_REF_READING, oid.hash, &flag))
+		if (read_ref_full(e->name, RESOLVE_REF_READING, oid.hash,
+				  &flag))
 			flag = 0;
 		display_ref = (flag & REF_ISSYMREF) ? e->name : ref;
 

@@ -201,7 +201,8 @@ static int compare_commit_dist(const void *a_, const void *b_)
 	return oidcmp(&a->commit->object.oid, &b->commit->object.oid);
 }
 
-static struct commit_list *best_bisection_sorted(struct commit_list *list, int nr)
+static struct commit_list *
+best_bisection_sorted(struct commit_list *list, int nr)
 {
 	struct commit_list *p;
 	struct commit_dist *array = xcalloc(nr, sizeof(*array));
@@ -498,7 +499,8 @@ filter_skipped(struct commit_list *list, struct commit_list **tried,
 	while (list) {
 		struct commit_list *next = list->next;
 		list->next = NULL;
-		if (0 <= oid_array_lookup(&skipped_revs, &list->item->object.oid)) {
+		if (0 <=
+		    oid_array_lookup(&skipped_revs, &list->item->object.oid)) {
 			if (skipped_first && !*skipped_first)
 				*skipped_first = 1;
 			/* Move current to tried list */
@@ -604,9 +606,9 @@ managed_skipped(struct commit_list *list, struct commit_list **tried)
 	return skip_away(list, count);
 }
 
-static void
-bisect_rev_setup(struct rev_info *revs, const char *prefix,
-		 const char *bad_format, const char *good_format, int read_paths)
+static void bisect_rev_setup(struct rev_info *revs, const char *prefix,
+			     const char *bad_format, const char *good_format,
+			     int read_paths)
 {
 	struct argv_array rev_argv = ARGV_ARRAY_INIT;
 	int i;
@@ -736,7 +738,8 @@ static void handle_bad_merge_base(void)
 				  "This means the bug has been fixed "
 				  "between %s and [%s].\n"),
 				bad_hex, bad_hex, good_hex);
-		} else if (!strcmp(term_bad, "new") && !strcmp(term_good, "old")) {
+		} else if (!strcmp(term_bad, "new") &&
+			   !strcmp(term_good, "old")) {
 			fprintf(stderr,
 				_("The merge base %s is new.\n"
 				  "The property has changed "
@@ -747,7 +750,8 @@ static void handle_bad_merge_base(void)
 				_("The merge base %s is %s.\n"
 				  "This means the first '%s' commit is "
 				  "between %s and [%s].\n"),
-				bad_hex, term_bad, term_good, bad_hex, good_hex);
+				bad_hex, term_bad, term_good, bad_hex,
+				good_hex);
 		}
 		exit(3);
 	}
@@ -959,8 +963,8 @@ int bisect_next_all(const char *prefix, int no_checkout)
 
 	bisect_common(&revs);
 
-	revs.commits = find_bisection(revs.commits, &reaches, &all,
-				      !!skipped_revs.nr);
+	revs.commits =
+		find_bisection(revs.commits, &reaches, &all, !!skipped_revs.nr);
 	revs.commits = managed_skipped(revs.commits, &tried);
 
 	if (!revs.commits) {
@@ -976,8 +980,9 @@ int bisect_next_all(const char *prefix, int no_checkout)
 	}
 
 	if (!all) {
-		fprintf(stderr, _("No testable commit found.\n"
-				  "Maybe you started with bad path parameters?\n"));
+		fprintf(stderr,
+			_("No testable commit found.\n"
+			  "Maybe you started with bad path parameters?\n"));
 		exit(4);
 	}
 
@@ -995,8 +1000,8 @@ int bisect_next_all(const char *prefix, int no_checkout)
 	nr = all - reaches - 1;
 	steps = estimate_bisect_steps(all);
 
-	steps_msg = xstrfmt(Q_("(roughly %d step)", "(roughly %d steps)", steps),
-			    steps);
+	steps_msg = xstrfmt(
+		Q_("(roughly %d step)", "(roughly %d steps)", steps), steps);
 	/*
 	 * TRANSLATORS: the last %s will be replaced with "(roughly %d
 	 * steps)" translation.

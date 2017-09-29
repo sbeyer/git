@@ -235,8 +235,8 @@ url_normalize_1(const char *url, struct url_info *out_info, char allow_globs)
 		/* file: URLs may not have a port number */
 		if (out_info) {
 			out_info->url = NULL;
-			out_info->err = _(
-				"a 'file:' URL may not have a port number");
+			out_info->err =
+				_("a 'file:' URL may not have a port number");
 		}
 		strbuf_release(&norm);
 		return NULL;
@@ -273,10 +273,12 @@ url_normalize_1(const char *url, struct url_info *out_info, char allow_globs)
 			url--;
 		if (url == slash_ptr) {
 			/* Skip ":" port with no number, it's same as default */
-		} else if (slash_ptr - url == 2 && !strncmp(norm.buf, "http:", 5) &&
+		} else if (slash_ptr - url == 2 &&
+			   !strncmp(norm.buf, "http:", 5) &&
 			   !strncmp(url, "80", 2)) {
 			/* Skip http :80 as it's the default */
-		} else if (slash_ptr - url == 3 && !strncmp(norm.buf, "https:", 6) &&
+		} else if (slash_ptr - url == 3 &&
+			   !strncmp(norm.buf, "https:", 6) &&
 			   !strncmp(url, "443", 3)) {
 			/* Skip https :443 as it's the default */
 		} else {
@@ -294,7 +296,8 @@ url_normalize_1(const char *url, struct url_info *out_info, char allow_globs)
 				/* port number has invalid characters */
 				if (out_info) {
 					out_info->url = NULL;
-					out_info->err = _("invalid port number");
+					out_info->err =
+						_("invalid port number");
 				}
 				strbuf_release(&norm);
 				return NULL;
@@ -305,7 +308,8 @@ url_normalize_1(const char *url, struct url_info *out_info, char allow_globs)
 				/* port number not in range 1..65535 */
 				if (out_info) {
 					out_info->url = NULL;
-					out_info->err = _("invalid port number");
+					out_info->err =
+						_("invalid port number");
 				}
 				strbuf_release(&norm);
 				return NULL;
@@ -347,7 +351,8 @@ url_normalize_1(const char *url, struct url_info *out_info, char allow_globs)
 					       URL_RESERVED)) {
 			if (out_info) {
 				out_info->url = NULL;
-				out_info->err = _("invalid %XX escape sequence");
+				out_info->err =
+					_("invalid %XX escape sequence");
 			}
 			strbuf_release(&norm);
 			return NULL;
@@ -374,8 +379,8 @@ url_normalize_1(const char *url, struct url_info *out_info, char allow_globs)
 				 * remove */
 				if (out_info) {
 					out_info->url = NULL;
-					out_info->err = _(
-						"invalid '..' path segment");
+					out_info->err =
+						_("invalid '..' path segment");
 				}
 				strbuf_release(&norm);
 				return NULL;
@@ -410,7 +415,8 @@ url_normalize_1(const char *url, struct url_info *out_info, char allow_globs)
 					       URL_RESERVED)) {
 			if (out_info) {
 				out_info->url = NULL;
-				out_info->err = _("invalid %XX escape sequence");
+				out_info->err =
+					_("invalid %XX escape sequence");
 			}
 			strbuf_release(&norm);
 			return NULL;
@@ -473,8 +479,9 @@ url_match_prefix(const char *url, const char *url_prefix, size_t url_prefix_len)
 	return 0;
 }
 
-static int match_urls(const struct url_info *url, const struct url_info *url_prefix,
-		      struct urlmatch_item *match)
+static int
+match_urls(const struct url_info *url, const struct url_info *url_prefix,
+	   struct urlmatch_item *match)
 {
 	/*
 	 * url_prefix matches url if the scheme, host and port of url_prefix
@@ -508,7 +515,8 @@ static int match_urls(const struct url_info *url, const struct url_info *url_pre
 	if (url_prefix->user_off) {
 		if (!url->user_off || url->user_len != url_prefix->user_len ||
 		    strncmp(url->url + url->user_off,
-			    url_prefix->url + url_prefix->user_off, url->user_len))
+			    url_prefix->url + url_prefix->user_off,
+			    url->user_len))
 			return 0; /* url_prefix has a user but it's not a match
 				   */
 		usermatched = 1;
@@ -525,9 +533,10 @@ static int match_urls(const struct url_info *url, const struct url_info *url_pre
 		return 0; /* ports do not match */
 
 	/* check the path */
-	pathmatchlen = url_match_prefix(url->url + url->path_off,
-					url_prefix->url + url_prefix->path_off,
-					url_prefix->url_len - url_prefix->path_off);
+	pathmatchlen =
+		url_match_prefix(url->url + url->path_off,
+				 url_prefix->url + url_prefix->path_off,
+				 url_prefix->url_len - url_prefix->path_off);
 	if (!pathmatchlen)
 		return 0; /* paths do not match */
 

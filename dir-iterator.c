@@ -52,7 +52,8 @@ int dir_iterator_advance(struct dir_iterator *dir_iterator)
 	struct dir_iterator_int *iter = (struct dir_iterator_int *)dir_iterator;
 
 	while (1) {
-		struct dir_iterator_level *level = &iter->levels[iter->levels_nr - 1];
+		struct dir_iterator_level *level =
+			&iter->levels[iter->levels_nr - 1];
 		struct dirent *de;
 
 		if (!level->initialized) {
@@ -60,7 +61,8 @@ int dir_iterator_advance(struct dir_iterator *dir_iterator)
 			 * Note: dir_iterator_begin() ensures that
 			 * path is not the empty string.
 			 */
-			if (!is_dir_sep(iter->base.path.buf[iter->base.path.len - 1]))
+			if (!is_dir_sep(iter->base.path
+						.buf[iter->base.path.len - 1]))
 				strbuf_addch(&iter->base.path, '/');
 			level->prefix_len = iter->base.path.len;
 
@@ -149,8 +151,8 @@ int dir_iterator_advance(struct dir_iterator *dir_iterator)
 			 */
 			iter->base.relative_path = iter->base.path.buf +
 						   iter->levels[0].prefix_len;
-			iter->base.basename = iter->base.path.buf +
-					      level->prefix_len;
+			iter->base.basename =
+				iter->base.path.buf + level->prefix_len;
 			level->dir_state = DIR_STATE_ITER;
 
 			return ITER_OK;
@@ -163,7 +165,8 @@ int dir_iterator_abort(struct dir_iterator *dir_iterator)
 	struct dir_iterator_int *iter = (struct dir_iterator_int *)dir_iterator;
 
 	for (; iter->levels_nr; iter->levels_nr--) {
-		struct dir_iterator_level *level = &iter->levels[iter->levels_nr - 1];
+		struct dir_iterator_level *level =
+			&iter->levels[iter->levels_nr - 1];
 
 		if (level->dir && closedir(level->dir)) {
 			strbuf_setlen(&iter->base.path, level->prefix_len);

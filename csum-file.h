@@ -23,7 +23,8 @@ struct sha1file_checkpoint {
 	git_SHA_CTX ctx;
 };
 
-extern void sha1file_checkpoint(struct sha1file *, struct sha1file_checkpoint *);
+extern void
+sha1file_checkpoint(struct sha1file *, struct sha1file_checkpoint *);
 extern int sha1file_truncate(struct sha1file *, struct sha1file_checkpoint *);
 
 /* sha1close flags */

@@ -11,36 +11,38 @@ struct repository;
  * using the safer "dup" or "strbuf" formats below (in some cases, the
  * unsafe versions have already been removed).
  */
-extern const char *
-mkpath(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
-extern const char *
-git_path(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
-extern const char *
-git_common_path(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
+extern const char *mkpath(const char *fmt, ...)
+	__attribute__((format(printf, 1, 2)));
+extern const char *git_path(const char *fmt, ...)
+	__attribute__((format(printf, 1, 2)));
+extern const char *git_common_path(const char *fmt, ...)
+	__attribute__((format(printf, 1, 2)));
 
 extern char *mksnpath(char *buf, size_t n, const char *fmt, ...)
 	__attribute__((format(printf, 3, 4)));
 extern void strbuf_git_path(struct strbuf *sb, const char *fmt, ...)
 	__attribute__((format(printf, 2, 3)));
-extern void strbuf_git_common_path(struct strbuf *sb,
-				   const struct repository *repo, const char *fmt,
-				   ...) __attribute__((format(printf, 3, 4)));
+extern void
+strbuf_git_common_path(struct strbuf *sb, const struct repository *repo,
+		       const char *fmt, ...)
+	__attribute__((format(printf, 3, 4)));
 extern char *git_path_buf(struct strbuf *buf, const char *fmt, ...)
 	__attribute__((format(printf, 2, 3)));
-extern int
-strbuf_git_path_submodule(struct strbuf *sb, const char *path, const char *fmt,
-			  ...) __attribute__((format(printf, 3, 4)));
-extern char *
-git_pathdup(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
-extern char *mkpathdup(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
+extern int strbuf_git_path_submodule(struct strbuf *sb, const char *path,
+				     const char *fmt, ...)
+	__attribute__((format(printf, 3, 4)));
+extern char *git_pathdup(const char *fmt, ...)
+	__attribute__((format(printf, 1, 2)));
+extern char *mkpathdup(const char *fmt, ...)
+	__attribute__((format(printf, 1, 2)));
 extern char *git_pathdup_submodule(const char *path, const char *fmt, ...)
 	__attribute__((format(printf, 2, 3)));
 
 extern char *repo_git_path(const struct repository *repo, const char *fmt, ...)
 	__attribute__((format(printf, 2, 3)));
-extern void
-strbuf_repo_git_path(struct strbuf *sb, const struct repository *repo,
-		     const char *fmt, ...) __attribute__((format(printf, 3, 4)));
+extern void strbuf_repo_git_path(struct strbuf *sb,
+				 const struct repository *repo, const char *fmt,
+				 ...) __attribute__((format(printf, 3, 4)));
 
 extern char *repo_worktree_path(const struct repository *repo, const char *fmt,
 				...) __attribute__((format(printf, 2, 3)));

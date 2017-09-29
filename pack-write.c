@@ -42,9 +42,10 @@ static int need_large_offset(off_t offset, const struct pack_idx_option *opts)
  * the SHA1 hash of sorted object names. The objects array passed in
  * will be sorted by SHA1 on exit.
  */
-const char *write_idx_file(const char *index_name, struct pack_idx_entry **objects,
-			   int nr_objects, const struct pack_idx_option *opts,
-			   const unsigned char *sha1)
+const char *
+write_idx_file(const char *index_name, struct pack_idx_entry **objects,
+	       int nr_objects, const struct pack_idx_option *opts,
+	       const unsigned char *sha1)
 {
 	struct sha1file *f;
 	struct pack_idx_entry **sorted_by_sha, **list, **last;
@@ -75,7 +76,8 @@ const char *write_idx_file(const char *index_name, struct pack_idx_entry **objec
 			index_name = strbuf_detach(&tmp_file, NULL);
 		} else {
 			unlink(index_name);
-			fd = open(index_name, O_CREAT | O_EXCL | O_WRONLY, 0600);
+			fd = open(index_name, O_CREAT | O_EXCL | O_WRONLY,
+				  0600);
 			if (fd < 0)
 				die_errno("unable to create '%s'", index_name);
 		}
@@ -83,8 +85,8 @@ const char *write_idx_file(const char *index_name, struct pack_idx_entry **objec
 	}
 
 	/* if last object's offset is >= 2^31 we should use index V2 */
-	index_version = need_large_offset(last_obj_offset, opts) ? 2 :
-								   opts->version;
+	index_version =
+		need_large_offset(last_obj_offset, opts) ? 2 : opts->version;
 
 	/* index versions 2 and above need a header */
 	if (index_version >= 2) {
@@ -338,7 +340,8 @@ struct sha1file *create_tmp_packfile(char **pack_tmp_name)
 }
 
 void finish_tmp_packfile(struct strbuf *name_buffer, const char *pack_tmp_name,
-			 struct pack_idx_entry **written_list, uint32_t nr_written,
+			 struct pack_idx_entry **written_list,
+			 uint32_t nr_written,
 			 struct pack_idx_option *pack_idx_opts,
 			 unsigned char sha1[])
 {

@@ -130,7 +130,8 @@ static int match_funcname(xdemitconf_t *xecfg, const char *bol, const char *eol)
 }
 
 static const char *
-find_funcname_matching_regexp(xdemitconf_t *xecfg, const char *start, regex_t *regexp)
+find_funcname_matching_regexp(xdemitconf_t *xecfg, const char *start,
+			      regex_t *regexp)
 {
 	int reg_error;
 	regmatch_t match[1];
@@ -162,9 +163,10 @@ find_funcname_matching_regexp(xdemitconf_t *xecfg, const char *start, regex_t *r
 	}
 }
 
-static const char *parse_range_funcname(const char *arg, nth_line_fn_t nth_line_cb,
-					void *cb_data, long lines, long anchor,
-					long *begin, long *end, const char *path)
+static const char *
+parse_range_funcname(const char *arg, nth_line_fn_t nth_line_cb, void *cb_data,
+		     long lines, long anchor, long *begin, long *end,
+		     const char *path)
 {
 	char *pattern;
 	const char *term;

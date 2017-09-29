@@ -79,7 +79,8 @@ static void alloc_table(struct hashmap *map, unsigned int size)
 	map->table = xcalloc(size, sizeof(struct hashmap_entry *));
 
 	/* calculate resize thresholds for new size */
-	map->grow_at = (unsigned int)((uint64_t)size * HASHMAP_LOAD_FACTOR / 100);
+	map->grow_at =
+		(unsigned int)((uint64_t)size * HASHMAP_LOAD_FACTOR / 100);
 	if (size <= HASHMAP_INITIAL_SIZE)
 		map->shrink_at = 0;
 	else
@@ -88,7 +89,8 @@ static void alloc_table(struct hashmap *map, unsigned int size)
 		 * (grow-threshold / resize-factor) to prevent erratic resizing,
 		 * thus we divide by (resize-factor + 1).
 		 */
-		map->shrink_at = map->grow_at / ((1 << HASHMAP_RESIZE_BITS) + 1);
+		map->shrink_at =
+			map->grow_at / ((1 << HASHMAP_RESIZE_BITS) + 1);
 }
 
 static inline int
@@ -184,7 +186,8 @@ void hashmap_free(struct hashmap *map, int free_entries)
 	memset(map, 0, sizeof(*map));
 }
 
-void *hashmap_get(const struct hashmap *map, const void *key, const void *keydata)
+void *
+hashmap_get(const struct hashmap *map, const void *key, const void *keydata)
 {
 	return *find_entry_ptr(map, key, keydata);
 }

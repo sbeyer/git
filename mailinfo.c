@@ -546,11 +546,13 @@ static int check_header(struct mailinfo *mi, const struct strbuf *line,
 	/* search for the interesting parts */
 	for (i = 0; header[i]; i++) {
 		int len = strlen(header[i]);
-		if ((!hdr_data[i] || overwrite) && cmp_header(line, header[i])) {
+		if ((!hdr_data[i] || overwrite) &&
+		    cmp_header(line, header[i])) {
 			/* Unwrap inline B and Q encoding, and optionally
 			 * normalize the meta information to utf8.
 			 */
-			strbuf_add(&sb, line->buf + len + 2, line->len - len - 2);
+			strbuf_add(&sb, line->buf + len + 2,
+				   line->len - len - 2);
 			decode_header(mi, &sb);
 			handle_header(&hdr_data[i], &sb);
 			ret = 1;
@@ -596,7 +598,8 @@ check_header_out:
  * in-body header (that is, check_header will succeed when passed
  * mi->s_hdr_data).
  */
-static int is_inbody_header(const struct mailinfo *mi, const struct strbuf *line)
+static int
+is_inbody_header(const struct mailinfo *mi, const struct strbuf *line)
 {
 	int i;
 	for (i = 0; header[i]; i++)

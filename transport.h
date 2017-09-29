@@ -87,7 +87,8 @@ struct transport {
 	 * get_refs_list(), it should set the old_sha1 fields in the
 	 * provided refs now.
 	 **/
-	int (*fetch)(struct transport *transport, int refs_nr, struct ref **refs);
+	int (*fetch)(struct transport *transport, int refs_nr,
+		     struct ref **refs);
 
 	/**
 	 * Push the objects and refs. Send the necessary objects, and
@@ -103,7 +104,8 @@ struct transport {
 	 * could be a different value from peer_ref->new_oid if the
 	 * process involved generating new commits.
 	 **/
-	int (*push_refs)(struct transport *transport, struct ref *refs, int flags);
+	int (*push_refs)(struct transport *transport, struct ref *refs,
+			 int flags);
 	int (*push)(struct transport *connection, int refspec_nr,
 		    const char **refspec, int flags);
 	int (*connect)(struct transport *connection, const char *name,
@@ -228,7 +230,8 @@ void transport_set_verbosity(struct transport *transport, int verbosity,
 #define REJECT_NEEDS_FORCE 0x10
 
 int transport_push(struct transport *connection, int refspec_nr,
-		   const char **refspec, int flags, unsigned int *reject_reasons);
+		   const char **refspec, int flags,
+		   unsigned int *reject_reasons);
 
 const struct ref *transport_get_remote_refs(struct transport *transport);
 
@@ -236,7 +239,8 @@ int transport_fetch_refs(struct transport *transport, struct ref *refs);
 void transport_unlock_pack(struct transport *transport);
 int transport_disconnect(struct transport *transport);
 char *transport_anonymize_url(const char *url);
-void transport_take_over(struct transport *transport, struct child_process *child);
+void transport_take_over(struct transport *transport,
+			 struct child_process *child);
 
 int transport_connect(struct transport *transport, const char *name,
 		      const char *exec, int fd[2]);
@@ -253,8 +257,9 @@ void transport_update_tracking_ref(struct remote *remote, struct ref *ref,
 
 int transport_refs_pushed(struct ref *ref);
 
-void transport_print_push_status(const char *dest, struct ref *refs, int verbose,
-				 int porcelain, unsigned int *reject_reasons);
+void transport_print_push_status(const char *dest, struct ref *refs,
+				 int verbose, int porcelain,
+				 unsigned int *reject_reasons);
 
 typedef void
 alternate_ref_fn(const char *refname, const struct object_id *oid, void *);

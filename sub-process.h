@@ -80,8 +80,9 @@ subprocess_get_child_process(struct subprocess_entry *entry)
  * This function is typically called when a subprocess is started (as part of
  * the "startfn" passed to subprocess_start).
  */
-int subprocess_handshake(struct subprocess_entry *entry, const char *welcome_prefix,
-			 int *versions, int *chosen_version,
+int subprocess_handshake(struct subprocess_entry *entry,
+			 const char *welcome_prefix, int *versions,
+			 int *chosen_version,
 			 struct subprocess_capability *capabilities,
 			 unsigned int *supported_capabilities);
 

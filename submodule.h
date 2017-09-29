@@ -39,14 +39,15 @@ extern int is_staging_gitmodules_ok(const struct index_state *istate);
 extern int update_path_in_gitmodules(const char *oldpath, const char *newpath);
 extern int remove_path_from_gitmodules(const char *path);
 extern void stage_updated_gitmodules(void);
-extern void
-set_diffopt_flags_from_submodule_config(struct diff_options *, const char *path);
+extern void set_diffopt_flags_from_submodule_config(struct diff_options *,
+						    const char *path);
 extern int
 git_default_submodule_config(const char *var, const char *value, void *cb);
 
 struct option;
 int option_parse_recurse_submodules_worktree_updater(const struct option *opt,
-						     const char *arg, int unset);
+						     const char *arg,
+						     int unset);
 extern int is_submodule_active(struct repository *repo, const char *path);
 /*
  * Determine if a submodule has been populated at a given 'path' by checking if
@@ -54,23 +55,27 @@ extern int is_submodule_active(struct repository *repo, const char *path);
  * If return_error_code is NULL, die on error.
  * Otherwise the return error code is the same as of resolve_gitdir_gently.
  */
-extern int is_submodule_populated_gently(const char *path, int *return_error_code);
+extern int
+is_submodule_populated_gently(const char *path, int *return_error_code);
 extern void die_in_unpopulated_submodule(const struct index_state *istate,
 					 const char *prefix);
 extern void die_path_inside_submodule(const struct index_state *istate,
 				      const struct pathspec *ps);
-extern enum submodule_update_type parse_submodule_update_type(const char *value);
-extern int parse_submodule_update_strategy(const char *value,
-					   struct submodule_update_strategy *dst);
+extern enum submodule_update_type
+parse_submodule_update_type(const char *value);
+extern int
+parse_submodule_update_strategy(const char *value,
+				struct submodule_update_strategy *dst);
 extern const char *
 submodule_strategy_to_string(const struct submodule_update_strategy *s);
 extern void handle_ignore_submodules_arg(struct diff_options *, const char *);
 extern void show_submodule_summary(struct diff_options *o, const char *path,
 				   struct object_id *one, struct object_id *two,
 				   unsigned dirty_submodule);
-extern void show_submodule_inline_diff(struct diff_options *o, const char *path,
-				       struct object_id *one, struct object_id *two,
-				       unsigned dirty_submodule);
+extern void
+show_submodule_inline_diff(struct diff_options *o, const char *path,
+			   struct object_id *one, struct object_id *two,
+			   unsigned dirty_submodule);
 /* Check if we want to update any submodule.*/
 extern int should_update_submodules(void);
 /*
@@ -90,9 +95,10 @@ extern int submodule_uses_gitfile(const char *path);
 #define SUBMODULE_REMOVAL_IGNORE_UNTRACKED (1 << 1)
 #define SUBMODULE_REMOVAL_IGNORE_IGNORED_UNTRACKED (1 << 2)
 extern int bad_to_remove_submodule(const char *path, unsigned flags);
-extern int merge_submodule(struct object_id *result, const char *path,
-			   const struct object_id *base, const struct object_id *a,
-			   const struct object_id *b, int search);
+extern int
+merge_submodule(struct object_id *result, const char *path,
+		const struct object_id *base, const struct object_id *a,
+		const struct object_id *b, int search);
 
 /* Checks if there are submodule changes in a..b. */
 extern int submodule_touches_in_range(struct object_id *a, struct object_id *b);

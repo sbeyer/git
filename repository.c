@@ -37,8 +37,8 @@ static void repo_setup_env(struct repository *repo)
 {
 	struct strbuf sb = STRBUF_INIT;
 
-	repo->different_commondir = find_common_dir(&sb, repo->gitdir,
-						    !repo->ignore_env);
+	repo->different_commondir =
+		find_common_dir(&sb, repo->gitdir, !repo->ignore_env);
 	free(repo->commondir);
 	repo->commondir = strbuf_detach(&sb, NULL);
 	free(repo->objectdir);
@@ -185,11 +185,12 @@ int repo_submodule_init(struct repository *submodule,
 		}
 	}
 
-	submodule->submodule_prefix = xstrfmt("%s%s/",
-					      superproject->submodule_prefix ?
-						      superproject->submodule_prefix :
-						      "",
-					      path);
+	submodule->submodule_prefix =
+		xstrfmt("%s%s/",
+			superproject->submodule_prefix ?
+				superproject->submodule_prefix :
+				"",
+			path);
 
 out:
 	strbuf_release(&gitdir);

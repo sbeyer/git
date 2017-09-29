@@ -121,7 +121,8 @@ static unsigned int gather_convert_stats(const char *data, unsigned long size)
 	return ret;
 }
 
-static const char *gather_convert_stats_ascii(const char *data, unsigned long size)
+static const char *
+gather_convert_stats_ascii(const char *data, unsigned long size)
 {
 	unsigned int convert_stats = gather_convert_stats(data, size);
 
@@ -139,8 +140,8 @@ static const char *gather_convert_stats_ascii(const char *data, unsigned long si
 	}
 }
 
-const char *
-get_cached_convert_stats_ascii(const struct index_state *istate, const char *path)
+const char *get_cached_convert_stats_ascii(const struct index_state *istate,
+					   const char *path)
 {
 	const char *ret;
 	unsigned long sz;
@@ -196,9 +197,10 @@ static enum eol output_eol(enum crlf_action crlf_action)
 	return core_eol;
 }
 
-static void check_safe_crlf(const char *path, enum crlf_action crlf_action,
-			    struct text_stat *old_stats,
-			    struct text_stat *new_stats, enum safe_crlf checksafe)
+static void
+check_safe_crlf(const char *path, enum crlf_action crlf_action,
+		struct text_stat *old_stats, struct text_stat *new_stats,
+		enum safe_crlf checksafe)
 {
 	if (old_stats->crlf && !new_stats->crlf) {
 		/*
@@ -297,7 +299,8 @@ static int crlf_to_git(const struct index_state *istate, const char *path,
 		    has_cr_in_index(istate, path))
 			convert_crlf_into_lf = 0;
 	}
-	if ((checksafe == SAFE_CRLF_WARN || (checksafe == SAFE_CRLF_FAIL)) && len) {
+	if ((checksafe == SAFE_CRLF_WARN || (checksafe == SAFE_CRLF_FAIL)) &&
+	    len) {
 		struct text_stat new_stats;
 		memcpy(&new_stats, &stats, sizeof(new_stats));
 		/* simulate "git add" */
@@ -310,7 +313,8 @@ static int crlf_to_git(const struct index_state *istate, const char *path,
 			new_stats.crlf += new_stats.lonelf;
 			new_stats.lonelf = 0;
 		}
-		check_safe_crlf(path, crlf_action, &stats, &new_stats, checksafe);
+		check_safe_crlf(path, crlf_action, &stats, &new_stats,
+				checksafe);
 	}
 	if (!convert_crlf_into_lf)
 		return 0;
@@ -455,7 +459,8 @@ static int filter_buffer_or_fd(int in, int out, void *data)
 	if (close(child_process.in))
 		write_err = 1;
 	if (write_err)
-		error("cannot feed the input to external filter '%s'", params->cmd);
+		error("cannot feed the input to external filter '%s'",
+		      params->cmd);
 
 	sigchain_pop(SIGPIPE);
 
@@ -467,8 +472,9 @@ static int filter_buffer_or_fd(int in, int out, void *data)
 	return (write_err || status);
 }
 
-static int apply_single_file_filter(const char *path, const char *src, size_t len,
-				    int fd, struct strbuf *dst, const char *cmd)
+static int
+apply_single_file_filter(const char *path, const char *src, size_t len, int fd,
+			 struct strbuf *dst, const char *cmd)
 {
 	/*
 	 * Create a pipeline to have the command filter the buffer's
@@ -527,14 +533,16 @@ static struct hashmap subprocess_map;
 static int start_multi_file_filter_fn(struct subprocess_entry *subprocess)
 {
 	static int versions[] = { 2, 0 };
-	static struct subprocess_capability capabilities[] =
-		{ { "clean", CAP_CLEAN },
-		  { "smudge", CAP_SMUDGE },
-		  { "delay", CAP_DELAY },
-		  { NULL, 0 } };
+	static struct subprocess_capability capabilities[] = {
+		{ "clean", CAP_CLEAN },
+		{ "smudge", CAP_SMUDGE },
+		{ "delay", CAP_DELAY },
+		{ NULL, 0 }
+	};
 	struct cmd2process *entry = (struct cmd2process *)subprocess;
 	return subprocess_handshake(subprocess, "git-filter", versions, NULL,
-				    capabilities, &entry->supported_capabilities);
+				    capabilities,
+				    &entry->supported_capabilities);
 }
 
 static void handle_filter_error(const struct strbuf *filter_status,
@@ -562,10 +570,11 @@ static void handle_filter_error(const struct strbuf *filter_status,
 	}
 }
 
-static int apply_multi_file_filter(const char *path, const char *src, size_t len,
-				   int fd, struct strbuf *dst, const char *cmd,
-				   const unsigned int wanted_capability,
-				   struct delayed_checkout *dco)
+static int
+apply_multi_file_filter(const char *path, const char *src, size_t len, int fd,
+			struct strbuf *dst, const char *cmd,
+			const unsigned int wanted_capability,
+			struct delayed_checkout *dco)
 {
 	int err;
 	int can_delay = 0;
@@ -580,8 +589,8 @@ static int apply_multi_file_filter(const char *path, const char *src, size_t len
 		hashmap_init(&subprocess_map, cmd2process_cmp, NULL, 0);
 		entry = NULL;
 	} else {
-		entry = (struct cmd2process *)subprocess_find_entry(&subprocess_map,
-								    cmd);
+		entry = (struct cmd2process *)subprocess_find_entry(
+			&subprocess_map, cmd);
 	}
 
 	fflush(NULL);
@@ -610,7 +619,8 @@ static int apply_multi_file_filter(const char *path, const char *src, size_t len
 
 	sigchain_push(SIGPIPE, SIG_IGN);
 
-	assert(strlen(filter_type) < LARGE_PACKET_DATA_MAX - strlen("command=\n"));
+	assert(strlen(filter_type) <
+	       LARGE_PACKET_DATA_MAX - strlen("command=\n"));
 	err = packet_write_fmt_gently(process->in, "command=%s\n", filter_type);
 	if (err)
 		goto done;
@@ -679,7 +689,8 @@ done:
 	return !err;
 }
 
-int async_query_available_blobs(const char *cmd, struct string_list *available_paths)
+int async_query_available_blobs(const char *cmd,
+				struct string_list *available_paths)
 {
 	int err;
 	char *line;
@@ -688,7 +699,8 @@ int async_query_available_blobs(const char *cmd, struct string_list *available_p
 	struct strbuf filter_status = STRBUF_INIT;
 
 	assert(subprocess_map_initialized);
-	entry = (struct cmd2process *)subprocess_find_entry(&subprocess_map, cmd);
+	entry = (struct cmd2process *)subprocess_find_entry(&subprocess_map,
+							    cmd);
 	if (!entry) {
 		error("external filter '%s' is not available anymore although "
 		      "not all paths have been filtered",
@@ -753,7 +765,8 @@ apply_filter(const char *path, const char *src, size_t len, int fd,
 
 	if ((wanted_capability & CAP_CLEAN) && !drv->process && drv->clean)
 		cmd = drv->clean;
-	else if ((wanted_capability & CAP_SMUDGE) && !drv->process && drv->smudge)
+	else if ((wanted_capability & CAP_SMUDGE) && !drv->process &&
+		 drv->smudge)
 		cmd = drv->smudge;
 
 	if (cmd && *cmd)
@@ -1015,7 +1028,8 @@ static enum eol git_path_check_eol(struct attr_check_item *check)
 	return EOL_UNSET;
 }
 
-static struct convert_driver *git_path_check_convert(struct attr_check_item *check)
+static struct convert_driver *
+git_path_check_convert(struct attr_check_item *check)
 {
 	const char *value = check->value;
 	struct convert_driver *drv;
@@ -1065,7 +1079,8 @@ static void convert_attrs(struct conv_attrs *ca, const char *path)
 			enum eol eol_attr = git_path_check_eol(ccheck + 3);
 			if (ca->crlf_action == CRLF_AUTO && eol_attr == EOL_LF)
 				ca->crlf_action = CRLF_AUTO_INPUT;
-			else if (ca->crlf_action == CRLF_AUTO && eol_attr == EOL_CRLF)
+			else if (ca->crlf_action == CRLF_AUTO &&
+				 eol_attr == EOL_CRLF)
 				ca->crlf_action = CRLF_AUTO_CRLF;
 			else if (eol_attr == EOL_LF)
 				ca->crlf_action = CRLF_TEXT_INPUT;
@@ -1164,8 +1179,9 @@ int convert_to_git(const struct index_state *istate, const char *path,
 	return ret | ident_to_git(path, src, len, dst, ca.ident);
 }
 
-void convert_to_git_filter_fd(const struct index_state *istate, const char *path,
-			      int fd, struct strbuf *dst, enum safe_crlf checksafe)
+void convert_to_git_filter_fd(const struct index_state *istate,
+			      const char *path, int fd, struct strbuf *dst,
+			      enum safe_crlf checksafe)
 {
 	struct conv_attrs ca;
 	convert_attrs(&ca, path);
@@ -1209,7 +1225,8 @@ convert_to_working_tree_internal(const char *path, const char *src, size_t len,
 		}
 	}
 
-	ret_filter = apply_filter(path, src, len, -1, dst, ca.drv, CAP_SMUDGE, dco);
+	ret_filter =
+		apply_filter(path, src, len, -1, dst, ca.drv, CAP_SMUDGE, dco);
 	if (!ret_filter && ca.drv && ca.drv->required)
 		die("%s: smudge filter %s failed", path, ca.drv->name);
 
@@ -1231,13 +1248,14 @@ int convert_to_working_tree(const char *path, const char *src, size_t len,
 int renormalize_buffer(const struct index_state *istate, const char *path,
 		       const char *src, size_t len, struct strbuf *dst)
 {
-	int ret = convert_to_working_tree_internal(path, src, len, dst, 1, NULL);
+	int ret =
+		convert_to_working_tree_internal(path, src, len, dst, 1, NULL);
 	if (ret) {
 		src = dst->buf;
 		len = dst->len;
 	}
-	return ret |
-	       convert_to_git(istate, path, src, len, dst, SAFE_CRLF_RENORMALIZE);
+	return ret | convert_to_git(istate, path, src, len, dst,
+				    SAFE_CRLF_RENORMALIZE);
 }
 
 /*****************************************************************
@@ -1310,7 +1328,8 @@ static int lf_to_crlf_filter_fn(struct stream_filter *filter, const char *input,
 				size_t *isize_p, char *output, size_t *osize_p)
 {
 	size_t count, o = 0;
-	struct lf_to_crlf_filter *lf_to_crlf = (struct lf_to_crlf_filter *)filter;
+	struct lf_to_crlf_filter *lf_to_crlf =
+		(struct lf_to_crlf_filter *)filter;
 
 	/*
 	 * We may be holding onto the CR to see if it is followed by a
@@ -1432,7 +1451,8 @@ static int cascade_filter_fn(struct stream_filter *filter, const char *input,
 		if (cas->ptr < cas->end) {
 			to_feed = cas->end - cas->ptr;
 			if (stream_filter(cas->two, cas->buf + cas->ptr,
-					  &to_feed, output + filled, &remaining))
+					  &to_feed, output + filled,
+					  &remaining))
 				return -1;
 			cas->ptr += (cas->end - cas->ptr) - to_feed;
 			filled = sz - remaining;
@@ -1444,7 +1464,8 @@ static int cascade_filter_fn(struct stream_filter *filter, const char *input,
 		if (input && !to_feed)
 			break;
 		remaining = sizeof(cas->buf);
-		if (stream_filter(cas->one, input, &to_feed, cas->buf, &remaining))
+		if (stream_filter(cas->one, input, &to_feed, cas->buf,
+				  &remaining))
 			return -1;
 		cas->end = sizeof(cas->buf) - remaining;
 		cas->ptr = 0;
@@ -1640,7 +1661,8 @@ static struct stream_filter *ident_filter(const unsigned char *sha1)
 {
 	struct ident_filter *ident = xmalloc(sizeof(*ident));
 
-	xsnprintf(ident->ident, sizeof(ident->ident), ": %s $", sha1_to_hex(sha1));
+	xsnprintf(ident->ident, sizeof(ident->ident), ": %s $",
+		  sha1_to_hex(sha1));
 	strbuf_init(&ident->left, 0);
 	ident->filter.vtbl = &ident_vtbl;
 	ident->state = 0;
@@ -1655,7 +1677,8 @@ static struct stream_filter *ident_filter(const unsigned char *sha1)
  * Note that you would be crazy to set CRLF, smuge/clean or ident to a
  * large binary blob you would want us not to slurp into the memory!
  */
-struct stream_filter *get_stream_filter(const char *path, const unsigned char *sha1)
+struct stream_filter *
+get_stream_filter(const char *path, const unsigned char *sha1)
 {
 	struct conv_attrs ca;
 	struct stream_filter *filter = NULL;

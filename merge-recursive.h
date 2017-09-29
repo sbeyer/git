@@ -28,8 +28,9 @@ struct merge_options {
 };
 
 /* merge_trees() but with recursive ancestor consolidation */
-int merge_recursive(struct merge_options *o, struct commit *h1, struct commit *h2,
-		    struct commit_list *ancestors, struct commit **result);
+int merge_recursive(struct merge_options *o, struct commit *h1,
+		    struct commit *h2, struct commit_list *ancestors,
+		    struct commit **result);
 
 /* rename-detecting three-way merge, no recursion */
 int merge_trees(struct merge_options *o, struct tree *head, struct tree *merge,
@@ -39,9 +40,11 @@ int merge_trees(struct merge_options *o, struct tree *head, struct tree *merge,
  * "git-merge-recursive" can be fed trees; wrap them into
  * virtual commits and call merge_recursive() proper.
  */
-int merge_recursive_generic(struct merge_options *o, const struct object_id *head,
+int merge_recursive_generic(struct merge_options *o,
+			    const struct object_id *head,
 			    const struct object_id *merge, int num_ca,
-			    const struct object_id **ca, struct commit **result);
+			    const struct object_id **ca,
+			    struct commit **result);
 
 void init_merge_options(struct merge_options *o);
 struct tree *write_tree_from_memory(struct merge_options *o);

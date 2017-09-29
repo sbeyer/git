@@ -195,8 +195,9 @@ static size_t get_path_prefix(const char *path, size_t pathlen, size_t maxlen)
 	return i;
 }
 
-static void prepare_header(struct archiver_args *args, struct ustar_header *header,
-			   unsigned int mode, unsigned long size)
+static void
+prepare_header(struct archiver_args *args, struct ustar_header *header,
+	       unsigned int mode, unsigned long size)
 {
 	xsnprintf(header->mode, sizeof(header->mode), "%07o", mode & 07777);
 	xsnprintf(header->size, sizeof(header->size), "%011lo",
@@ -234,8 +235,9 @@ write_extended_header(struct archiver_args *args, const unsigned char *sha1,
 	write_blocked(buffer, size);
 }
 
-static int write_tar_entry(struct archiver_args *args, const unsigned char *sha1,
-			   const char *path, size_t pathlen, unsigned int mode)
+static int
+write_tar_entry(struct archiver_args *args, const unsigned char *sha1,
+		const char *path, size_t pathlen, unsigned int mode)
 {
 	struct ustar_header header;
 	struct strbuf ext_header = STRBUF_INIT;
@@ -260,7 +262,8 @@ static int write_tar_entry(struct archiver_args *args, const unsigned char *sha1
 			     sha1_to_hex(sha1));
 	}
 	if (pathlen > sizeof(header.name)) {
-		size_t plen = get_path_prefix(path, pathlen, sizeof(header.prefix));
+		size_t plen =
+			get_path_prefix(path, pathlen, sizeof(header.prefix));
 		size_t rest = pathlen - plen - 1;
 		if (plen > 0 && rest <= sizeof(header.name)) {
 			memcpy(header.prefix, path, plen);
@@ -275,7 +278,8 @@ static int write_tar_entry(struct archiver_args *args, const unsigned char *sha1
 		memcpy(header.name, path, pathlen);
 
 	if (S_ISREG(mode) && !args->convert &&
-	    sha1_object_info(sha1, &size) == OBJ_BLOB && size > big_file_threshold)
+	    sha1_object_info(sha1, &size) == OBJ_BLOB &&
+	    size > big_file_threshold)
 		buffer = NULL;
 	else if (S_ISLNK(mode) || S_ISREG(mode)) {
 		enum object_type type;
@@ -307,7 +311,8 @@ static int write_tar_entry(struct archiver_args *args, const unsigned char *sha1
 	prepare_header(args, &header, mode, size_in_header);
 
 	if (ext_header.len > 0) {
-		write_extended_header(args, sha1, ext_header.buf, ext_header.len);
+		write_extended_header(args, sha1, ext_header.buf,
+				      ext_header.len);
 	}
 	strbuf_release(&ext_header);
 	write_blocked(&header, sizeof(header));
@@ -417,7 +422,8 @@ static int git_tar_config(const char *var, const char *value, void *cb)
 	return tar_filter_config(var, value, cb);
 }
 
-static int write_tar_archive(const struct archiver *ar, struct archiver_args *args)
+static int
+write_tar_archive(const struct archiver *ar, struct archiver_args *args)
 {
 	int err = 0;
 
@@ -466,7 +472,8 @@ write_tar_filter_archive(const struct archiver *ar, struct archiver_args *args)
 	return r;
 }
 
-static struct archiver tar_archiver = { "tar", write_tar_archive, ARCHIVER_REMOTE };
+static struct archiver tar_archiver = { "tar", write_tar_archive,
+					ARCHIVER_REMOTE };
 
 void init_tar_archiver(void)
 {

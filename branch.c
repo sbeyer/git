@@ -49,11 +49,11 @@ static int should_setup_rebase(const char *origin)
 	return 0;
 }
 
-static const char tracking_advice[] = N_(
-	"\n"
-	"After fixing the error cause you may try to fix up\n"
-	"the remote tracking information by invoking\n"
-	"\"git branch --set-upstream-to=%s%s%s\".");
+static const char tracking_advice[] =
+	N_("\n"
+	   "After fixing the error cause you may try to fix up\n"
+	   "the remote tracking information by invoking\n"
+	   "\"git branch --set-upstream-to=%s%s%s\".");
 
 int install_branch_config(int flag, const char *local, const char *origin,
 			  const char *remote)
@@ -88,26 +88,30 @@ int install_branch_config(int flag, const char *local, const char *origin,
 	if (flag & BRANCH_CONFIG_VERBOSE) {
 		if (shortname) {
 			if (origin)
-				printf_ln(rebasing ?
-						  _("Branch '%s' set up to track remote branch '%s' from '%s' by rebasing.") :
-						  _("Branch '%s' set up to track remote branch '%s' from '%s'."),
-					  local, shortname, origin);
+				printf_ln(
+					rebasing ?
+						_("Branch '%s' set up to track remote branch '%s' from '%s' by rebasing.") :
+						_("Branch '%s' set up to track remote branch '%s' from '%s'."),
+					local, shortname, origin);
 			else
-				printf_ln(rebasing ?
-						  _("Branch '%s' set up to track local branch '%s' by rebasing.") :
-						  _("Branch '%s' set up to track local branch '%s'."),
-					  local, shortname);
+				printf_ln(
+					rebasing ?
+						_("Branch '%s' set up to track local branch '%s' by rebasing.") :
+						_("Branch '%s' set up to track local branch '%s'."),
+					local, shortname);
 		} else {
 			if (origin)
-				printf_ln(rebasing ?
-						  _("Branch '%s' set up to track remote ref '%s' by rebasing.") :
-						  _("Branch '%s' set up to track remote ref '%s'."),
-					  local, remote);
+				printf_ln(
+					rebasing ?
+						_("Branch '%s' set up to track remote ref '%s' by rebasing.") :
+						_("Branch '%s' set up to track remote ref '%s'."),
+					local, remote);
 			else
-				printf_ln(rebasing ?
-						  _("Branch '%s' set up to track local ref '%s' by rebasing.") :
-						  _("Branch '%s' set up to track local ref '%s'."),
-					  local, remote);
+				printf_ln(
+					rebasing ?
+						_("Branch '%s' set up to track local ref '%s' by rebasing.") :
+						_("Branch '%s' set up to track local ref '%s'."),
+					local, remote);
 		}
 	}
 
@@ -150,7 +154,8 @@ static void setup_tracking(const char *new_ref, const char *orig_ref,
 		}
 
 	if (tracking.matches > 1)
-		die(_("Not tracking: ambiguous information for ref %s"), orig_ref);
+		die(_("Not tracking: ambiguous information for ref %s"),
+		    orig_ref);
 
 	if (install_branch_config(config_flags, new_ref, tracking.remote,
 				  tracking.src ? tracking.src : orig_ref) < 0)
@@ -212,20 +217,21 @@ static int validate_remote_tracking_branch(char *ref)
 
 static const char upstream_not_branch[] = N_(
 	"Cannot setup tracking information; starting point '%s' is not a branch.");
-static const char upstream_missing[] = N_(
-	"the requested upstream branch '%s' does not exist");
-static const char upstream_advice[] = N_(
-	"\n"
-	"If you are planning on basing your work on an upstream\n"
-	"branch that already exists at the remote, you may need to\n"
-	"run \"git fetch\" to retrieve it.\n"
-	"\n"
-	"If you are planning to push out a new local branch that\n"
-	"will track its remote counterpart, you may want to use\n"
-	"\"git push -u\" to set the upstream config as you push.");
+static const char upstream_missing[] =
+	N_("the requested upstream branch '%s' does not exist");
+static const char upstream_advice[] =
+	N_("\n"
+	   "If you are planning on basing your work on an upstream\n"
+	   "branch that already exists at the remote, you may need to\n"
+	   "run \"git fetch\" to retrieve it.\n"
+	   "\n"
+	   "If you are planning to push out a new local branch that\n"
+	   "will track its remote counterpart, you may want to use\n"
+	   "\"git push -u\" to set the upstream config as you push.");
 
-void create_branch(const char *name, const char *start_name, int force, int reflog,
-		   int clobber_head, int quiet, enum branch_track track)
+void create_branch(const char *name, const char *start_name, int force,
+		   int reflog, int clobber_head, int quiet,
+		   enum branch_track track)
 {
 	struct commit *commit;
 	struct object_id oid;
@@ -239,7 +245,8 @@ void create_branch(const char *name, const char *start_name, int force, int refl
 		explicit_tracking = 1;
 
 	if (validate_new_branchname(name, &ref, force,
-				    track == BRANCH_TRACK_OVERRIDE || clobber_head)) {
+				    track == BRANCH_TRACK_OVERRIDE ||
+					    clobber_head)) {
 		if (!force)
 			dont_change_ref = 1;
 		else

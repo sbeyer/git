@@ -109,8 +109,8 @@ static void shrink_columns(struct column_data *data)
 }
 
 /* Display without layout when not enabled */
-static void
-display_plain(const struct string_list *list, const char *indent, const char *nl)
+static void display_plain(const struct string_list *list, const char *indent,
+			  const char *nl)
 {
 	int i;
 
@@ -176,7 +176,8 @@ static void display_table(const struct string_list *list, unsigned int colopts,
 	memset(empty_cell, ' ', initial_width);
 	for (y = 0; y < data.rows; y++) {
 		for (x = 0; x < data.cols; x++)
-			if (display_cell(&data, initial_width, empty_cell, x, y))
+			if (display_cell(&data, initial_width, empty_cell, x,
+					 y))
 				break;
 	}
 
@@ -264,7 +265,8 @@ parse_option(const char *arg, int len, unsigned int *colopts, int *group_set)
 		}
 
 		name_len = strlen(opts[i].name);
-		if (arg_len != name_len || strncmp(arg_str, opts[i].name, name_len))
+		if (arg_len != name_len ||
+		    strncmp(arg_str, opts[i].name, name_len))
 			continue;
 
 		switch (opts[i].mask) {
@@ -345,7 +347,8 @@ int git_column_config(const char *var, const char *value, const char *command,
 	return 0;
 }
 
-int parseopt_column_callback(const struct option *opt, const char *arg, int unset)
+int parseopt_column_callback(const struct option *opt, const char *arg,
+			     int unset)
 {
 	unsigned int *colopts = opt->value;
 	*colopts |= COL_PARSEOPT;

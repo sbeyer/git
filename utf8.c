@@ -135,7 +135,8 @@ static ucs_char_t pick_one_utf8_char(const char **start, size_t *remainder_p)
 		incr = 1;
 	} else if ((s[0] & 0xe0) == 0xc0) {
 		/* 110XXXXx 10xxxxxx */
-		if (remainder < 2 || (s[1] & 0xc0) != 0x80 || (s[0] & 0xfe) == 0xc0)
+		if (remainder < 2 || (s[1] & 0xc0) != 0x80 ||
+		    (s[0] & 0xfe) == 0xc0)
 			goto invalid;
 		ch = ((s[0] & 0x1f) << 6) | (s[1] & 0x3f);
 		incr = 2;
@@ -150,7 +151,8 @@ static ucs_char_t pick_one_utf8_char(const char **start, size_t *remainder_p)
 		    /* U+FFFE or U+FFFF? */
 		    (s[0] == 0xef && s[1] == 0xbf && (s[2] & 0xfe) == 0xbe))
 			goto invalid;
-		ch = ((s[0] & 0x0f) << 12) | ((s[1] & 0x3f) << 6) | (s[2] & 0x3f);
+		ch = ((s[0] & 0x0f) << 12) | ((s[1] & 0x3f) << 6) |
+		     (s[2] & 0x3f);
 		incr = 3;
 	} else if ((s[0] & 0xf8) == 0xf0) {
 		/* 11110XXX 10XXxxxx 10xxxxxx 10xxxxxx */
@@ -342,7 +344,8 @@ void strbuf_add_wrapped_bytes(struct strbuf *buf, const char *data, int len,
 	free(tmp);
 }
 
-void strbuf_utf8_replace(struct strbuf *sb_src, int pos, int width, const char *subst)
+void strbuf_utf8_replace(struct strbuf *sb_src, int pos, int width,
+			 const char *subst)
 {
 	struct strbuf sb_dst = STRBUF_INIT;
 	char *src = sb_src->buf;
@@ -438,7 +441,8 @@ typedef const char *iconv_ibp;
 #else
 typedef char *iconv_ibp;
 #endif
-char *reencode_string_iconv(const char *in, size_t insz, iconv_t conv, int *outsz_p)
+char *
+reencode_string_iconv(const char *in, size_t insz, iconv_t conv, int *outsz_p)
 {
 	size_t outsz, outalloc;
 	char *out, *outpos;

@@ -15,7 +15,8 @@
 #include "gpg-interface.h"
 #include "cache.h"
 
-int option_parse_push_signed(const struct option *opt, const char *arg, int unset)
+int option_parse_push_signed(const struct option *opt, const char *arg,
+			     int unset)
 {
 	if (unset) {
 		*(int *)(opt->value) = SEND_PACK_PUSH_CERT_NEVER;
@@ -143,7 +144,8 @@ static int receive_unpack_status(int in)
 {
 	const char *line = packet_read_line(in, NULL);
 	if (!skip_prefix(line, "unpack ", &line))
-		return error(_("unable to parse remote unpack status: %s"), line);
+		return error(_("unable to parse remote unpack status: %s"),
+			     line);
 	if (strcmp(line, "ok"))
 		return error(_("remote unpack failed: %s"), line);
 	return 0;
@@ -213,7 +215,8 @@ static int sideband_demux(int in, int out, void *data)
 	return ret;
 }
 
-static int advertise_shallow_grafts_cb(const struct commit_graft *graft, void *cb)
+static int
+advertise_shallow_grafts_cb(const struct commit_graft *graft, void *cb)
 {
 	struct strbuf *sb = cb;
 	if (graft->nr_parent == -1)
@@ -482,7 +485,8 @@ int send_pack(struct send_pack_args *args, int fd[], struct child_process *conn,
 			if (use_atomic) {
 				strbuf_release(&req_buf);
 				strbuf_release(&cap_buf);
-				return atomic_push_failure(args, remote_refs, ref);
+				return atomic_push_failure(args, remote_refs,
+							   ref);
 			}
 			/* else fallthrough */
 		default:

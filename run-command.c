@@ -38,8 +38,9 @@ static void cleanup_children(int sig, int in_signal)
 		if (p->process && !in_signal) {
 			struct child_process *process = p->process;
 			if (process->clean_on_exit_handler) {
-				trace_printf("trace: run_command: running exit handler for pid %" PRIuMAX,
-					     (uintmax_t)p->pid);
+				trace_printf(
+					"trace: run_command: running exit handler for pid %" PRIuMAX,
+					(uintmax_t)p->pid);
 				process->clean_on_exit_handler(process);
 			}
 		}
@@ -352,7 +353,8 @@ static void child_err_spew(struct child_process *cmd, struct child_err *cerr)
 
 	switch (cerr->err) {
 	case CHILD_ERR_CHDIR:
-		error_errno("exec '%s': cd to '%s' failed", cmd->argv[0], cmd->dir);
+		error_errno("exec '%s': cd to '%s' failed", cmd->argv[0],
+			    cmd->dir);
 		break;
 	case CHILD_ERR_DUP2:
 		error_errno("dup2() in child failed");
@@ -499,7 +501,8 @@ static void atfork_parent(struct atfork_state *as)
 	if (sigprocmask(SIG_SETMASK, &as->old, NULL))
 		die_errno("sigprocmask");
 #else
-	bug_die(pthread_setcancelstate(as->cs, NULL), "re-enabling cancellation");
+	bug_die(pthread_setcancelstate(as->cs, NULL),
+		"re-enabling cancellation");
 	bug_die(pthread_sigmask(SIG_SETMASK, &as->old, NULL),
 		"restoring signal mask");
 #endif
@@ -753,7 +756,8 @@ int start_command(struct child_process *cmd)
 		 * keep error checks minimal.
 		 */
 		close(notify_pipe[1]);
-		if (xread(notify_pipe[0], &cerr, sizeof(cerr)) == sizeof(cerr)) {
+		if (xread(notify_pipe[0], &cerr, sizeof(cerr)) ==
+		    sizeof(cerr)) {
 			/*
 			 * At this point we know that fork() succeeded, but
 			 * exec() failed. Errors have been reported to our
@@ -809,7 +813,8 @@ int start_command(struct child_process *cmd)
 					  (char **)cmd->env, cmd->dir, fhin,
 					  fhout, fherr);
 		failed_errno = errno;
-		if (cmd->pid < 0 && (!cmd->silent_exec_failure || errno != ENOENT))
+		if (cmd->pid < 0 &&
+		    (!cmd->silent_exec_failure || errno != ENOENT))
 			error_errno("cannot spawn %s", cmd->argv[0]);
 		if (cmd->clean_on_exit && cmd->pid >= 0)
 			mark_child_for_cleanup(cmd->pid, cmd);
@@ -1266,7 +1271,8 @@ static int pump_io_round(struct io_pump *slots, int nr, struct pollfd *pfd)
 			continue;
 
 		if (io->type == POLLOUT) {
-			ssize_t len = xwrite(io->fd, io->u.out.buf, io->u.out.len);
+			ssize_t len =
+				xwrite(io->fd, io->u.out.buf, io->u.out.len);
 			if (len < 0) {
 				io->error = errno;
 				close(io->fd);
@@ -1400,7 +1406,8 @@ struct parallel_processes {
 	struct strbuf buffered_output; /* of finished children */
 };
 
-static int default_start_failure(struct strbuf *out, void *pp_cb, void *pp_task_cb)
+static int
+default_start_failure(struct strbuf *out, void *pp_cb, void *pp_task_cb)
 {
 	return 0;
 }
@@ -1431,7 +1438,8 @@ static void handle_children_on_signal(int signo)
 
 static void
 pp_init(struct parallel_processes *pp, int n, get_next_task_fn get_next_task,
-	start_failure_fn start_failure, task_finished_fn task_finished, void *data)
+	start_failure_fn start_failure, task_finished_fn task_finished,
+	void *data)
 {
 	int i;
 
@@ -1440,15 +1448,18 @@ pp_init(struct parallel_processes *pp, int n, get_next_task_fn get_next_task,
 
 	pp->max_processes = n;
 
-	trace_printf("run_processes_parallel: preparing to run up to %d tasks", n);
+	trace_printf("run_processes_parallel: preparing to run up to %d tasks",
+		     n);
 
 	pp->data = data;
 	if (!get_next_task)
 		die("BUG: you need to specify a get_next_task function");
 	pp->get_next_task = get_next_task;
 
-	pp->start_failure = start_failure ? start_failure : default_start_failure;
-	pp->task_finished = task_finished ? task_finished : default_task_finished;
+	pp->start_failure = start_failure ? start_failure :
+					    default_start_failure;
+	pp->task_finished = task_finished ? task_finished :
+					    default_task_finished;
 
 	pp->nr_processes = 0;
 	pp->output_owner = 0;
@@ -1551,7 +1562,8 @@ static void pp_buffer_stderr(struct parallel_processes *pp, int output_timeout)
 		if (pp->children[i].state == GIT_CP_WORKING &&
 		    pp->pfd[i].revents & (POLLIN | POLLHUP)) {
 			int n = strbuf_read_once(&pp->children[i].err,
-						 pp->children[i].process.err, 0);
+						 pp->children[i].process.err,
+						 0);
 			if (n == 0) {
 				close(pp->children[i].process.err);
 				pp->children[i].state = GIT_CP_WAIT_CLEANUP;
@@ -1565,7 +1577,8 @@ static void pp_buffer_stderr(struct parallel_processes *pp, int output_timeout)
 static void pp_output(struct parallel_processes *pp)
 {
 	int i = pp->output_owner;
-	if (pp->children[i].state == GIT_CP_WORKING && pp->children[i].err.len) {
+	if (pp->children[i].state == GIT_CP_WORKING &&
+	    pp->children[i].err.len) {
 		strbuf_write(&pp->children[i].err, stderr);
 		strbuf_reset(&pp->children[i].err);
 	}
@@ -1600,7 +1613,8 @@ static int pp_collect_finished(struct parallel_processes *pp)
 		child_process_init(&pp->children[i].process);
 
 		if (i != pp->output_owner) {
-			strbuf_addbuf(&pp->buffered_output, &pp->children[i].err);
+			strbuf_addbuf(&pp->buffered_output,
+				      &pp->children[i].err);
 			strbuf_reset(&pp->children[i].err);
 		} else {
 			strbuf_write(&pp->children[i].err, stderr);
@@ -1619,8 +1633,8 @@ static int pp_collect_finished(struct parallel_processes *pp)
 			 * running process time.
 			 */
 			for (i = 0; i < n; i++)
-				if (pp->children[(pp->output_owner + i) % n].state ==
-				    GIT_CP_WORKING)
+				if (pp->children[(pp->output_owner + i) % n]
+					    .state == GIT_CP_WORKING)
 					break;
 			pp->output_owner = (pp->output_owner + i) % n;
 		}

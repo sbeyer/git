@@ -32,7 +32,8 @@ extern int parse_fetch_recurse_submodules_arg(const char *opt, const char *arg);
 struct option;
 extern int option_fetch_parse_recurse_submodules(const struct option *opt,
 						 const char *arg, int unset);
-extern int parse_update_recurse_submodules_arg(const char *opt, const char *arg);
+extern int
+parse_update_recurse_submodules_arg(const char *opt, const char *arg);
 extern int parse_push_recurse_submodules_arg(const char *opt, const char *arg);
 extern void repo_read_gitmodules(struct repository *repo);
 extern void gitmodules_config_oid(const struct object_id *commit_oid);

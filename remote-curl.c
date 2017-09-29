@@ -205,7 +205,8 @@ static struct ref *parse_info_refs(struct discovery *heads)
 	}
 
 	ref = alloc_ref("HEAD");
-	if (!http_fetch_ref(url.buf, ref) && !resolve_remote_symref(ref, refs)) {
+	if (!http_fetch_ref(url.buf, ref) &&
+	    !resolve_remote_symref(ref, refs)) {
 		ref->next = refs;
 		refs = ref;
 	} else {
@@ -227,8 +228,8 @@ static void free_discovery(struct discovery *d)
 	}
 }
 
-static int
-show_http_message(struct strbuf *type, struct strbuf *charset, struct strbuf *msg)
+static int show_http_message(struct strbuf *type, struct strbuf *charset,
+			     struct strbuf *msg)
 {
 	const char *p, *eol;
 
@@ -271,7 +272,8 @@ static struct discovery *discover_refs(const char *service, int for_push)
 	free_discovery(last);
 
 	strbuf_addf(&refs_url, "%sinfo/refs", url.buf);
-	if ((starts_with(url.buf, "http://") || starts_with(url.buf, "https://")) &&
+	if ((starts_with(url.buf, "http://") ||
+	     starts_with(url.buf, "https://")) &&
 	    git_env_bool("GIT_SMART_HTTP", 1)) {
 		maybe_smart = 1;
 		if (!strchr(url.buf, '?'))
@@ -374,7 +376,8 @@ static void output_refs(struct ref *refs)
 		if (posn->symref)
 			printf("@%s %s\n", posn->symref, posn->name);
 		else
-			printf("%s %s\n", oid_to_hex(&posn->old_oid), posn->name);
+			printf("%s %s\n", oid_to_hex(&posn->old_oid),
+			       posn->name);
 	}
 	printf("\n");
 	fflush(stdout);
@@ -407,7 +410,8 @@ static size_t rpc_out(void *ptr, size_t eltsize, size_t nmemb, void *buffer_)
 
 	if (!avail) {
 		rpc->initial_buffer = 0;
-		avail = packet_read(rpc->out, NULL, NULL, rpc->buf, rpc->alloc, 0);
+		avail = packet_read(rpc->out, NULL, NULL, rpc->buf, rpc->alloc,
+				    0);
 		if (!avail)
 			return 0;
 		rpc->pos = 0;
@@ -454,7 +458,8 @@ static size_t rpc_in(char *ptr, size_t eltsize, size_t nmemb, void *buffer_)
 	return size;
 }
 
-static int run_slot(struct active_request_slot *slot, struct slot_results *results)
+static int
+run_slot(struct active_request_slot *slot, struct slot_results *results)
 {
 	int err;
 	struct slot_results results_buf;
@@ -584,7 +589,8 @@ retry:
 		/* The request body is large and the size cannot be predicted.
 		 * We must use chunked encoding to send it.
 		 */
-		headers = curl_slist_append(headers, "Transfer-Encoding: chunked");
+		headers = curl_slist_append(headers,
+					    "Transfer-Encoding: chunked");
 		rpc->initial_buffer = 1;
 		curl_easy_setopt(slot->curl, CURLOPT_READFUNCTION, rpc_out);
 		curl_easy_setopt(slot->curl, CURLOPT_INFILE, rpc);
@@ -593,7 +599,8 @@ retry:
 		curl_easy_setopt(slot->curl, CURLOPT_IOCTLDATA, rpc);
 #endif
 		if (options.verbosity > 1) {
-			fprintf(stderr, "POST %s (chunked)\n", rpc->service_name);
+			fprintf(stderr, "POST %s (chunked)\n",
+				rpc->service_name);
 			fflush(stderr);
 		}
 
@@ -626,7 +633,8 @@ retry:
 
 		ret = git_deflate(&stream, Z_FINISH);
 		if (ret != Z_STREAM_END)
-			die("cannot deflate request; zlib deflate error %d", ret);
+			die("cannot deflate request; zlib deflate error %d",
+			    ret);
 
 		ret = git_deflate_end_gently(&stream);
 		if (ret != Z_OK)
@@ -715,7 +723,8 @@ static int rpc_service(struct rpc_state *rpc, struct discovery *heads)
 	rpc->hdr_accept = strbuf_detach(&buf, NULL);
 
 	while (!err) {
-		int n = packet_read(rpc->out, NULL, NULL, rpc->buf, rpc->alloc, 0);
+		int n = packet_read(rpc->out, NULL, NULL, rpc->buf, rpc->alloc,
+				    0);
 		if (!n)
 			break;
 		rpc->pos = 0;
@@ -774,7 +783,8 @@ static int fetch_dumb(int nr_heads, struct ref **to_fetch)
 	return ret ? error("fetch failed.") : 0;
 }
 
-static int fetch_git(struct discovery *heads, int nr_heads, struct ref **to_fetch)
+static int
+fetch_git(struct discovery *heads, int nr_heads, struct ref **to_fetch)
 {
 	struct rpc_state rpc;
 	struct strbuf preamble = STRBUF_INIT;
@@ -800,7 +810,8 @@ static int fetch_git(struct discovery *heads, int nr_heads, struct ref **to_fetc
 	if (options.depth)
 		argv_array_pushf(&args, "--depth=%lu", options.depth);
 	if (options.deepen_since)
-		argv_array_pushf(&args, "--shallow-since=%s", options.deepen_since);
+		argv_array_pushf(&args, "--shallow-since=%s",
+				 options.deepen_since);
 	for (i = 0; i < options.deepen_not.nr; i++)
 		argv_array_pushf(&args, "--shallow-exclude=%s",
 				 options.deepen_not.items[i].string);
@@ -855,13 +866,15 @@ static void parse_fetch(struct strbuf *buf)
 			struct object_id old_oid;
 
 			if (get_oid_hex(p, &old_oid))
-				die("protocol error: expected sha/ref, got %s'", p);
+				die("protocol error: expected sha/ref, got %s'",
+				    p);
 			if (p[GIT_SHA1_HEXSZ] == ' ')
 				name = p + GIT_SHA1_HEXSZ + 1;
 			else if (!p[GIT_SHA1_HEXSZ])
 				name = "";
 			else
-				die("protocol error: expected sha/ref, got %s'", p);
+				die("protocol error: expected sha/ref, got %s'",
+				    p);
 
 			ref = alloc_ref(name);
 			oidcpy(&ref->old_oid, &old_oid);
@@ -939,7 +952,8 @@ static int push_git(struct discovery *heads, int nr_spec, char **specs)
 	for (i = 0; i < options.push_options.nr; i++)
 		argv_array_pushf(&args, "--push-option=%s",
 				 options.push_options.items[i].string);
-	argv_array_push(&args, options.progress ? "--progress" : "--no-progress");
+	argv_array_push(&args,
+			options.progress ? "--progress" : "--no-progress");
 	for_each_string_list_item (cas_option, &cas_options)
 		argv_array_push(&args, cas_option->string);
 	argv_array_push(&args, url.buf);

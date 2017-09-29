@@ -236,7 +236,8 @@ static void add_lines(struct strbuf *out, const char *prefix1,
 	strbuf_complete_line(out);
 }
 
-void strbuf_add_commented_lines(struct strbuf *out, const char *buf, size_t size)
+void strbuf_add_commented_lines(struct strbuf *out, const char *buf,
+				size_t size)
 {
 	static char prefix1[3];
 	static char prefix2[2];
@@ -279,7 +280,8 @@ void strbuf_vaddf(struct strbuf *sb, const char *fmt, va_list ap)
 		die("BUG: your vsnprintf is broken (returned %d)", len);
 	if (len > strbuf_avail(sb)) {
 		strbuf_grow(sb, len);
-		len = vsnprintf(sb->buf + sb->len, sb->alloc - sb->len, fmt, ap);
+		len = vsnprintf(sb->buf + sb->len, sb->alloc - sb->len, fmt,
+				ap);
 		if (len > strbuf_avail(sb))
 			die("BUG: your vsnprintf is broken (insatiable)");
 	}
@@ -706,7 +708,8 @@ void strbuf_add_absolute_path(struct strbuf *sb, const char *path)
 		char *pwd = getenv("PWD");
 		if (pwd && strcmp(pwd, cwd) && !stat(cwd, &cwd_stat) &&
 		    (cwd_stat.st_dev || cwd_stat.st_ino) &&
-		    !stat(pwd, &pwd_stat) && pwd_stat.st_dev == cwd_stat.st_dev &&
+		    !stat(pwd, &pwd_stat) &&
+		    pwd_stat.st_dev == cwd_stat.st_dev &&
 		    pwd_stat.st_ino == cwd_stat.st_ino)
 			strbuf_addstr(sb, pwd);
 		else

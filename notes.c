@@ -289,7 +289,8 @@ static int note_tree_insert(struct notes_tree *t, struct int_node *tree,
 		}
 		break;
 	case PTR_TYPE_SUBTREE:
-		if (!SUBTREE_SHA1_PREFIXCMP(entry->key_oid.hash, l->key_oid.hash)) {
+		if (!SUBTREE_SHA1_PREFIXCMP(entry->key_oid.hash,
+					    l->key_oid.hash)) {
 			/* unpack 'l' and restart insert */
 			*p = NULL;
 			load_subtree(t, l, tree, n);
@@ -436,7 +437,8 @@ static void load_subtree(struct notes_tree *t, struct leaf_node *subtree,
 				goto handle_non_note;
 
 			if (hex_to_bytes(object_oid.hash + prefix_len,
-					 entry.path, GIT_SHA1_RAWSZ - prefix_len))
+					 entry.path,
+					 GIT_SHA1_RAWSZ - prefix_len))
 				goto handle_non_note; /* entry.path is not a
 							 SHA1 */
 
@@ -449,7 +451,8 @@ static void load_subtree(struct notes_tree *t, struct leaf_node *subtree,
 				/* internal nodes must be trees */
 				goto handle_non_note;
 
-			if (hex_to_bytes(object_oid.hash + len++, entry.path, 1))
+			if (hex_to_bytes(object_oid.hash + len++, entry.path,
+					 1))
 				goto handle_non_note; /* entry.path is not a
 							 SHA1 */
 
@@ -458,7 +461,8 @@ static void load_subtree(struct notes_tree *t, struct leaf_node *subtree,
 			 * except for the last byte, where we write
 			 * the length:
 			 */
-			memset(object_oid.hash + len, 0, GIT_SHA1_RAWSZ - len - 1);
+			memset(object_oid.hash + len, 0,
+			       GIT_SHA1_RAWSZ - len - 1);
 			object_oid.hash[KEY_INDEX] = (unsigned char)len;
 
 			type = PTR_TYPE_SUBTREE;
@@ -470,7 +474,8 @@ static void load_subtree(struct notes_tree *t, struct leaf_node *subtree,
 		l = xcalloc(1, sizeof(*l));
 		oidcpy(&l->key_oid, &object_oid);
 		oidcpy(&l->val_oid, entry.oid);
-		if (note_tree_insert(t, node, n, l, type, combine_notes_concatenate))
+		if (note_tree_insert(t, node, n, l, type,
+				     combine_notes_concatenate))
 			die("Failed to load %s %s into notes tree "
 			    "from %s",
 			    type == PTR_TYPE_NOTE ? "note" : "subtree",
@@ -602,9 +607,8 @@ static int for_each_note_helper(struct notes_tree *t, struct int_node *tree,
 			if (n <= 2 * fanout &&
 			    flags & FOR_EACH_NOTE_YIELD_SUBTREES) {
 				/* invoke callback with subtree */
-				unsigned int path_len = l->key_oid.hash[KEY_INDEX] *
-								2 +
-							fanout;
+				unsigned int path_len =
+					l->key_oid.hash[KEY_INDEX] * 2 + fanout;
 				assert(path_len < FANOUT_PATH_MAX - 1);
 				construct_path_with_fanout(l->key_oid.hash,
 							   fanout, path);
@@ -612,7 +616,8 @@ static int for_each_note_helper(struct notes_tree *t, struct int_node *tree,
 				if (path[path_len - 1] != '/')
 					path[path_len++] = '/';
 				path[path_len] = '\0';
-				ret = fn(&l->key_oid, &l->val_oid, path, cb_data);
+				ret = fn(&l->key_oid, &l->val_oid, path,
+					 cb_data);
 			}
 			if (n > fanout * 2 ||
 			    !(flags & FOR_EACH_NOTE_DONT_UNPACK_SUBTREES)) {
@@ -625,7 +630,8 @@ static int for_each_note_helper(struct notes_tree *t, struct int_node *tree,
 			break;
 		case PTR_TYPE_NOTE:
 			l = (struct leaf_node *)CLR_PTR_TYPE(p);
-			construct_path_with_fanout(l->key_oid.hash, fanout, path);
+			construct_path_with_fanout(l->key_oid.hash, fanout,
+						   path);
 			ret = fn(&l->key_oid, &l->val_oid, path, cb_data);
 			break;
 		}
@@ -681,7 +687,8 @@ static int tree_write_stack_finish_subtree(struct tree_write_stack *tws)
 		ret = tree_write_stack_finish_subtree(n);
 		if (ret)
 			return ret;
-		ret = write_sha1_file(n->buf.buf, n->buf.len, tree_type, s.hash);
+		ret = write_sha1_file(n->buf.buf, n->buf.len, tree_type,
+				      s.hash);
 		if (ret)
 			return ret;
 		strbuf_release(&n->buf);
@@ -693,8 +700,9 @@ static int tree_write_stack_finish_subtree(struct tree_write_stack *tws)
 	return 0;
 }
 
-static int write_each_note_helper(struct tree_write_stack *tws, const char *path,
-				  unsigned int mode, const struct object_id *oid)
+static int
+write_each_note_helper(struct tree_write_stack *tws, const char *path,
+		       unsigned int mode, const struct object_id *oid)
 {
 	size_t path_len = strlen(path);
 	unsigned int n = 0;
@@ -754,9 +762,9 @@ write_each_non_note_until(const char *note_path, struct write_each_note_data *d)
 	return 0;
 }
 
-static int
-write_each_note(const struct object_id *object_oid,
-		const struct object_id *note_oid, char *note_path, void *cb_data)
+static int write_each_note(const struct object_id *object_oid,
+			   const struct object_id *note_oid, char *note_path,
+			   void *cb_data)
 {
 	struct write_each_note_data *d = (struct write_each_note_data *)cb_data;
 	size_t note_path_len = strlen(note_path);
@@ -798,7 +806,8 @@ static int prune_notes_helper(const struct object_id *object_oid,
 	return 0;
 }
 
-int combine_notes_concatenate(unsigned char *cur_sha1, const unsigned char *new_sha1)
+int combine_notes_concatenate(unsigned char *cur_sha1,
+			      const unsigned char *new_sha1)
 {
 	char *cur_msg = NULL, *new_msg = NULL, *buf;
 	unsigned long cur_len, new_len, buf_len;
@@ -841,7 +850,8 @@ int combine_notes_concatenate(unsigned char *cur_sha1, const unsigned char *new_
 	return ret;
 }
 
-int combine_notes_overwrite(unsigned char *cur_sha1, const unsigned char *new_sha1)
+int combine_notes_overwrite(unsigned char *cur_sha1,
+			    const unsigned char *new_sha1)
 {
 	hashcpy(cur_sha1, new_sha1);
 	return 0;
@@ -922,8 +932,9 @@ out:
 	return ret;
 }
 
-static int string_list_add_one_ref(const char *refname,
-				   const struct object_id *oid, int flag, void *cb)
+static int
+string_list_add_one_ref(const char *refname, const struct object_id *oid,
+			int flag, void *cb)
 {
 	struct string_list *refs = cb;
 	if (!unsorted_string_list_has_string(refs, refname))
@@ -948,7 +959,8 @@ void string_list_add_refs_by_glob(struct string_list *list, const char *glob)
 	}
 }
 
-void string_list_add_refs_from_colon_sep(struct string_list *list, const char *globs)
+void string_list_add_refs_from_colon_sep(struct string_list *list,
+					 const char *globs)
 {
 	struct string_list split = STRING_LIST_INIT_NODUP;
 	char *globs_copy = xstrdup(globs);
@@ -1110,7 +1122,8 @@ int remove_note(struct notes_tree *t, const unsigned char *object_sha1)
 	return 0;
 }
 
-const struct object_id *get_note(struct notes_tree *t, const struct object_id *oid)
+const struct object_id *
+get_note(struct notes_tree *t, const struct object_id *oid)
 {
 	struct leaf_node *found;
 
@@ -1121,7 +1134,8 @@ const struct object_id *get_note(struct notes_tree *t, const struct object_id *o
 	return found ? &found->val_oid : NULL;
 }
 
-int for_each_note(struct notes_tree *t, int flags, each_note_fn fn, void *cb_data)
+int for_each_note(struct notes_tree *t, int flags, each_note_fn fn,
+		  void *cb_data)
 {
 	if (!t)
 		t = &default_notes_tree;
@@ -1141,8 +1155,8 @@ int write_notes_tree(struct notes_tree *t, unsigned char *result)
 
 	/* Prepare for traversal of current notes tree */
 	root.next = NULL; /* last forward entry in list is grounded */
-	strbuf_init(&root.buf,
-		    256 * (32 + GIT_SHA1_HEXSZ)); /* assume 256 entries */
+	strbuf_init(&root.buf, 256 * (32 + GIT_SHA1_HEXSZ)); /* assume 256
+								entries */
 	root.path[0] = root.path[1] = '\0';
 	cb_data.root = &root;
 	cb_data.next_non_note = t->first_non_note;
@@ -1206,8 +1220,9 @@ void free_notes(struct notes_tree *t)
  * (raw != 0) gives the %N userformat; otherwise, the note message is given
  * for human consumption.
  */
-static void format_note(struct notes_tree *t, const struct object_id *object_oid,
-			struct strbuf *sb, const char *output_encoding, int raw)
+static void
+format_note(struct notes_tree *t, const struct object_id *object_oid,
+	    struct strbuf *sb, const char *output_encoding, int raw)
 {
 	static const char utf8[] = "utf-8";
 	const struct object_id *oid;
@@ -1224,7 +1239,8 @@ static void format_note(struct notes_tree *t, const struct object_id *object_oid
 	if (!oid)
 		return;
 
-	if (!(msg = read_sha1_file(oid->hash, &type, &msglen)) || type != OBJ_BLOB) {
+	if (!(msg = read_sha1_file(oid->hash, &type, &msglen)) ||
+	    type != OBJ_BLOB) {
 		free(msg);
 		return;
 	}

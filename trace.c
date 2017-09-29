@@ -190,8 +190,9 @@ void trace_strbuf_fl(const char *file, int line, struct trace_key *key,
 
 static struct trace_key trace_perf_key = TRACE_KEY_INIT(PERFORMANCE);
 
-static void trace_performance_vprintf_fl(const char *file, int line, uint64_t nanos,
-					 const char *format, va_list ap)
+static void
+trace_performance_vprintf_fl(const char *file, int line, uint64_t nanos,
+			     const char *format, va_list ap)
 {
 	struct strbuf buf = STRBUF_INIT;
 
@@ -251,7 +252,8 @@ void trace_performance_since(uint64_t start, const char *format, ...)
 {
 	va_list ap;
 	va_start(ap, format);
-	trace_performance_vprintf_fl(NULL, 0, getnanotime() - start, format, ap);
+	trace_performance_vprintf_fl(NULL, 0, getnanotime() - start, format,
+				     ap);
 	va_end(ap);
 }
 
@@ -332,10 +334,12 @@ void trace_repo_setup(const char *prefix)
 	if (!prefix)
 		prefix = "(null)";
 
-	trace_printf_key(&key, "setup: git_dir: %s\n", quote_crnl(get_git_dir()));
+	trace_printf_key(&key, "setup: git_dir: %s\n",
+			 quote_crnl(get_git_dir()));
 	trace_printf_key(&key, "setup: git_common_dir: %s\n",
 			 quote_crnl(get_git_common_dir()));
-	trace_printf_key(&key, "setup: worktree: %s\n", quote_crnl(git_work_tree));
+	trace_printf_key(&key, "setup: worktree: %s\n",
+			 quote_crnl(git_work_tree));
 	trace_printf_key(&key, "setup: cwd: %s\n", quote_crnl(cwd));
 	trace_printf_key(&key, "setup: prefix: %s\n", quote_crnl(prefix));
 
@@ -389,7 +393,8 @@ static inline uint64_t highres_nanos(void)
 	/* if QPF worked on initialization, we expect QPC to work as well */
 	QueryPerformanceCounter(&cnt);
 
-	return (high_ns * cnt.HighPart) + ((scaled_low_ns * cnt.LowPart) >> scale);
+	return (high_ns * cnt.HighPart) +
+	       ((scaled_low_ns * cnt.LowPart) >> scale);
 }
 
 #else

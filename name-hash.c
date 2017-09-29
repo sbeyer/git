@@ -37,10 +37,11 @@ find_dir_entry__hash(struct index_state *istate, const char *name,
 	return hashmap_get(&istate->dir_hash, &key, name);
 }
 
-static struct dir_entry *
-find_dir_entry(struct index_state *istate, const char *name, unsigned int namelen)
+static struct dir_entry *find_dir_entry(struct index_state *istate,
+					const char *name, unsigned int namelen)
 {
-	return find_dir_entry__hash(istate, name, namelen, memihash(name, namelen));
+	return find_dir_entry__hash(istate, name, namelen,
+				    memihash(name, namelen));
 }
 
 static struct dir_entry *
@@ -257,7 +258,8 @@ static void unlock_dir_mutex(int j)
 	pthread_mutex_unlock(&lazy_dir_mutex_array[j]);
 }
 
-static inline int compute_dir_lock_nr(const struct hashmap *map, unsigned int hash)
+static inline int
+compute_dir_lock_nr(const struct hashmap *map, unsigned int hash)
 {
 	return hashmap_bucket(map, hash) % LAZY_MAX_MUTEX;
 }
@@ -323,10 +325,10 @@ static int handle_range_1(struct index_state *istate, int k_start, int k_end,
 			  struct dir_entry *parent, struct strbuf *prefix,
 			  struct lazy_entry *lazy_entries);
 
-static int
-handle_range_dir(struct index_state *istate, int k_start, int k_end,
-		 struct dir_entry *parent, struct strbuf *prefix,
-		 struct lazy_entry *lazy_entries, struct dir_entry **dir_new_out)
+static int handle_range_dir(struct index_state *istate, int k_start, int k_end,
+			    struct dir_entry *parent, struct strbuf *prefix,
+			    struct lazy_entry *lazy_entries,
+			    struct dir_entry **dir_new_out)
 {
 	int rc, k;
 	int input_prefix_len = prefix->len;
@@ -355,11 +357,11 @@ handle_range_dir(struct index_state *istate, int k_start, int k_end,
 			int mid = (begin + end) >> 1;
 			int cmp = strncmp(istate->cache[mid]->name, prefix->buf,
 					  prefix->len);
-			if (cmp ==
-			    0) /* mid has same prefix; look in second part */
+			if (cmp == 0) /* mid has same prefix; look in second
+					 part */
 				begin = mid + 1;
-			else if (cmp >
-				 0) /* mid is past group; look in first part */
+			else if (cmp > 0) /* mid is past group; look in first
+					     part */
 				end = mid;
 			else
 				die("cache entry out of order");
@@ -389,7 +391,8 @@ static int handle_range_1(struct index_state *istate, int k_start, int k_end,
 		struct cache_entry *ce_k = istate->cache[k];
 		const char *name, *slash;
 
-		if (prefix->len && strncmp(ce_k->name, prefix->buf, prefix->len))
+		if (prefix->len &&
+		    strncmp(ce_k->name, prefix->buf, prefix->len))
 			break;
 
 		name = ce_k->name + prefix->len;
@@ -438,8 +441,8 @@ static int handle_range_1(struct index_state *istate, int k_start, int k_end,
 				ce_namelen(ce_k) - parent->namelen);
 			lazy_entries[k].hash_dir = parent->ent.hash;
 		} else {
-			lazy_entries[k].hash_name = memihash(ce_k->name,
-							     ce_namelen(ce_k));
+			lazy_entries[k].hash_name =
+				memihash(ce_k->name, ce_namelen(ce_k));
 		}
 
 		k++;
@@ -511,7 +514,8 @@ static void threaded_lazy_init_name_hash(struct index_state *istate)
 	nr_each = DIV_ROUND_UP(istate->cache_nr, lazy_nr_dir_threads);
 
 	lazy_entries = xcalloc(istate->cache_nr, sizeof(struct lazy_entry));
-	td_dir = xcalloc(lazy_nr_dir_threads, sizeof(struct lazy_dir_thread_data));
+	td_dir = xcalloc(lazy_nr_dir_threads,
+			 sizeof(struct lazy_dir_thread_data));
 	td_name = xcalloc(1, sizeof(struct lazy_name_thread_data));
 
 	init_dir_mutex();
@@ -552,7 +556,8 @@ static void threaded_lazy_init_name_hash(struct index_state *istate)
 	 */
 	td_name->istate = istate;
 	td_name->lazy_entries = lazy_entries;
-	if (pthread_create(&td_name->pthread, NULL, lazy_name_thread_proc, td_name))
+	if (pthread_create(&td_name->pthread, NULL, lazy_name_thread_proc,
+			   td_name))
 		die("unable to create lazy_name_thread");
 
 	lazy_update_dir_ref_counts(istate, lazy_entries);
@@ -573,7 +578,8 @@ static void lazy_init_name_hash(struct index_state *istate)
 {
 	if (istate->name_hash_initialized)
 		return;
-	hashmap_init(&istate->name_hash, cache_entry_cmp, NULL, istate->cache_nr);
+	hashmap_init(&istate->name_hash, cache_entry_cmp, NULL,
+		     istate->cache_nr);
 	hashmap_init(&istate->dir_hash, dir_entry_cmp, NULL, istate->cache_nr);
 
 	if (lookup_lazy_params(istate)) {
@@ -631,7 +637,8 @@ void remove_name_hash(struct index_state *istate, struct cache_entry *ce)
 		remove_dir_entry(istate, ce);
 }
 
-static int slow_same_name(const char *name1, int len1, const char *name2, int len2)
+static int
+slow_same_name(const char *name1, int len1, const char *name2, int len2)
 {
 	if (len1 != len2)
 		return 0;
@@ -650,8 +657,8 @@ static int slow_same_name(const char *name1, int len1, const char *name2, int le
 	return 1;
 }
 
-static int
-same_name(const struct cache_entry *ce, const char *name, int namelen, int icase)
+static int same_name(const struct cache_entry *ce, const char *name,
+		     int namelen, int icase)
 {
 	int len = ce_namelen(ce);
 

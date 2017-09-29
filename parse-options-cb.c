@@ -28,18 +28,21 @@ int parse_opt_abbrev_cb(const struct option *opt, const char *arg, int unset)
 	return 0;
 }
 
-int parse_opt_approxidate_cb(const struct option *opt, const char *arg, int unset)
+int parse_opt_approxidate_cb(const struct option *opt, const char *arg,
+			     int unset)
 {
 	*(timestamp_t *)(opt->value) = approxidate(arg);
 	return 0;
 }
 
-int parse_opt_expiry_date_cb(const struct option *opt, const char *arg, int unset)
+int parse_opt_expiry_date_cb(const struct option *opt, const char *arg,
+			     int unset)
 {
 	return parse_expiry_date(arg, (timestamp_t *)opt->value);
 }
 
-int parse_opt_color_flag_cb(const struct option *opt, const char *arg, int unset)
+int parse_opt_color_flag_cb(const struct option *opt, const char *arg,
+			    int unset)
 {
 	int value;
 
@@ -47,8 +50,8 @@ int parse_opt_color_flag_cb(const struct option *opt, const char *arg, int unset
 		arg = unset ? "never" : (const char *)opt->defval;
 	value = git_config_colorbool(NULL, arg);
 	if (value < 0)
-		return opterror(opt,
-				"expects \"always\", \"auto\", or \"never\"", 0);
+		return opterror(
+			opt, "expects \"always\", \"auto\", or \"never\"", 0);
 	*(int *)opt->value = value;
 	return 0;
 }
@@ -220,7 +223,8 @@ int parse_opt_passthru(const struct option *opt, const char *arg, int unset)
  * the command-line option, which can be specified multiple times, to another
  * command.
  */
-int parse_opt_passthru_argv(const struct option *opt, const char *arg, int unset)
+int parse_opt_passthru_argv(const struct option *opt, const char *arg,
+			    int unset)
 {
 	static struct strbuf sb = STRBUF_INIT;
 	struct argv_array *opt_value = opt->value;

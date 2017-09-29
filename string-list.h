@@ -63,7 +63,8 @@ void string_list_remove_empty_items(struct string_list *list, int free_util);
 /* Use these functions only on sorted lists: */
 int string_list_has_string(const struct string_list *list, const char *string);
 int string_list_find_insert_index(const struct string_list *list,
-				  const char *string, int negative_existing_index);
+				  const char *string,
+				  int negative_existing_index);
 /*
  * Inserts the given string into the sorted list.
  * If the string already exists, the list is not altered.
@@ -91,7 +92,8 @@ string_list_lookup(struct string_list *list, const char *string);
  * string value.  If free_util is true, call free() on the util
  * members of any items that have to be deleted.
  */
-void string_list_remove_duplicates(struct string_list *sorted_list, int free_util);
+void string_list_remove_duplicates(struct string_list *sorted_list,
+				   int free_util);
 
 /* Use these functions only on unsorted lists: */
 
@@ -113,7 +115,8 @@ struct string_list_item *
 string_list_append_nodup(struct string_list *list, char *string);
 
 void string_list_sort(struct string_list *list);
-int unsorted_string_list_has_string(struct string_list *list, const char *string);
+int unsorted_string_list_has_string(struct string_list *list,
+				    const char *string);
 struct string_list_item *
 unsorted_string_list_lookup(struct string_list *list, const char *string);
 

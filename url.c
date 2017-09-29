@@ -29,8 +29,9 @@ int is_url(const char *url)
 	return (url[0] == ':' && url[1] == '/' && url[2] == '/');
 }
 
-static char *url_decode_internal(const char **query, int len, const char *stop_at,
-				 struct strbuf *out, int decode_plus)
+static char *
+url_decode_internal(const char **query, int len, const char *stop_at,
+		    struct strbuf *out, int decode_plus)
 {
 	const char *q = *query;
 

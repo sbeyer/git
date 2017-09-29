@@ -73,7 +73,8 @@ static void (*error_routine)(const char *err, va_list params) = error_builtin;
 static void (*warn_routine)(const char *err, va_list params) = warn_builtin;
 static int (*die_is_recursing)(void) = die_is_recursing_builtin;
 
-void set_die_routine(NORETURN_PTR void (*routine)(const char *err, va_list params))
+void set_die_routine(NORETURN_PTR void (*routine)(const char *err,
+						  va_list params))
 {
 	die_routine = routine;
 }
@@ -160,7 +161,8 @@ void NORETURN die_errno(const char *fmt, ...)
 	va_list params;
 
 	if (die_is_recursing()) {
-		fputs("fatal: recursion detected in die_errno handler\n", stderr);
+		fputs("fatal: recursion detected in die_errno handler\n",
+		      stderr);
 		exit(128);
 	}
 

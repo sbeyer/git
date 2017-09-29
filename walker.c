@@ -22,7 +22,8 @@ void walker_say(struct walker *walker, const char *fmt, ...)
 static void report_missing(const struct object *obj)
 {
 	fprintf(stderr, "Cannot obtain needed %s %s\n",
-		obj->type ? typename(obj->type) : "object", oid_to_hex(&obj->oid));
+		obj->type ? typename(obj->type) : "object",
+		oid_to_hex(&obj->oid));
 	if (!is_null_sha1(current_commit_sha1))
 		fprintf(stderr, "while processing commit %s.\n",
 			sha1_to_hex(current_commit_sha1));
@@ -303,9 +304,9 @@ int walker_fetch(struct walker *walker, int targets, char **target,
 			continue;
 		strbuf_reset(&refname);
 		strbuf_addf(&refname, "refs/%s", write_ref[i]);
-		if (ref_transaction_update(transaction, refname.buf,
-					   &sha1[20 * i], NULL, 0,
-					   msg ? msg : "fetch (unknown)", &err)) {
+		if (ref_transaction_update(
+			    transaction, refname.buf, &sha1[20 * i], NULL, 0,
+			    msg ? msg : "fetch (unknown)", &err)) {
 			error("%s", err.buf);
 			goto done;
 		}

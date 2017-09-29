@@ -2,8 +2,9 @@
 
 static int
 threaded_check_leading_path(struct cache_def *cache, const char *name, int len);
-static int threaded_has_dirs_only_path(struct cache_def *cache, const char *name,
-				       int len, int prefix_len);
+static int
+threaded_has_dirs_only_path(struct cache_def *cache, const char *name, int len,
+			    int prefix_len);
 
 /*
  * Returns the length (on a path component basis) of the longest
@@ -91,11 +92,11 @@ lstat_cache_matchlen(struct cache_def *cache, const char *name, int len,
 		 * Check to see if we have a match from the cache for
 		 * the 2 "excluding" path types.
 		 */
-		match_len = last_slash = longest_path_match(name, len,
-							    cache->path.buf,
-							    cache->path.len,
-							    &previous_slash);
-		*ret_flags = cache->flags & track_flags & (FL_NOENT | FL_SYMLINK);
+		match_len = last_slash =
+			longest_path_match(name, len, cache->path.buf,
+					   cache->path.len, &previous_slash);
+		*ret_flags = cache->flags & track_flags &
+			     (FL_NOENT | FL_SYMLINK);
 
 		if (!(track_flags & FL_FULLPATH) && match_len == len)
 			match_len = last_slash = previous_slash;
@@ -201,7 +202,8 @@ static int lstat_cache(struct cache_def *cache, const char *name, int len,
 int threaded_has_symlink_leading_path(struct cache_def *cache, const char *name,
 				      int len)
 {
-	return lstat_cache(cache, name, len, FL_SYMLINK | FL_DIR, USE_ONLY_LSTAT) &
+	return lstat_cache(cache, name, len, FL_SYMLINK | FL_DIR,
+			   USE_ONLY_LSTAT) &
 	       FL_SYMLINK;
 }
 
@@ -260,7 +262,8 @@ threaded_check_leading_path(struct cache_def *cache, const char *name, int len)
  */
 int has_dirs_only_path(const char *name, int len, int prefix_len)
 {
-	return threaded_has_dirs_only_path(&default_cache, name, len, prefix_len);
+	return threaded_has_dirs_only_path(&default_cache, name, len,
+					   prefix_len);
 }
 
 /*
@@ -270,8 +273,9 @@ int has_dirs_only_path(const char *name, int len, int prefix_len)
  * 'prefix_len', thus we then allow for symlinks in the prefix part as
  * long as those points to real existing directories.
  */
-static int threaded_has_dirs_only_path(struct cache_def *cache,
-				       const char *name, int len, int prefix_len)
+static int
+threaded_has_dirs_only_path(struct cache_def *cache, const char *name, int len,
+			    int prefix_len)
 {
 	return lstat_cache(cache, name, len, FL_DIR | FL_FULLPATH, prefix_len) &
 	       FL_DIR;
@@ -287,7 +291,8 @@ static void do_remove_scheduled_dirs(int new_len)
 			break;
 		do {
 			removal.len--;
-		} while (removal.len > new_len && removal.buf[removal.len] != '/');
+		} while (removal.len > new_len &&
+			 removal.buf[removal.len] != '/');
 	}
 	removal.len = new_len;
 }
@@ -296,9 +301,8 @@ void schedule_dir_for_removal(const char *name, int len)
 {
 	int match_len, last_slash, i, previous_slash;
 
-	match_len = last_slash = i = longest_path_match(name, len, removal.buf,
-							removal.len,
-							&previous_slash);
+	match_len = last_slash = i = longest_path_match(
+		name, len, removal.buf, removal.len, &previous_slash);
 	/* Find last slash inside 'name' */
 	while (i < len) {
 		if (name[i] == '/')

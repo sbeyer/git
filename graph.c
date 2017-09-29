@@ -78,7 +78,8 @@ static void graph_show_line_prefix(const struct diff_options *diffopt)
 static const char **column_colors;
 static unsigned short column_colors_max;
 
-static void parse_graph_colors_config(struct argv_array *colors, const char *string)
+static void
+parse_graph_colors_config(struct argv_array *colors, const char *string)
 {
 	const char *end, *start;
 
@@ -263,7 +264,8 @@ struct git_graph *graph_init(struct rev_info *opt)
 			graph_set_column_colors(column_colors_ansi,
 						column_colors_ansi_max);
 		} else {
-			static struct argv_array custom_colors = ARGV_ARRAY_INIT;
+			static struct argv_array custom_colors =
+				ARGV_ARRAY_INIT;
 			argv_array_clear(&custom_colors);
 			parse_graph_colors_config(&custom_colors, string);
 			free(string);
@@ -402,7 +404,8 @@ static struct commit_list *first_interesting_parent(struct git_graph *graph)
 	return next_interesting_parent(graph, parents);
 }
 
-static unsigned short graph_get_current_column_color(const struct git_graph *graph)
+static unsigned short
+graph_get_current_column_color(const struct git_graph *graph)
 {
 	if (!want_color(graph->revs->diffopt.use_color))
 		return column_colors_max;
@@ -414,8 +417,8 @@ static unsigned short graph_get_current_column_color(const struct git_graph *gra
  */
 static void graph_increment_column_color(struct git_graph *graph)
 {
-	graph->default_column_color = (graph->default_column_color + 1) %
-				      column_colors_max;
+	graph->default_column_color =
+		(graph->default_column_color + 1) % column_colors_max;
 }
 
 static unsigned short graph_find_commit_color(const struct git_graph *graph,
@@ -429,8 +432,9 @@ static unsigned short graph_find_commit_color(const struct git_graph *graph,
 	return graph_get_current_column_color(graph);
 }
 
-static void graph_insert_into_new_columns(struct git_graph *graph,
-					  struct commit *commit, int *mapping_index)
+static void
+graph_insert_into_new_columns(struct git_graph *graph, struct commit *commit,
+			      int *mapping_index)
 {
 	int i;
 
@@ -567,8 +571,8 @@ static void graph_update_columns(struct git_graph *graph)
 				    !is_commit_in_columns) {
 					graph_increment_column_color(graph);
 				}
-				graph_insert_into_new_columns(graph, parent->item,
-							      &mapping_idx);
+				graph_insert_into_new_columns(
+					graph, parent->item, &mapping_idx);
 			}
 			/*
 			 * We always need to increment mapping_idx by at
@@ -697,7 +701,8 @@ static void graph_pad_horizontally(struct git_graph *graph, struct strbuf *sb,
 	strbuf_addf(sb, "%*s", (int)extra, "");
 }
 
-static void graph_output_padding_line(struct git_graph *graph, struct strbuf *sb)
+static void
+graph_output_padding_line(struct git_graph *graph, struct strbuf *sb)
 {
 	int i;
 
@@ -888,8 +893,8 @@ static void graph_output_commit_line(struct git_graph *graph, struct strbuf *sb)
 			chars_written++;
 
 			if (graph->num_parents > 2)
-				chars_written += graph_draw_octopus_merge(graph,
-									  sb);
+				chars_written +=
+					graph_draw_octopus_merge(graph, sb);
 		} else if (seen_this && (graph->num_parents > 2)) {
 			strbuf_write_column(sb, col, '\\');
 			chars_written++;
@@ -978,17 +983,18 @@ graph_output_post_merge_line(struct git_graph *graph, struct strbuf *sb)
 			seen_this = 1;
 			parents = first_interesting_parent(graph);
 			assert(parents);
-			par_column = find_new_column_by_commit(graph,
-							       parents->item);
+			par_column =
+				find_new_column_by_commit(graph, parents->item);
 			assert(par_column);
 
 			strbuf_write_column(sb, par_column, '|');
 			chars_written++;
 			for (j = 0; j < graph->num_parents - 1; j++) {
-				parents = next_interesting_parent(graph, parents);
+				parents =
+					next_interesting_parent(graph, parents);
 				assert(parents);
-				par_column = find_new_column_by_commit(graph,
-								       parents->item);
+				par_column = find_new_column_by_commit(
+					graph, parents->item);
 				assert(par_column);
 				strbuf_write_column(sb, par_column, '\\');
 				strbuf_addch(sb, ' ');
@@ -1129,7 +1135,8 @@ graph_output_collapsing_line(struct git_graph *graph, struct strbuf *sb)
 		if (target < 0)
 			strbuf_addch(sb, ' ');
 		else if (target * 2 == i)
-			strbuf_write_column(sb, &graph->new_columns[target], '|');
+			strbuf_write_column(sb, &graph->new_columns[target],
+					    '|');
 		else if (target == horizontal_edge_target &&
 			 i != horizontal_edge - 1) {
 			/*
@@ -1140,11 +1147,13 @@ graph_output_collapsing_line(struct git_graph *graph, struct strbuf *sb)
 			if (i != (target * 2) + 3)
 				graph->new_mapping[i] = -1;
 			used_horizontal = 1;
-			strbuf_write_column(sb, &graph->new_columns[target], '_');
+			strbuf_write_column(sb, &graph->new_columns[target],
+					    '_');
 		} else {
 			if (used_horizontal && i < horizontal_edge)
 				graph->new_mapping[i] = -1;
-			strbuf_write_column(sb, &graph->new_columns[target], '/');
+			strbuf_write_column(sb, &graph->new_columns[target],
+					    '/');
 		}
 	}
 

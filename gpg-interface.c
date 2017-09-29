@@ -44,7 +44,8 @@ void parse_gpg_output(struct signature_check *sigc)
 	for (i = 0; i < ARRAY_SIZE(sigcheck_gpg_status); i++) {
 		const char *found, *next;
 
-		if (!skip_prefix(buf, sigcheck_gpg_status[i].check + 1, &found)) {
+		if (!skip_prefix(buf, sigcheck_gpg_status[i].check + 1,
+				 &found)) {
 			found = strstr(buf, sigcheck_gpg_status[i].check);
 			if (!found)
 				continue;

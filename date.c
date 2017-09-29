@@ -25,7 +25,8 @@ static time_t tm_to_time_t(const struct tm *tm)
 		day--;
 	if (tm->tm_hour < 0 || tm->tm_min < 0 || tm->tm_sec < 0)
 		return -1;
-	return (year * 365 + (year + 1) / 4 + mdays[month] + day) * 24 * 60 * 60UL +
+	return (year * 365 + (year + 1) / 4 + mdays[month] + day) * 24 * 60 *
+		       60UL +
 	       tm->tm_hour * 60 * 60 + tm->tm_min * 60 + tm->tm_sec;
 }
 
@@ -48,7 +49,8 @@ static time_t gm_time_t(timestamp_t time, int tz)
 
 	if (minutes > 0) {
 		if (unsigned_add_overflows(time, minutes * 60))
-			die("Timestamp+tz too large: %" PRItime " +%04d", time, tz);
+			die("Timestamp+tz too large: %" PRItime " +%04d", time,
+			    tz);
 	} else if (time < -minutes * 60)
 		die("Timestamp before Unix epoch: %" PRItime " %04d", time, tz);
 	time += minutes * 60;
@@ -143,7 +145,8 @@ void show_date_relative(timestamp_t time, int tz, const struct timeval *now,
 	diff = (diff + 12) / 24;
 	if (diff < 14) {
 		strbuf_addf(timebuf,
-			    Q_("%" PRItime " day ago", "%" PRItime " days ago", diff),
+			    Q_("%" PRItime " day ago", "%" PRItime " days ago",
+			       diff),
 			    diff);
 		return;
 	}
@@ -253,7 +256,8 @@ const char *show_date(timestamp_t time, int tz, const struct date_mode *mode)
 	else if (mode->type == DATE_ISO8601_STRICT) {
 		char sign = (tz >= 0) ? '+' : '-';
 		tz = abs(tz);
-		strbuf_addf(&timebuf, "%04d-%02d-%02dT%02d:%02d:%02d%c%02d:%02d",
+		strbuf_addf(&timebuf,
+			    "%04d-%02d-%02dT%02d:%02d:%02d%c%02d:%02d",
 			    tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
 			    tm->tm_hour, tm->tm_min, tm->tm_sec, sign, tz / 100,
 			    tz % 100);
@@ -263,7 +267,8 @@ const char *show_date(timestamp_t time, int tz, const struct date_mode *mode)
 			    month_names[tm->tm_mon], tm->tm_year + 1900,
 			    tm->tm_hour, tm->tm_min, tm->tm_sec, tz);
 	else if (mode->type == DATE_STRFTIME)
-		strbuf_addftime(&timebuf, mode->strftime_fmt, tm, tz, !mode->local);
+		strbuf_addftime(&timebuf, mode->strftime_fmt, tm, tz,
+				!mode->local);
 	else
 		strbuf_addf(&timebuf, "%.3s %.3s %d %02d:%02d:%02d %d%c%+05d",
 			    weekday_names[tm->tm_wday], month_names[tm->tm_mon],
@@ -645,7 +650,8 @@ static int match_multi_number(timestamp_t num, char c, const char *date,
 	case ':':
 		if (num3 < 0)
 			num3 = 0;
-		if (num < 25 && num2 >= 0 && num2 < 60 && num3 >= 0 && num3 <= 60) {
+		if (num < 25 && num2 >= 0 && num2 < 60 && num3 >= 0 &&
+		    num3 <= 60) {
 			tm->tm_hour = num;
 			tm->tm_min = num2;
 			tm->tm_sec = num3;
@@ -674,13 +680,15 @@ static int match_multi_number(timestamp_t num, char c, const char *date,
 		 * is the norm there, so giving precedence to
 		 * mm/dd/yy[yy] form only when separator is not '.'
 		 */
-		if (c != '.' && is_date(num3, num, num2, refuse_future, now, tm))
+		if (c != '.' &&
+		    is_date(num3, num, num2, refuse_future, now, tm))
 			break;
 		/* European dd.mm.yy[yy] or funny US dd/mm/yy[yy] */
 		if (is_date(num3, num2, num, refuse_future, now, tm))
 			break;
 		/* Funny European mm.dd.yy */
-		if (c == '.' && is_date(num3, num, num2, refuse_future, now, tm))
+		if (c == '.' &&
+		    is_date(num3, num, num2, refuse_future, now, tm))
 			break;
 		return 0;
 	}
@@ -701,7 +709,8 @@ static inline int nodate(struct tm *tm)
 /*
  * We've seen a digit. Time? Year? Date?
  */
-static int match_digit(const char *date, struct tm *tm, int *offset, int *tm_gmt)
+static int
+match_digit(const char *date, struct tm *tm, int *offset, int *tm_gmt)
 {
 	int n;
 	char *end;
@@ -731,7 +740,8 @@ static int match_digit(const char *date, struct tm *tm, int *offset, int *tm_gmt
 	case '/':
 	case '-':
 		if (isdigit(end[1])) {
-			int match = match_multi_number(num, *end, date, end, tm, 0);
+			int match =
+				match_multi_number(num, *end, date, end, tm, 0);
 			if (match)
 				return match;
 		}
@@ -858,7 +868,8 @@ match_object_header_date(const char *date, timestamp_t *timestamp, int *offset)
 	if (*date < '0' || '9' < *date)
 		return -1;
 	stamp = parse_timestamp(date, &end, 10);
-	if (*end != ' ' || stamp == TIME_MAX || (end[1] != '+' && end[1] != '-'))
+	if (*end != ' ' || stamp == TIME_MAX ||
+	    (end[1] != '+' && end[1] != '-'))
 		return -1;
 	date = end + 2;
 	ofs = strtol(date, &end, 10);
@@ -897,7 +908,8 @@ int parse_date_basic(const char *date, timestamp_t *timestamp, int *offset)
 	*offset = -1;
 	tm_gmt = 0;
 
-	if (*date == '@' && !match_object_header_date(date + 1, timestamp, offset))
+	if (*date == '@' &&
+	    !match_object_header_date(date + 1, timestamp, offset))
 		return 0; /* success */
 	for (;;) {
 		int match = 0;
@@ -984,9 +996,11 @@ static enum date_mode_type parse_date_type(const char *format, const char **end)
 	if (skip_prefix(format, "iso8601-strict", end) ||
 	    skip_prefix(format, "iso-strict", end))
 		return DATE_ISO8601_STRICT;
-	if (skip_prefix(format, "iso8601", end) || skip_prefix(format, "iso", end))
+	if (skip_prefix(format, "iso8601", end) ||
+	    skip_prefix(format, "iso", end))
 		return DATE_ISO8601;
-	if (skip_prefix(format, "rfc2822", end) || skip_prefix(format, "rfc", end))
+	if (skip_prefix(format, "rfc2822", end) ||
+	    skip_prefix(format, "rfc", end))
 		return DATE_RFC2822;
 	if (skip_prefix(format, "short", end))
 		return DATE_SHORT;
@@ -1331,7 +1345,8 @@ approxidate_str(const char *date, const struct timeval *tv, int *error_ret)
 		date++;
 		if (isdigit(c)) {
 			pending_number(&tm, &number);
-			date = approxidate_digit(date - 1, &tm, &number, time_sec);
+			date = approxidate_digit(date - 1, &tm, &number,
+						 time_sec);
 			touched = 1;
 			continue;
 		}

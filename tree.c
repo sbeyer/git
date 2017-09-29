@@ -74,7 +74,8 @@ read_tree_1(struct tree *tree, struct strbuf *base, int stage,
 
 	while (tree_entry(&desc, &entry)) {
 		if (retval != all_entries_interesting) {
-			retval = tree_entry_interesting(&entry, base, 0, pathspec);
+			retval = tree_entry_interesting(&entry, base, 0,
+							pathspec);
 			if (retval == all_entries_not_interesting)
 				break;
 			if (retval == entry_not_interesting)
@@ -99,11 +100,13 @@ read_tree_1(struct tree *tree, struct strbuf *base, int stage,
 			commit = lookup_commit(entry.oid);
 			if (!commit)
 				die("Commit %s in submodule path %s%s not found",
-				    oid_to_hex(entry.oid), base->buf, entry.path);
+				    oid_to_hex(entry.oid), base->buf,
+				    entry.path);
 
 			if (parse_commit(commit))
 				die("Invalid commit %s in submodule path %s%s",
-				    oid_to_hex(entry.oid), base->buf, entry.path);
+				    oid_to_hex(entry.oid), base->buf,
+				    entry.path);
 
 			oidcpy(&oid, &commit->tree->object.oid);
 		} else
@@ -220,7 +223,8 @@ int parse_tree_gently(struct tree *item, int quiet_on_missing)
 						oid_to_hex(&item->object.oid));
 	if (type != OBJ_TREE) {
 		free(buffer);
-		return error("Object %s not a tree", oid_to_hex(&item->object.oid));
+		return error("Object %s not a tree",
+			     oid_to_hex(&item->object.oid));
 	}
 	return parse_tree_buffer(item, buffer, size);
 }

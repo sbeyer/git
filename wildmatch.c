@@ -104,7 +104,8 @@ static int dowild(const uchar *p, const uchar *text, unsigned int flags)
 					 * both foo/bar and foo/a/bar.
 					 */
 					if (p[0] == '/' &&
-					    dowild(p + 1, text, flags) == WM_MATCH)
+					    dowild(p + 1, text, flags) ==
+						    WM_MATCH)
 						return WM_MATCH;
 					match_slash = 1;
 				} else
@@ -148,7 +149,8 @@ static int dowild(const uchar *p, const uchar *text, unsigned int flags)
 				 */
 				if (!is_glob_special(*p)) {
 					p_ch = *p;
-					if ((flags & WM_CASEFOLD) && ISUPPER(p_ch))
+					if ((flags & WM_CASEFOLD) &&
+					    ISUPPER(p_ch))
 						p_ch = tolower(p_ch);
 					while ((t_ch = *text) != '\0' &&
 					       (match_slash || t_ch != '/')) {
@@ -208,7 +210,8 @@ static int dowild(const uchar *p, const uchar *text, unsigned int flags)
 						matched = 1;
 					else if ((flags & WM_CASEFOLD) &&
 						 ISLOWER(t_ch)) {
-						uchar t_ch_upper = toupper(t_ch);
+						uchar t_ch_upper =
+							toupper(t_ch);
 						if (t_ch_upper <= p_ch &&
 						    t_ch_upper >= prev_ch)
 							matched = 1;
@@ -266,7 +269,8 @@ static int dowild(const uchar *p, const uchar *text, unsigned int flags)
 					} else if (CC_EQ(s, i, "upper")) {
 						if (ISUPPER(t_ch))
 							matched = 1;
-						else if ((flags & WM_CASEFOLD) &&
+						else if ((flags &
+							  WM_CASEFOLD) &&
 							 ISLOWER(t_ch))
 							matched = 1;
 					} else if (CC_EQ(s, i, "xdigit")) {

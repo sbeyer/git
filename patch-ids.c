@@ -84,7 +84,8 @@ static int init_patch_id_entry(struct patch_id *patch, struct commit *commit,
 	return 0;
 }
 
-struct patch_id *has_commit_patch_id(struct commit *commit, struct patch_ids *ids)
+struct patch_id *
+has_commit_patch_id(struct commit *commit, struct patch_ids *ids)
 {
 	struct patch_id patch;
 
@@ -98,7 +99,8 @@ struct patch_id *has_commit_patch_id(struct commit *commit, struct patch_ids *id
 	return hashmap_get(&ids->patches, &patch, NULL);
 }
 
-struct patch_id *add_commit_patch_id(struct commit *commit, struct patch_ids *ids)
+struct patch_id *
+add_commit_patch_id(struct commit *commit, struct patch_ids *ids)
 {
 	struct patch_id *key;
 

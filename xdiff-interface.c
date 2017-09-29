@@ -209,8 +209,8 @@ struct ff_regs {
 	} * array;
 };
 
-static long
-ff_regexp(const char *line, long len, char *buffer, long buffer_size, void *priv)
+static long ff_regexp(const char *line, long len, char *buffer,
+		      long buffer_size, void *priv)
 {
 	struct ff_regs *regs = priv;
 	regmatch_t pmatch[2];

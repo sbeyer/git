@@ -305,8 +305,8 @@ struct strbuf_expand_dict_entry {
 	const char *placeholder;
 	const char *value;
 };
-extern size_t
-strbuf_expand_dict_cb(struct strbuf *sb, const char *placeholder, void *context);
+extern size_t strbuf_expand_dict_cb(struct strbuf *sb, const char *placeholder,
+				    void *context);
 
 /**
  * Append the contents of one strbuf to another, quoting any
@@ -382,7 +382,8 @@ extern ssize_t strbuf_read_once(struct strbuf *, int fd, size_t hint);
  * Return the number of bytes read or a negative value if some error
  * occurred while opening or reading the file.
  */
-extern ssize_t strbuf_read_file(struct strbuf *sb, const char *path, size_t hint);
+extern ssize_t
+strbuf_read_file(struct strbuf *sb, const char *path, size_t hint);
 
 /**
  * Read the target of a symbolic link, specified by its path.  The third
@@ -526,7 +527,8 @@ strbuf_split_max(const struct strbuf *sb, int terminator, int max)
 	return strbuf_split_buf(sb->buf, sb->len, terminator, max);
 }
 
-static inline struct strbuf **strbuf_split(const struct strbuf *sb, int terminator)
+static inline struct strbuf **
+strbuf_split(const struct strbuf *sb, int terminator)
 {
 	return strbuf_split_max(sb, terminator, 0);
 }
@@ -602,9 +604,11 @@ strbuf_branchname(struct strbuf *sb, const char *name, unsigned allowed);
  */
 extern int strbuf_check_branch_ref(struct strbuf *sb, const char *name);
 
-extern void strbuf_addstr_urlencode(struct strbuf *, const char *, int reserved);
+extern void
+strbuf_addstr_urlencode(struct strbuf *, const char *, int reserved);
 
-__attribute__((format(printf, 1, 2))) extern int printf_ln(const char *fmt, ...);
+__attribute__((format(printf, 1, 2))) extern int
+printf_ln(const char *fmt, ...);
 __attribute__((format(printf, 2, 3))) extern int
 fprintf_ln(FILE *fp, const char *fmt, ...);
 
@@ -614,7 +618,8 @@ char *xstrdup_tolower(const char *);
  * Create a newly allocated string using printf format. You can do this easily
  * with a strbuf, but this provides a shortcut to save a few lines.
  */
-__attribute__((format(printf, 1, 0))) char *xstrvfmt(const char *fmt, va_list ap);
+__attribute__((format(printf, 1, 0))) char *
+xstrvfmt(const char *fmt, va_list ap);
 __attribute__((format(printf, 1, 2))) char *xstrfmt(const char *fmt, ...);
 
 #endif /* STRBUF_H */

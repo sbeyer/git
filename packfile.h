@@ -107,7 +107,8 @@ extern off_t nth_packed_object_offset(const struct packed_git *, uint32_t n);
  * If the object named sha1 is present in the specified packfile,
  * return its offset within the packfile; otherwise, return 0.
  */
-extern off_t find_pack_entry_one(const unsigned char *sha1, struct packed_git *);
+extern off_t
+find_pack_entry_one(const unsigned char *sha1, struct packed_git *);
 
 extern int is_pack_valid(struct packed_git *);
 extern void *
@@ -146,6 +147,7 @@ extern int has_pack_index(const unsigned char *sha1);
 typedef int
 each_packed_object_fn(const struct object_id *oid, struct packed_git *pack,
 		      uint32_t pos, void *data);
-extern int for_each_packed_object(each_packed_object_fn, void *, unsigned flags);
+extern int
+for_each_packed_object(each_packed_object_fn, void *, unsigned flags);
 
 #endif

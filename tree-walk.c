@@ -62,7 +62,8 @@ static int init_tree_desc_internal(struct tree_desc *desc, const void *buffer,
 	return 0;
 }
 
-void init_tree_desc(struct tree_desc *desc, const void *buffer, unsigned long size)
+void init_tree_desc(struct tree_desc *desc, const void *buffer,
+		    unsigned long size)
 {
 	struct strbuf err = STRBUF_INIT;
 	if (init_tree_desc_internal(desc, buffer, size, &err))
@@ -87,7 +88,8 @@ void *fill_tree_descriptor(struct tree_desc *desc, const struct object_id *oid)
 	void *buf = NULL;
 
 	if (oid) {
-		buf = read_object_with_reference(oid->hash, tree_type, &size, NULL);
+		buf = read_object_with_reference(oid->hash, tree_type, &size,
+						 NULL);
 		if (!buf)
 			die("unable to read tree %s", oid_to_hex(oid));
 	}
@@ -105,7 +107,8 @@ static void entry_extract(struct tree_desc *t, struct name_entry *a)
 	*a = t->entry;
 }
 
-static int update_tree_entry_internal(struct tree_desc *desc, struct strbuf *err)
+static int
+update_tree_entry_internal(struct tree_desc *desc, struct strbuf *err)
 {
 	const void *buf = desc->buffer;
 	const unsigned char *end = desc->entry.oid->hash + 20;
@@ -365,8 +368,9 @@ static void free_extended_entry(struct tree_desc_x *t)
 	}
 }
 
-static inline int prune_traversal(struct name_entry *e, struct traverse_info *info,
-				  struct strbuf *base, int still_interesting)
+static inline int
+prune_traversal(struct name_entry *e, struct traverse_info *info,
+		struct strbuf *base, int still_interesting)
 {
 	if (!info->pathspec || still_interesting == 2)
 		return 2;
@@ -436,12 +440,14 @@ int traverse_trees(int n, struct tree_desc *t, struct traverse_info *info)
 		if (first) {
 			for (i = 0; i < n; i++) {
 				e = entry + i;
-				extended_entry_extract(tx + i, e, first, first_len);
+				extended_entry_extract(tx + i, e, first,
+						       first_len);
 				/* Cull the ones that are not the earliest */
 				if (!e->path)
 					continue;
 				len = tree_entry_len(e);
-				if (name_compare(e->path, len, first, first_len))
+				if (name_compare(e->path, len, first,
+						 first_len))
 					entry_clear(e);
 			}
 		}
@@ -605,8 +611,8 @@ get_tree_entry_follow_symlinks(unsigned char *tree_sha1, const char *name,
 			void *tree;
 			unsigned char root[20];
 			unsigned long size;
-			tree = read_object_with_reference(current_tree_sha1,
-							  tree_type, &size, root);
+			tree = read_object_with_reference(
+				current_tree_sha1, tree_type, &size, root);
 			if (!tree)
 				goto done;
 
@@ -650,7 +656,8 @@ get_tree_entry_follow_symlinks(unsigned char *tree_sha1, const char *name,
 			if (parents_nr == 1) {
 				if (remainder)
 					*first_slash = '/';
-				strbuf_add(result_path, namebuf.buf, namebuf.len);
+				strbuf_add(result_path, namebuf.buf,
+					   namebuf.len);
 				*mode = 0;
 				retval = FOUND;
 				goto done;
@@ -686,7 +693,8 @@ get_tree_entry_follow_symlinks(unsigned char *tree_sha1, const char *name,
 			}
 			/* Descend the tree */
 			t.buffer = NULL;
-			strbuf_remove(&namebuf, 0, 1 + first_slash - namebuf.buf);
+			strbuf_remove(&namebuf, 0,
+				      1 + first_slash - namebuf.buf);
 		} else if (S_ISREG(*mode)) {
 			if (!remainder) {
 				hashcpy(result, current_tree_sha1);
@@ -738,7 +746,8 @@ get_tree_entry_follow_symlinks(unsigned char *tree_sha1, const char *name,
 
 			parent = &parents[parents_nr - 1];
 			init_tree_desc(&t, parent->tree, parent->size);
-			strbuf_splice(&namebuf, 0, len, contents_start, link_len);
+			strbuf_splice(&namebuf, 0, len, contents_start,
+				      link_len);
 			if (remainder)
 				namebuf.buf[link_len] = '/';
 			free(contents);
@@ -929,9 +938,9 @@ do_match(const struct name_entry *entry, struct strbuf *base, int base_offset,
 {
 	int i;
 	int pathlen, baselen = base->len - base_offset;
-	enum interesting never_interesting = ps->has_wildcard ?
-						     entry_not_interesting :
-						     all_entries_not_interesting;
+	enum interesting never_interesting =
+		ps->has_wildcard ? entry_not_interesting :
+				   all_entries_not_interesting;
 
 	GUARD_PATHSPEC(ps, PATHSPEC_FROMTOP | PATHSPEC_MAXDEPTH |
 				   PATHSPEC_LITERAL | PATHSPEC_GLOB |
@@ -964,13 +973,15 @@ do_match(const struct name_entry *entry, struct strbuf *base, int base_offset,
 			if (!match_dir_prefix(item, base_str, match, matchlen))
 				goto match_wildcards;
 
-			if (!ps->recursive || !(ps->magic & PATHSPEC_MAXDEPTH) ||
+			if (!ps->recursive ||
+			    !(ps->magic & PATHSPEC_MAXDEPTH) ||
 			    ps->max_depth == -1)
 				return all_entries_interesting;
 
 			return within_depth(base_str + matchlen + 1,
 					    baselen - matchlen - 1,
-					    !!S_ISDIR(entry->mode), ps->max_depth) ?
+					    !!S_ISDIR(entry->mode),
+					    ps->max_depth) ?
 				       entry_interesting :
 				       entry_not_interesting;
 		}
@@ -982,8 +993,9 @@ do_match(const struct name_entry *entry, struct strbuf *base, int base_offset,
 				return entry_interesting;
 
 			if (item->nowildcard_len < item->len) {
-				if (!git_fnmatch(item, match + baselen, entry->path,
-						 item->nowildcard_len - baselen))
+				if (!git_fnmatch(
+					    item, match + baselen, entry->path,
+					    item->nowildcard_len - baselen))
 					return entry_interesting;
 
 				/*
@@ -1001,7 +1013,8 @@ do_match(const struct name_entry *entry, struct strbuf *base, int base_offset,
 				 * be performed in the submodule itself.
 				 */
 				if (ps->recursive && S_ISGITLINK(entry->mode) &&
-				    !ps_strncmp(item, match + baselen, entry->path,
+				    !ps_strncmp(item, match + baselen,
+						entry->path,
 						item->nowildcard_len - baselen))
 					return entry_interesting;
 			}

@@ -88,7 +88,8 @@ struct commit_list *get_shallow_commits(struct object_array *heads, int depth,
 			if (i < heads->nr) {
 				commit = (struct commit *)deref_tag(
 					heads->objects[i++].item, NULL, 0);
-				if (!commit || commit->object.type != OBJ_COMMIT) {
+				if (!commit ||
+				    commit->object.type != OBJ_COMMIT) {
 					commit = NULL;
 					continue;
 				}
@@ -97,7 +98,8 @@ struct commit_list *get_shallow_commits(struct object_array *heads, int depth,
 				*(int *)commit->util = 0;
 				cur_depth = 0;
 			} else {
-				commit = (struct commit *)object_array_pop(&stack);
+				commit = (struct commit *)object_array_pop(
+					&stack);
 				cur_depth = *(int *)commit->util;
 			}
 		}
@@ -105,7 +107,8 @@ struct commit_list *get_shallow_commits(struct object_array *heads, int depth,
 		cur_depth++;
 		if ((depth != INFINITE_DEPTH && cur_depth >= depth) ||
 		    (is_repository_shallow() && !commit->parents &&
-		     (graft = lookup_commit_graft(&commit->object.oid)) != NULL &&
+		     (graft = lookup_commit_graft(&commit->object.oid)) !=
+			     NULL &&
 		     graft->nr_parent < 0)) {
 			commit_list_insert(commit, &result);
 			commit->object.flags |= shallow_flag;
@@ -125,7 +128,8 @@ struct commit_list *get_shallow_commits(struct object_array *heads, int depth,
 				*pointer = cur_depth;
 			}
 			if (p->next)
-				add_object_array(&p->item->object, NULL, &stack);
+				add_object_array(&p->item->object, NULL,
+						 &stack);
 			else {
 				commit = p->item;
 				cur_depth = *(int *)commit->util;
@@ -256,8 +260,9 @@ static int write_one_shallow(const struct commit_graft *graft, void *cb_data)
 	return 0;
 }
 
-static int write_shallow_commits_1(struct strbuf *out, int use_pack_protocol,
-				   const struct oid_array *extra, unsigned flags)
+static int
+write_shallow_commits_1(struct strbuf *out, int use_pack_protocol,
+			const struct oid_array *extra, unsigned flags)
 {
 	struct write_shallow_data data;
 	int i;
@@ -292,7 +297,8 @@ const char *setup_temporary_shallow(const struct oid_array *extra)
 
 		if (write_in_full(temp->fd, sb.buf, sb.len) < 0 ||
 		    close_tempfile_gently(temp) < 0)
-			die_errno("failed to write to %s", get_tempfile_path(temp));
+			die_errno("failed to write to %s",
+				  get_tempfile_path(temp));
 		strbuf_release(&sb);
 		return get_tempfile_path(temp);
 	}
@@ -327,7 +333,8 @@ void setup_alternate_shallow(struct lock_file *shallow_lock,
 	strbuf_release(&sb);
 }
 
-static int advertise_shallow_grafts_cb(const struct commit_graft *graft, void *cb)
+static int
+advertise_shallow_grafts_cb(const struct commit_graft *graft, void *cb)
 {
 	int fd = *(int *)cb;
 	if (graft->nr_parent == -1)
@@ -460,8 +467,8 @@ static uint32_t *paint_alloc(struct paint_info *info)
  * UNINTERESTING or BOTTOM is hit. Set the id-th bit in ref_bitmap for
  * all walked commits.
  */
-static void
-paint_down(struct paint_info *info, const struct object_id *oid, unsigned int id)
+static void paint_down(struct paint_info *info, const struct object_id *oid,
+		       unsigned int id)
 {
 	unsigned int i, nr;
 	struct commit_list *head = NULL;
@@ -605,10 +612,12 @@ void assign_shallow_commits_to_refs(struct shallow_info *info, uint32_t **used,
 		paint_down(&pi, ref->oid + i, i);
 
 	if (used) {
-		int bitmap_size = DIV_ROUND_UP(pi.nr_bits, 32) * sizeof(uint32_t);
+		int bitmap_size =
+			DIV_ROUND_UP(pi.nr_bits, 32) * sizeof(uint32_t);
 		memset(used, 0, sizeof(*used) * info->shallow->nr);
 		for (i = 0; i < nr_shallow; i++) {
-			const struct commit *c = lookup_commit(&oid[shallow[i]]);
+			const struct commit *c =
+				lookup_commit(&oid[shallow[i]]);
 			uint32_t **map = ref_bitmap_at(&pi.ref_bitmap, c);
 			if (*map)
 				used[shallow[i]] = xmemdupz(*map, bitmap_size);

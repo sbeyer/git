@@ -46,15 +46,17 @@ int gpg_verify_tag(const struct object_id *oid, const char *name_to_report,
 		return error("%s: cannot verify a non-tag object of type %s.",
 			     name_to_report ?
 				     name_to_report :
-				     find_unique_abbrev(oid->hash, DEFAULT_ABBREV),
+				     find_unique_abbrev(oid->hash,
+							DEFAULT_ABBREV),
 			     typename(type));
 
 	buf = read_sha1_file(oid->hash, &type, &size);
 	if (!buf)
 		return error("%s: unable to read file.",
-			     name_to_report ? name_to_report :
-					      find_unique_abbrev(oid->hash,
-								 DEFAULT_ABBREV));
+			     name_to_report ?
+				     name_to_report :
+				     find_unique_abbrev(oid->hash,
+							DEFAULT_ABBREV));
 
 	ret = run_gpg_verify(buf, size, flags);
 
@@ -185,10 +187,12 @@ int parse_tag(struct tag *item)
 		return 0;
 	data = read_sha1_file(item->object.oid.hash, &type, &size);
 	if (!data)
-		return error("Could not read %s", oid_to_hex(&item->object.oid));
+		return error("Could not read %s",
+			     oid_to_hex(&item->object.oid));
 	if (type != OBJ_TAG) {
 		free(data);
-		return error("Object %s not a tag", oid_to_hex(&item->object.oid));
+		return error("Object %s not a tag",
+			     oid_to_hex(&item->object.oid));
 	}
 	ret = parse_tag_buffer(item, data, size);
 	free(data);

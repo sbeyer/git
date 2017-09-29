@@ -120,7 +120,8 @@ static int display(struct progress *progress, unsigned n, const char *done)
 		}
 	} else if (progress_update) {
 		if (is_foreground_fd(fileno(stderr)) || done) {
-			fprintf(stderr, "%s: %u%s%s", progress->title, n, tp, eol);
+			fprintf(stderr, "%s: %u%s%s", progress->title, n, tp,
+				eol);
 			fflush(stderr);
 		}
 		progress_update = 0;
@@ -130,7 +131,8 @@ static int display(struct progress *progress, unsigned n, const char *done)
 	return 0;
 }
 
-static void throughput_string(struct strbuf *buf, off_t total, unsigned int rate)
+static void
+throughput_string(struct strbuf *buf, off_t total, unsigned int rate)
 {
 	strbuf_reset(buf);
 	strbuf_addstr(buf, ", ");

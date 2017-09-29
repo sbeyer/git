@@ -79,7 +79,8 @@ void set_commit_buffer(struct commit *, void *buffer, unsigned long size);
  * Get any cached object buffer associated with the commit. Returns NULL
  * if none. The resulting memory should not be freed.
  */
-const void *get_cached_commit_buffer(const struct commit *, unsigned long *size);
+const void *
+get_cached_commit_buffer(const struct commit *, unsigned long *size);
 
 /*
  * Get the commit's object contents, either from cache or by reading the object
@@ -196,8 +197,8 @@ extern void format_commit_message(const struct commit *commit,
 				  const struct pretty_print_context *context);
 extern void pretty_print_commit(struct pretty_print_context *pp,
 				const struct commit *commit, struct strbuf *sb);
-extern void
-pp_commit_easy(enum cmit_fmt fmt, const struct commit *commit, struct strbuf *sb);
+extern void pp_commit_easy(enum cmit_fmt fmt, const struct commit *commit,
+			   struct strbuf *sb);
 void pp_user_info(struct pretty_print_context *pp, const char *what,
 		  struct strbuf *sb, const char *line, const char *encoding);
 void pp_title_line(struct pretty_print_context *pp, const char **msg_p,
@@ -325,9 +326,10 @@ struct commit_extra_header {
 extern void append_merge_tag_headers(struct commit_list *parents,
 				     struct commit_extra_header ***tail);
 
-extern int commit_tree(const char *msg, size_t msg_len, const unsigned char *tree,
-		       struct commit_list *parents, unsigned char *ret,
-		       const char *author, const char *sign_commit);
+extern int
+commit_tree(const char *msg, size_t msg_len, const unsigned char *tree,
+	    struct commit_list *parents, unsigned char *ret, const char *author,
+	    const char *sign_commit);
 
 extern int
 commit_tree_extended(const char *msg, size_t msg_len, const unsigned char *tree,
@@ -355,7 +357,8 @@ find_commit_header(const char *msg, const char *key, size_t *out_len);
 extern int ignore_non_trailer(const char *buf, size_t len);
 
 typedef void (*each_mergetag_fn)(struct commit *commit,
-				 struct commit_extra_header *extra, void *cb_data);
+				 struct commit_extra_header *extra,
+				 void *cb_data);
 
 extern void
 for_each_mergetag(each_mergetag_fn fn, struct commit *commit, void *data);
@@ -375,8 +378,9 @@ extern void set_merge_remote_desc(struct commit *commit, const char *name,
  */
 struct commit *get_merge_parent(const char *name);
 
-extern int parse_signed_commit(const struct commit *commit,
-			       struct strbuf *message, struct strbuf *signature);
+extern int
+parse_signed_commit(const struct commit *commit, struct strbuf *message,
+		    struct strbuf *signature);
 extern int remove_signature(struct strbuf *buf);
 
 /*
@@ -386,10 +390,11 @@ extern int remove_signature(struct strbuf *buf);
  * at all.  This may allocate memory for sig->gpg_output, sig->gpg_status,
  * sig->signer and sig->key.
  */
-extern int
-check_commit_signature(const struct commit *commit, struct signature_check *sigc);
+extern int check_commit_signature(const struct commit *commit,
+				  struct signature_check *sigc);
 
-int compare_commits_by_commit_date(const void *a_, const void *b_, void *unused);
+int compare_commits_by_commit_date(const void *a_, const void *b_,
+				   void *unused);
 
 LAST_ARG_MUST_BE_NULL
 extern int run_commit_hook(int editor_is_used, const char *index_file,

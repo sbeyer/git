@@ -152,7 +152,8 @@ static inline int list_empty(struct list_head *head)
 	return head == head->next;
 }
 
-static inline void list_replace_init(struct list_head *old, struct list_head *newp)
+static inline void
+list_replace_init(struct list_head *old, struct list_head *newp)
 {
 	struct list_head *head = old->next;
 

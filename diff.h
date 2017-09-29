@@ -36,7 +36,8 @@ typedef void (*add_remove_fn_t)(struct diff_options *options, int addremove,
 typedef void (*diff_format_fn_t)(struct diff_queue_struct *q,
 				 struct diff_options *options, void *data);
 
-typedef struct strbuf *(*diff_prefix_fn_t)(struct diff_options *opt, void *data);
+typedef struct strbuf *(*diff_prefix_fn_t)(struct diff_options *opt,
+					   void *data);
 
 #define DIFF_FORMAT_RAW 0x0001
 #define DIFF_FORMAT_DIFFSTAT 0x0002
@@ -285,7 +286,8 @@ diff_change(struct diff_options *, unsigned mode1, unsigned mode2,
 	    int old_oid_valid, int new_oid_valid, const char *fullpath,
 	    unsigned dirty_submodule1, unsigned dirty_submodule2);
 
-extern struct diff_filepair *diff_unmerge(struct diff_options *, const char *path);
+extern struct diff_filepair *
+diff_unmerge(struct diff_options *, const char *path);
 
 #define DIFF_SETUP_REVERSE 1
 #define DIFF_SETUP_USE_CACHE 2
@@ -295,14 +297,17 @@ extern struct diff_filepair *diff_unmerge(struct diff_options *, const char *pat
  * Poor man's alternative to parse-option, to allow both stuck form
  * (--option=value) and separate form (--option value).
  */
-extern int parse_long_opt(const char *opt, const char **argv, const char **optarg);
+extern int
+parse_long_opt(const char *opt, const char **argv, const char **optarg);
 
 extern int git_diff_basic_config(const char *var, const char *value, void *cb);
-extern int git_diff_heuristic_config(const char *var, const char *value, void *cb);
+extern int
+git_diff_heuristic_config(const char *var, const char *value, void *cb);
 extern void init_diff_ui_defaults(void);
 extern int git_diff_ui_config(const char *var, const char *value, void *cb);
 extern void diff_setup(struct diff_options *);
-extern int diff_opt_parse(struct diff_options *, const char **, int, const char *);
+extern int
+diff_opt_parse(struct diff_options *, const char **, int, const char *);
 extern void diff_setup_done(struct diff_options *);
 
 #define DIFF_DETECT_RENAME 1
@@ -423,7 +428,8 @@ extern int parse_rename_score(const char **cp_p);
 
 extern long parse_algorithm_value(const char *value);
 
-extern void print_stat_summary(FILE *fp, int files, int insertions, int deletions);
+extern void
+print_stat_summary(FILE *fp, int files, int insertions, int deletions);
 extern void setup_diff_pager(struct diff_options *);
 
 #endif /* DIFF_H */

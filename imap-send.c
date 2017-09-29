@@ -46,14 +46,16 @@ typedef void *SSL;
 static int verbosity;
 static int use_curl = USE_CURL_DEFAULT;
 
-static const char *const imap_send_usage[] =
-	{ "git imap-send [-v] [-q] [--[no-]curl] < <mbox>", NULL };
+static const char *const imap_send_usage[] = {
+	"git imap-send [-v] [-q] [--[no-]curl] < <mbox>", NULL
+};
 
-static struct option imap_send_options[] =
-	{ OPT__VERBOSITY(&verbosity),
-	  OPT_BOOL(0, "curl", &use_curl,
-		   "use libcurl to communicate with the IMAP server"),
-	  OPT_END() };
+static struct option imap_send_options[] = {
+	OPT__VERBOSITY(&verbosity),
+	OPT_BOOL(0, "curl", &use_curl,
+		 "use libcurl to communicate with the IMAP server"),
+	OPT_END()
+};
 
 #undef DRV_OK
 #define DRV_OK 0
@@ -145,7 +147,8 @@ struct imap_store {
 struct imap_cmd_cb {
 	int (*cont)(struct imap_store *ctx, struct imap_cmd *cmd,
 		    const char *prompt);
-	void (*done)(struct imap_store *ctx, struct imap_cmd *cmd, int response);
+	void (*done)(struct imap_store *ctx, struct imap_cmd *cmd,
+		     int response);
 	void *ctx;
 	char *data;
 	int dlen;
@@ -184,7 +187,8 @@ static int get_cmd_result(struct imap_store *ctx, struct imap_cmd *tcmd);
 #ifndef NO_OPENSSL
 static void ssl_socket_perror(const char *func)
 {
-	fprintf(stderr, "%s: %s\n", func, ERR_error_string(ERR_get_error(), NULL));
+	fprintf(stderr, "%s: %s\n", func,
+		ERR_error_string(ERR_get_error(), NULL));
 }
 #endif
 
@@ -254,8 +258,9 @@ static int verify_hostname(X509 *cert, const char *hostname)
 			if (subj_alt_name->type == GEN_DNS &&
 			    strlen((const char *)subj_alt_name->d.ia5->data) ==
 				    (size_t)subj_alt_name->d.ia5->length &&
-			    host_matches(hostname,
-					 (const char *)(subj_alt_name->d.ia5->data)))
+			    host_matches(
+				    hostname,
+				    (const char *)(subj_alt_name->d.ia5->data)))
 				found = 1;
 		}
 		sk_GENERAL_NAME_pop_free(subj_alt_names, GENERAL_NAME_free);
@@ -604,7 +609,8 @@ imap_exec(struct imap_store *ctx, struct imap_cmd_cb *cb, const char *fmt, ...)
 }
 
 __attribute__((format(printf, 3, 4))) static int
-imap_exec_m(struct imap_store *ctx, struct imap_cmd_cb *cb, const char *fmt, ...)
+imap_exec_m(struct imap_store *ctx, struct imap_cmd_cb *cb, const char *fmt,
+	    ...)
 {
 	va_list ap;
 	struct imap_cmd *cmdp;
@@ -708,7 +714,8 @@ parse_response_code(struct imap_store *ctx, struct imap_cmd_cb *cb, char *s)
 		}
 	} else if (!strcmp("UIDNEXT", arg)) {
 		if (!(arg = next_arg(&s)) || !(imap->uidnext = atoi(arg))) {
-			fprintf(stderr, "IMAP error: malformed NEXTUID status\n");
+			fprintf(stderr,
+				"IMAP error: malformed NEXTUID status\n");
 			return RESP_BAD;
 		}
 	} else if (!strcmp("CAPABILITY", arg)) {
@@ -723,7 +730,8 @@ parse_response_code(struct imap_store *ctx, struct imap_cmd_cb *cb, char *s)
 	} else if (cb && cb->ctx && !strcmp("APPENDUID", arg)) {
 		if (!(arg = next_arg(&s)) || !(ctx->uidvalidity = atoi(arg)) ||
 		    !(arg = next_arg(&s)) || !(*(int *)cb->ctx = atoi(arg))) {
-			fprintf(stderr, "IMAP error: malformed APPENDUID status\n");
+			fprintf(stderr,
+				"IMAP error: malformed APPENDUID status\n");
 			return RESP_BAD;
 		}
 	}
@@ -757,8 +765,8 @@ static int get_cmd_result(struct imap_store *ctx, struct imap_cmd *tcmd)
 				skip_list(&cmd); /* Shared mailboxes */
 			} else if (!strcmp("OK", arg) || !strcmp("BAD", arg) ||
 				   !strcmp("NO", arg) || !strcmp("BYE", arg)) {
-				if ((resp = parse_response_code(ctx, NULL, cmd)) !=
-				    RESP_OK)
+				if ((resp = parse_response_code(
+					     ctx, NULL, cmd)) != RESP_OK)
 					return resp;
 			} else if (!strcmp("CAPABILITY", arg)) {
 				parse_capability(imap, cmd);
@@ -787,8 +795,9 @@ static int get_cmd_result(struct imap_store *ctx, struct imap_cmd *tcmd)
 		} else if (*arg == '+') {
 			/* This can happen only with the last command underway,
 			   as it enforces a round-trip. */
-			cmdp = (struct imap_cmd *)((char *)imap->in_progress_append -
-						   offsetof(struct imap_cmd, next));
+			cmdp = (struct imap_cmd
+					*)((char *)imap->in_progress_append -
+					   offsetof(struct imap_cmd, next));
 			if (cmdp->cb.data) {
 				n = socket_write(&imap->buf.sock, cmdp->cb.data,
 						 cmdp->cb.dlen);
@@ -838,7 +847,8 @@ static int get_cmd_result(struct imap_store *ctx, struct imap_cmd *tcmd)
 						"LOGIN <user> <pass>",
 					arg, cmd ? cmd : "");
 			}
-			if ((resp2 = parse_response_code(ctx, &cmdp->cb, cmd)) > resp)
+			if ((resp2 = parse_response_code(ctx, &cmdp->cb, cmd)) >
+			    resp)
 				resp = resp2;
 			if (cmdp->cb.done)
 				cmdp->cb.done(ctx, cmdp, resp);
@@ -895,7 +905,8 @@ static char *cram(const char *challenge_64, const char *user, const char *pass)
 	encoded_len = strlen(challenge_64);
 	challenge = xmalloc(encoded_len);
 	decoded_len = EVP_DecodeBlock((unsigned char *)challenge,
-				      (unsigned char *)challenge_64, encoded_len);
+				      (unsigned char *)challenge_64,
+				      encoded_len);
 	if (decoded_len < 0)
 		die("invalid challenge %s", challenge_64);
 	if (!HMAC(EVP_md5(), pass, strlen(pass), (unsigned char *)challenge,
@@ -1023,7 +1034,8 @@ imap_open_store(struct imap_server_conf *srvc, char *folder)
 		for (ai0 = ai; ai; ai = ai->ai_next) {
 			char addr[NI_MAXHOST];
 
-			s = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
+			s = socket(ai->ai_family, ai->ai_socktype,
+				   ai->ai_protocol);
 			if (s < 0)
 				continue;
 
@@ -1111,7 +1123,8 @@ imap_open_store(struct imap_server_conf *srvc, char *folder)
 		if (!srvc->use_ssl && CAP(STARTTLS)) {
 			if (imap_exec(ctx, NULL, "STARTTLS") != RESP_OK)
 				goto bail;
-			if (ssl_socket_connect(&imap->buf.sock, 1, srvc->ssl_verify))
+			if (ssl_socket_connect(&imap->buf.sock, 1,
+					       srvc->ssl_verify))
 				goto bail;
 			/* capabilities may have changed, so get the new
 			 * capabilities */
@@ -1138,7 +1151,8 @@ imap_open_store(struct imap_server_conf *srvc, char *folder)
 
 				memset(&cb, 0, sizeof(cb));
 				cb.cont = auth_cram_md5;
-				if (imap_exec(ctx, &cb, "AUTHENTICATE CRAM-MD5") !=
+				if (imap_exec(ctx, &cb,
+					      "AUTHENTICATE CRAM-MD5") !=
 				    RESP_OK) {
 					fprintf(stderr,
 						"IMAP error: AUTHENTICATE CRAM-MD5 failed\n");
@@ -1158,8 +1172,9 @@ imap_open_store(struct imap_server_conf *srvc, char *folder)
 				goto bail;
 			}
 			if (!imap->buf.sock.ssl)
-				imap_warn("*** IMAP Warning *** Password is being "
-					  "sent in the clear\n");
+				imap_warn(
+					"*** IMAP Warning *** Password is being "
+					"sent in the clear\n");
 			if (imap_exec(ctx, NULL, "LOGIN \"%s\" \"%s\"",
 				      srvc->user, srvc->pass) != RESP_OK) {
 				fprintf(stderr, "IMAP error: LOGIN failed\n");
@@ -1182,7 +1197,8 @@ imap_open_store(struct imap_server_conf *srvc, char *folder)
 		fprintf(stderr, "IMAP error: could not check mailbox\n");
 		goto out;
 	case RESP_NO:
-		if (imap_exec(ctx, NULL, "CREATE \"%s\"", ctx->name) == RESP_OK) {
+		if (imap_exec(ctx, NULL, "CREATE \"%s\"", ctx->name) ==
+		    RESP_OK) {
 			imap_info("Created missing mailbox\n");
 		} else {
 			fprintf(stderr,
@@ -1411,7 +1427,8 @@ static int append_msgs_to_imap(struct imap_server_conf *server,
 	}
 	ctx->name = server->folder;
 
-	fprintf(stderr, "sending %d message%s\n", total, (total != 1) ? "s" : "");
+	fprintf(stderr, "sending %d message%s\n", total,
+		(total != 1) ? "s" : "");
 	while (1) {
 		unsigned percent = n * 100 / total;
 
@@ -1503,7 +1520,8 @@ static int curl_append_msgs_to_imap(struct imap_server_conf *server,
 	curl = setup_curl(server, &cred);
 	curl_easy_setopt(curl, CURLOPT_READDATA, &msgbuf);
 
-	fprintf(stderr, "sending %d message%s\n", total, (total != 1) ? "s" : "");
+	fprintf(stderr, "sending %d message%s\n", total,
+		(total != 1) ? "s" : "");
 	while (1) {
 		unsigned percent = n * 100 / total;
 		int prev_len;

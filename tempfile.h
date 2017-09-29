@@ -138,7 +138,8 @@ extern struct tempfile *
 mks_tempfile_sm(const char *template, int suffixlen, int mode);
 
 /* See "mks_tempfile functions" above. */
-static inline struct tempfile *mks_tempfile_s(const char *template, int suffixlen)
+static inline struct tempfile *
+mks_tempfile_s(const char *template, int suffixlen)
 {
 	return mks_tempfile_sm(template, suffixlen, 0600);
 }
@@ -160,7 +161,8 @@ extern struct tempfile *
 mks_tempfile_tsm(const char *template, int suffixlen, int mode);
 
 /* See "mks_tempfile functions" above. */
-static inline struct tempfile *mks_tempfile_ts(const char *template, int suffixlen)
+static inline struct tempfile *
+mks_tempfile_ts(const char *template, int suffixlen)
 {
 	return mks_tempfile_tsm(template, suffixlen, 0600);
 }

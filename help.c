@@ -99,8 +99,8 @@ static void pretty_print_cmdnames(struct cmdnames *cmds, unsigned int colopts)
 	string_list_clear(&list, 0);
 }
 
-static void
-list_commands_in_dir(struct cmdnames *cmds, const char *path, const char *prefix)
+static void list_commands_in_dir(struct cmdnames *cmds, const char *path,
+				 const char *prefix)
 {
 	DIR *dir = opendir(path);
 	struct dirent *de;
@@ -181,7 +181,8 @@ void list_commands(unsigned int colopts, struct cmdnames *main_cmds,
 	}
 
 	if (other_cmds->cnt) {
-		printf_ln(_("git commands available from elsewhere on your $PATH"));
+		printf_ln(_(
+			"git commands available from elsewhere on your $PATH"));
 		putchar('\n');
 		pretty_print_cmdnames(other_cmds, colopts);
 		putchar('\n');
@@ -276,9 +277,9 @@ static void add_cmd_list(struct cmdnames *cmds, struct cmdnames *old)
 #define SIMILARITY_FLOOR 7
 #define SIMILAR_ENOUGH(x) ((x) < SIMILARITY_FLOOR)
 
-static const char bad_interpreter_advice[] = N_(
-	"'%s' appears to be a git command, but we were not\n"
-	"able to execute it. Maybe git-%s is broken?");
+static const char bad_interpreter_advice[] =
+	N_("'%s' appears to be a git command, but we were not\n"
+	   "able to execute it. Maybe git-%s is broken?");
 
 const char *help_unknown_cmd(const char *cmd)
 {
@@ -325,8 +326,8 @@ const char *help_unknown_cmd(const char *cmd)
 			}
 		}
 
-		main_cmds.names[i]->len = levenshtein(cmd, candidate, 0, 2, 1, 3) +
-					  1;
+		main_cmds.names[i]->len =
+			levenshtein(cmd, candidate, 0, 2, 1, 3) + 1;
 	}
 
 	QSORT(main_cmds.names, main_cmds.cnt, levenshtein_compare);
@@ -453,7 +454,8 @@ void help_unknown_ref(const char *ref, const char *cmd, const char *error)
 				      "\nDid you mean one of these?",
 				      suggested_refs.nr));
 		for (i = 0; i < suggested_refs.nr; i++)
-			fprintf(stderr, "\t%s\n", suggested_refs.items[i].string);
+			fprintf(stderr, "\t%s\n",
+				suggested_refs.items[i].string);
 	}
 
 	string_list_clear(&suggested_refs, 0);

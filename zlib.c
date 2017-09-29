@@ -116,7 +116,8 @@ int git_inflate(git_zstream *strm, int flush)
 		zlib_pre_call(strm);
 		/* Never say Z_FINISH unless we are feeding everything */
 		status = inflate(&strm->z,
-				 (strm->z.avail_in != strm->avail_in) ? 0 : flush);
+				 (strm->z.avail_in != strm->avail_in) ? 0 :
+									flush);
 		if (status == Z_MEM_ERROR)
 			die("inflate: out of memory");
 		zlib_post_call(strm);
@@ -240,7 +241,8 @@ int git_deflate(git_zstream *strm, int flush)
 
 		/* Never say Z_FINISH unless we are feeding everything */
 		status = deflate(&strm->z,
-				 (strm->z.avail_in != strm->avail_in) ? 0 : flush);
+				 (strm->z.avail_in != strm->avail_in) ? 0 :
+									flush);
 		if (status == Z_MEM_ERROR)
 			die("deflate: out of memory");
 		zlib_post_call(strm);

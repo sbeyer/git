@@ -16,7 +16,8 @@ static const char *system_prefix(void)
 	assert(argv0_path);
 	assert(is_absolute_path(argv0_path));
 
-	if (!prefix && !(prefix = strip_path_suffix(argv0_path, GIT_EXEC_PATH)) &&
+	if (!prefix &&
+	    !(prefix = strip_path_suffix(argv0_path, GIT_EXEC_PATH)) &&
 	    !(prefix = strip_path_suffix(argv0_path, BINDIR)) &&
 	    !(prefix = strip_path_suffix(argv0_path, "git"))) {
 		prefix = PREFIX;
