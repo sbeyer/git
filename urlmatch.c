@@ -9,8 +9,9 @@
 #define URL_UNSAFE_CHARS " <>\"%{}|\\^`" /* plus 0x00-0x1F,0x7F-0xFF */
 #define URL_GEN_RESERVED ":/?#[]@"
 #define URL_SUB_RESERVED "!$&'()*+,;="
-#define URL_RESERVED URL_GEN_RESERVED URL_SUB_RESERVED /* only allowed delims \
-							*/
+#define URL_RESERVED                                             \
+	URL_GEN_RESERVED URL_SUB_RESERVED /* only allowed delims \
+					   */
 
 static int
 append_normalized_escapes(struct strbuf *buf, const char *from, size_t from_len,
