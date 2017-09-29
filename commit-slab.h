@@ -49,7 +49,7 @@
 #define MAYBE_UNUSED __attribute__((__unused__))
 
 #define define_commit_slab(slabname, elemtype) 				\
-									\
+/**/									\
 struct slabname {							\
 	unsigned slab_size;						\
 	unsigned stride;						\
@@ -57,7 +57,7 @@ struct slabname {							\
 	elemtype **slab;						\
 };									\
 static int stat_ ##slabname## realloc;					\
-									\
+/**/									\
 static MAYBE_UNUSED void init_ ##slabname## _with_stride(struct slabname *s, \
 						   unsigned stride)	\
 {									\
@@ -70,12 +70,12 @@ static MAYBE_UNUSED void init_ ##slabname## _with_stride(struct slabname *s, \
 	s->slab_count = 0;						\
 	s->slab = NULL;							\
 }									\
-									\
+/**/									\
 static MAYBE_UNUSED void init_ ##slabname(struct slabname *s)		\
 {									\
 	init_ ##slabname## _with_stride(s, 1);				\
 }									\
-									\
+/**/									\
 static MAYBE_UNUSED void clear_ ##slabname(struct slabname *s)		\
 {									\
 	unsigned int i;							\
@@ -84,16 +84,16 @@ static MAYBE_UNUSED void clear_ ##slabname(struct slabname *s)		\
 	s->slab_count = 0;						\
 	FREE_AND_NULL(s->slab);						\
 }									\
-									\
+/**/									\
 static MAYBE_UNUSED elemtype *slabname## _at_peek(struct slabname *s,	\
 						  const struct commit *c, \
 						  int add_if_missing)   \
 {									\
 	unsigned int nth_slab, nth_slot;				\
-									\
+/**/									\
 	nth_slab = c->index / s->slab_size;				\
 	nth_slot = c->index % s->slab_size;				\
-									\
+/**/									\
 	if (s->slab_count <= nth_slab) {				\
 		unsigned int i;						\
 		if (!add_if_missing)					\
@@ -112,19 +112,19 @@ static MAYBE_UNUSED elemtype *slabname## _at_peek(struct slabname *s,	\
 	}								\
 	return &s->slab[nth_slab][nth_slot * s->stride];		\
 }									\
-									\
+/**/									\
 static MAYBE_UNUSED elemtype *slabname## _at(struct slabname *s,	\
 					     const struct commit *c)	\
 {									\
 	return slabname##_at_peek(s, c, 1);				\
 }									\
-									\
+/**/									\
 static MAYBE_UNUSED elemtype *slabname## _peek(struct slabname *s,	\
 					     const struct commit *c)	\
 {									\
 	return slabname##_at_peek(s, c, 0);				\
 }									\
-									\
+/**/									\
 struct slabname
 
 /*
