@@ -76,20 +76,20 @@ struct repository {
 	 * The exception to this is 'the_repository', which doesn't go through
 	 * the normal 'repo_init()' process.
 	 */
-	unsigned ignore_env:1;
+	unsigned ignore_env : 1;
 
 	/* Indicate if a repository has a different 'commondir' from 'gitdir' */
-	unsigned different_commondir:1;
+	unsigned different_commondir : 1;
 };
 
 extern struct repository *the_repository;
 
 extern void repo_set_gitdir(struct repository *repo, const char *path);
 extern void repo_set_worktree(struct repository *repo, const char *path);
-extern int repo_init(struct repository *repo, const char *gitdir, const char *worktree);
+extern int
+repo_init(struct repository *repo, const char *gitdir, const char *worktree);
 extern int repo_submodule_init(struct repository *submodule,
-			       struct repository *superproject,
-			       const char *path);
+			       struct repository *superproject, const char *path);
 extern void repo_clear(struct repository *repo);
 
 /*

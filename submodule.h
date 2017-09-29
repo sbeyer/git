@@ -7,16 +7,14 @@ struct argv_array;
 struct oid_array;
 struct remote;
 
-enum {
-	RECURSE_SUBMODULES_ONLY = -5,
-	RECURSE_SUBMODULES_CHECK = -4,
-	RECURSE_SUBMODULES_ERROR = -3,
-	RECURSE_SUBMODULES_NONE = -2,
-	RECURSE_SUBMODULES_ON_DEMAND = -1,
-	RECURSE_SUBMODULES_OFF = 0,
-	RECURSE_SUBMODULES_DEFAULT = 1,
-	RECURSE_SUBMODULES_ON = 2
-};
+enum { RECURSE_SUBMODULES_ONLY = -5,
+       RECURSE_SUBMODULES_CHECK = -4,
+       RECURSE_SUBMODULES_ERROR = -3,
+       RECURSE_SUBMODULES_NONE = -2,
+       RECURSE_SUBMODULES_ON_DEMAND = -1,
+       RECURSE_SUBMODULES_OFF = 0,
+       RECURSE_SUBMODULES_DEFAULT = 1,
+       RECURSE_SUBMODULES_ON = 2 };
 
 enum submodule_update_type {
 	SM_UPDATE_UNSPECIFIED = 0,
@@ -31,16 +29,20 @@ struct submodule_update_strategy {
 	enum submodule_update_type type;
 	const char *command;
 };
-#define SUBMODULE_UPDATE_STRATEGY_INIT {SM_UPDATE_UNSPECIFIED, NULL}
+#define SUBMODULE_UPDATE_STRATEGY_INIT      \
+	{                                   \
+		SM_UPDATE_UNSPECIFIED, NULL \
+	}
 
 extern int is_gitmodules_unmerged(const struct index_state *istate);
 extern int is_staging_gitmodules_ok(const struct index_state *istate);
 extern int update_path_in_gitmodules(const char *oldpath, const char *newpath);
 extern int remove_path_from_gitmodules(const char *path);
 extern void stage_updated_gitmodules(void);
-extern void set_diffopt_flags_from_submodule_config(struct diff_options *,
-		const char *path);
-extern int git_default_submodule_config(const char *var, const char *value, void *cb);
+extern void
+set_diffopt_flags_from_submodule_config(struct diff_options *, const char *path);
+extern int
+git_default_submodule_config(const char *var, const char *value, void *cb);
 
 struct option;
 int option_parse_recurse_submodules_worktree_updater(const struct option *opt,
@@ -59,15 +61,16 @@ extern void die_path_inside_submodule(const struct index_state *istate,
 				      const struct pathspec *ps);
 extern enum submodule_update_type parse_submodule_update_type(const char *value);
 extern int parse_submodule_update_strategy(const char *value,
-		struct submodule_update_strategy *dst);
-extern const char *submodule_strategy_to_string(const struct submodule_update_strategy *s);
+					   struct submodule_update_strategy *dst);
+extern const char *
+submodule_strategy_to_string(const struct submodule_update_strategy *s);
 extern void handle_ignore_submodules_arg(struct diff_options *, const char *);
 extern void show_submodule_summary(struct diff_options *o, const char *path,
-		struct object_id *one, struct object_id *two,
-		unsigned dirty_submodule);
+				   struct object_id *one, struct object_id *two,
+				   unsigned dirty_submodule);
 extern void show_submodule_inline_diff(struct diff_options *o, const char *path,
-		struct object_id *one, struct object_id *two,
-		unsigned dirty_submodule);
+				       struct object_id *one, struct object_id *two,
+				       unsigned dirty_submodule);
 /* Check if we want to update any submodule.*/
 extern int should_update_submodules(void);
 /*
@@ -76,34 +79,32 @@ extern int should_update_submodules(void);
  */
 extern const struct submodule *submodule_from_ce(const struct cache_entry *ce);
 extern void check_for_new_submodule_commits(struct object_id *oid);
-extern int fetch_populated_submodules(const struct argv_array *options,
-			       const char *prefix, int command_line_option,
-			       int default_option,
-			       int quiet, int max_parallel_jobs);
+extern int
+fetch_populated_submodules(const struct argv_array *options, const char *prefix,
+			   int command_line_option, int default_option,
+			   int quiet, int max_parallel_jobs);
 extern unsigned is_submodule_modified(const char *path, int ignore_untracked);
 extern int submodule_uses_gitfile(const char *path);
 
-#define SUBMODULE_REMOVAL_DIE_ON_ERROR (1<<0)
-#define SUBMODULE_REMOVAL_IGNORE_UNTRACKED (1<<1)
-#define SUBMODULE_REMOVAL_IGNORE_IGNORED_UNTRACKED (1<<2)
+#define SUBMODULE_REMOVAL_DIE_ON_ERROR (1 << 0)
+#define SUBMODULE_REMOVAL_IGNORE_UNTRACKED (1 << 1)
+#define SUBMODULE_REMOVAL_IGNORE_IGNORED_UNTRACKED (1 << 2)
 extern int bad_to_remove_submodule(const char *path, unsigned flags);
 extern int merge_submodule(struct object_id *result, const char *path,
-			   const struct object_id *base,
-			   const struct object_id *a,
+			   const struct object_id *base, const struct object_id *a,
 			   const struct object_id *b, int search);
 
 /* Checks if there are submodule changes in a..b. */
-extern int submodule_touches_in_range(struct object_id *a,
-				      struct object_id *b);
-extern int find_unpushed_submodules(struct oid_array *commits,
-				    const char *remotes_name,
-				    struct string_list *needs_pushing);
-extern int push_unpushed_submodules(struct oid_array *commits,
-				    const struct remote *remote,
-				    const char **refspec, int refspec_nr,
-				    const struct string_list *push_options,
-				    int dry_run);
-extern void connect_work_tree_and_git_dir(const char *work_tree, const char *git_dir);
+extern int submodule_touches_in_range(struct object_id *a, struct object_id *b);
+extern int
+find_unpushed_submodules(struct oid_array *commits, const char *remotes_name,
+			 struct string_list *needs_pushing);
+extern int
+push_unpushed_submodules(struct oid_array *commits, const struct remote *remote,
+			 const char **refspec, int refspec_nr,
+			 const struct string_list *push_options, int dry_run);
+extern void
+connect_work_tree_and_git_dir(const char *work_tree, const char *git_dir);
 /*
  * Given a submodule path (as in the index), return the repository
  * path of that submodule in 'buf'. Return -1 on error or when the
@@ -111,12 +112,10 @@ extern void connect_work_tree_and_git_dir(const char *work_tree, const char *git
  */
 int submodule_to_gitdir(struct strbuf *buf, const char *submodule);
 
-#define SUBMODULE_MOVE_HEAD_DRY_RUN (1<<0)
-#define SUBMODULE_MOVE_HEAD_FORCE   (1<<1)
-extern int submodule_move_head(const char *path,
-			       const char *old,
-			       const char *new,
-			       unsigned flags);
+#define SUBMODULE_MOVE_HEAD_DRY_RUN (1 << 0)
+#define SUBMODULE_MOVE_HEAD_FORCE (1 << 1)
+extern int submodule_move_head(const char *path, const char *old,
+			       const char *new, unsigned flags);
 
 /*
  * Prepare the "env_array" parameter of a "struct child_process" for executing
@@ -125,10 +124,9 @@ extern int submodule_move_head(const char *path,
  */
 extern void prepare_submodule_repo_env(struct argv_array *out);
 
-#define ABSORB_GITDIR_RECURSE_SUBMODULES (1<<0)
+#define ABSORB_GITDIR_RECURSE_SUBMODULES (1 << 0)
 extern void absorb_git_dir_into_superproject(const char *prefix,
-					     const char *path,
-					     unsigned flags);
+					     const char *path, unsigned flags);
 
 /*
  * Return the absolute path of the working tree of the superproject, which this

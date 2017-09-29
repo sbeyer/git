@@ -9,18 +9,10 @@ int color_stdout_is_tty = -1;
  * The list of available column colors.
  */
 const char *column_colors_ansi[] = {
-	GIT_COLOR_RED,
-	GIT_COLOR_GREEN,
-	GIT_COLOR_YELLOW,
-	GIT_COLOR_BLUE,
-	GIT_COLOR_MAGENTA,
-	GIT_COLOR_CYAN,
-	GIT_COLOR_BOLD_RED,
-	GIT_COLOR_BOLD_GREEN,
-	GIT_COLOR_BOLD_YELLOW,
-	GIT_COLOR_BOLD_BLUE,
-	GIT_COLOR_BOLD_MAGENTA,
-	GIT_COLOR_BOLD_CYAN,
+	GIT_COLOR_RED,       GIT_COLOR_GREEN,	GIT_COLOR_YELLOW,
+	GIT_COLOR_BLUE,      GIT_COLOR_MAGENTA,      GIT_COLOR_CYAN,
+	GIT_COLOR_BOLD_RED,  GIT_COLOR_BOLD_GREEN,   GIT_COLOR_BOLD_YELLOW,
+	GIT_COLOR_BOLD_BLUE, GIT_COLOR_BOLD_MAGENTA, GIT_COLOR_BOLD_CYAN,
 	GIT_COLOR_RESET,
 };
 
@@ -29,13 +21,11 @@ const int column_colors_ansi_max = ARRAY_SIZE(column_colors_ansi) - 1;
 
 /* An individual foreground or background color. */
 struct color {
-	enum {
-		COLOR_UNSPECIFIED = 0,
-		COLOR_NORMAL,
-		COLOR_ANSI, /* basic 0-7 ANSI colors */
-		COLOR_256,
-		COLOR_RGB
-	} type;
+	enum { COLOR_UNSPECIFIED = 0,
+	       COLOR_NORMAL,
+	       COLOR_ANSI, /* basic 0-7 ANSI colors */
+	       COLOR_256,
+	       COLOR_RGB } type;
 	/* The numeric value for ANSI and 256-color modes */
 	unsigned char value;
 	/* 24-bit RGB color values */
@@ -64,10 +54,9 @@ static int get_hex_color(const char *in, unsigned char *out)
 static int parse_color(struct color *out, const char *name, int len)
 {
 	/* Positions in array must match ANSI color codes */
-	static const char * const color_names[] = {
-		"black", "red", "green", "yellow",
-		"blue", "magenta", "cyan", "white"
-	};
+	static const char *const color_names[] = { "black",  "red",  "green",
+						   "yellow", "blue", "magenta",
+						   "cyan",   "white" };
 	char *end;
 	int i;
 	long val;
@@ -109,7 +98,8 @@ static int parse_color(struct color *out, const char *name, int len)
 		else if (val < 0) {
 			out->type = COLOR_NORMAL;
 			return 0;
-		/* Rewrite low numbers as more-portable standard colors. */
+			/* Rewrite low numbers as more-portable standard colors.
+			 */
 		} else if (val < 8) {
 			out->type = COLOR_ANSI;
 			out->value = val;
@@ -131,14 +121,11 @@ static int parse_attr(const char *name, size_t len)
 		size_t len;
 		int val, neg;
 	} attrs[] = {
-#define ATTR(x, val, neg) { (x), sizeof(x)-1, (val), (neg) }
-		ATTR("bold",      1, 22),
-		ATTR("dim",       2, 22),
-		ATTR("italic",    3, 23),
-		ATTR("ul",        4, 24),
-		ATTR("blink",     5, 25),
-		ATTR("reverse",   7, 27),
-		ATTR("strike",    9, 29)
+#define ATTR(x, val, neg) { (x), sizeof(x) - 1, (val), (neg) }
+		ATTR("bold", 1, 22),   ATTR("dim", 2, 22),
+		ATTR("italic", 3, 23), ATTR("ul", 4, 24),
+		ATTR("blink", 5, 25),  ATTR("reverse", 7, 27),
+		ATTR("strike", 9, 29)
 #undef ATTR
 	};
 	int negate = 0;
@@ -187,8 +174,8 @@ static char *color_output(char *out, int len, const struct color *c, char type)
 		out += xsnprintf(out, len, "%c8;5;%d", type, c->value);
 		break;
 	case COLOR_RGB:
-		out += xsnprintf(out, len, "%c8;2;%d;%d;%d", type,
-				 c->red, c->green, c->blue);
+		out += xsnprintf(out, len, "%c8;2;%d;%d;%d", type, c->red,
+				 c->green, c->blue);
 		break;
 	}
 	return out;
@@ -259,11 +246,12 @@ int color_parse_mem(const char *value, int value_len, char *dst)
 	}
 
 #undef OUT
-#define OUT(x) do { \
-	if (dst == end) \
-		die("BUG: color parsing ran out of space"); \
-	*dst++ = (x); \
-} while(0)
+#define OUT(x)                                                      \
+	do {                                                        \
+		if (dst == end)                                     \
+			die("BUG: color parsing ran out of space"); \
+		*dst++ = (x);                                       \
+	} while (0)
 
 	if (attr || !color_empty(&fg) || !color_empty(&bg)) {
 		int sep = 0;
@@ -378,7 +366,7 @@ void color_print_strbuf(FILE *fp, const char *color, const struct strbuf *sb)
 }
 
 static int color_vfprintf(FILE *fp, const char *color, const char *fmt,
-		va_list args, const char *trail)
+			  va_list args, const char *trail)
 {
 	int r = 0;
 
@@ -391,8 +379,6 @@ static int color_vfprintf(FILE *fp, const char *color, const char *fmt,
 		r += fprintf(fp, "%s", trail);
 	return r;
 }
-
-
 
 int color_fprintf(FILE *fp, const char *color, const char *fmt, ...)
 {

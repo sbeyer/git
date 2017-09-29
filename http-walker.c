@@ -13,12 +13,7 @@ struct alt_base {
 	struct alt_base *next;
 };
 
-enum object_request_state {
-	WAITING,
-	ABORTED,
-	ACTIVE,
-	COMPLETE
-};
+enum object_request_state { WAITING, ABORTED, ACTIVE, COMPLETE };
 
 struct object_request {
 	struct walker *walker;
@@ -50,8 +45,8 @@ static void fetch_alternates(struct walker *walker, const char *base);
 
 static void process_object_response(void *callback_data);
 
-static void start_object_request(struct walker *walker,
-				 struct object_request *obj_req)
+static void
+start_object_request(struct walker *walker, struct object_request *obj_req)
 {
 	struct active_request_slot *slot;
 	struct http_object_request *req;
@@ -87,8 +82,7 @@ static void finish_object_request(struct object_request *obj_req)
 
 static void process_object_response(void *callback_data)
 {
-	struct object_request *obj_req =
-		(struct object_request *)callback_data;
+	struct object_request *obj_req = (struct object_request *)callback_data;
 	struct walker *walker = obj_req->walker;
 	struct walker_data *data = walker->data;
 	struct alt_base *alt = data->alt;
@@ -100,8 +94,7 @@ static void process_object_response(void *callback_data)
 	if (missing_target(obj_req->req)) {
 		fetch_alternates(walker, alt->base);
 		if (obj_req->repo->next != NULL) {
-			obj_req->repo =
-				obj_req->repo->next;
+			obj_req->repo = obj_req->repo->next;
 			release_http_object_request(obj_req->req);
 			start_object_request(walker, obj_req);
 			return;
@@ -113,7 +106,7 @@ static void process_object_response(void *callback_data)
 
 static void release_object_request(struct object_request *obj_req)
 {
-	if (obj_req->req !=NULL && obj_req->req->localfile != -1)
+	if (obj_req->req != NULL && obj_req->req->localfile != -1)
 		error("fd leakage in release: %d", obj_req->req->localfile);
 
 	list_del(&obj_req->node);
@@ -126,7 +119,8 @@ static int fill_active_slot(struct walker *walker)
 	struct object_request *obj_req;
 	struct list_head *pos, *tmp, *head = &object_queue_head;
 
-	list_for_each_safe(pos, tmp, head) {
+	list_for_each_safe(pos, tmp, head)
+	{
 		obj_req = list_entry(pos, struct object_request, node);
 		if (obj_req->state == WAITING) {
 			if (has_sha1_file(obj_req->sha1))
@@ -164,9 +158,7 @@ static void prefetch(struct walker *walker, unsigned char *sha1)
 
 static int is_alternate_allowed(const char *url)
 {
-	const char *protocols[] = {
-		"http", "https", "ftp", "ftps"
-	};
+	const char *protocols[] = { "http", "https", "ftp", "ftps" };
 	int i;
 
 	if (http_follow_config != HTTP_FOLLOW_ALWAYS) {
@@ -176,8 +168,7 @@ static int is_alternate_allowed(const char *url)
 
 	for (i = 0; i < ARRAY_SIZE(protocols); i++) {
 		const char *end;
-		if (skip_prefix(url, protocols[i], &end) &&
-		    starts_with(end, "://"))
+		if (skip_prefix(url, protocols[i], &end) && starts_with(end, "://"))
 			break;
 	}
 
@@ -195,8 +186,7 @@ static int is_alternate_allowed(const char *url)
 
 static void process_alternates_response(void *callback_data)
 {
-	struct alternates_request *alt_req =
-		(struct alternates_request *)callback_data;
+	struct alternates_request *alt_req = (struct alternates_request *)callback_data;
 	struct walker *walker = alt_req->walker;
 	struct walker_data *cdata = walker->data;
 	struct active_request_slot *slot = alt_req->slot;
@@ -207,9 +197,7 @@ static void process_alternates_response(void *callback_data)
 	int i = 0;
 
 	if (alt_req->http_specific) {
-		if (slot->curl_result != CURLE_OK ||
-		    !alt_req->buffer->len) {
-
+		if (slot->curl_result != CURLE_OK || !alt_req->buffer->len) {
 			/* Try reusing the slot to get non-http alternates */
 			alt_req->http_specific = 0;
 			strbuf_reset(alt_req->url);
@@ -256,10 +244,10 @@ static void process_alternates_response(void *callback_data)
 				 * so memcpy(dst, base, serverlen) will
 				 * copy up to "...git.host".
 				 */
-				const char *colon_ss = strstr(base,"://");
+				const char *colon_ss = strstr(base, "://");
 				if (colon_ss) {
-					serverlen = (strchr(colon_ss + 3, '/')
-						     - base);
+					serverlen = (strchr(colon_ss + 3, '/') -
+						     base);
 					okay = 1;
 				}
 			} else if (!memcmp(data + i, "../", 3)) {
@@ -283,8 +271,7 @@ static void process_alternates_response(void *callback_data)
 				 */
 				i += 3;
 				serverlen = strlen(base);
-				while (i + 2 < posn &&
-				       !memcmp(data + i, "../", 3)) {
+				while (i + 2 < posn && !memcmp(data + i, "../", 3)) {
 					do {
 						serverlen--;
 					} while (serverlen &&
@@ -292,8 +279,7 @@ static void process_alternates_response(void *callback_data)
 					i += 3;
 				}
 				/* If the server got removed, give up. */
-				okay = strchr(base, ':') - base + 3 <
-				       serverlen;
+				okay = strchr(base, ':') - base + 3 < serverlen;
 			} else if (alt_req->http_specific) {
 				char *colon = strchr(data + i, ':');
 				char *slash = strchr(data + i, '/');
@@ -417,7 +403,8 @@ static int fetch_indices(struct walker *walker, struct alt_base *repo)
 	return ret;
 }
 
-static int http_fetch_pack(struct walker *walker, struct alt_base *repo, unsigned char *sha1)
+static int
+http_fetch_pack(struct walker *walker, struct alt_base *repo, unsigned char *sha1)
 {
 	struct packed_git *target;
 	int ret;
@@ -431,10 +418,8 @@ static int http_fetch_pack(struct walker *walker, struct alt_base *repo, unsigne
 		return -1;
 
 	if (walker->get_verbosely) {
-		fprintf(stderr, "Getting pack %s\n",
-			sha1_to_hex(target->sha1));
-		fprintf(stderr, " which contains %s\n",
-			sha1_to_hex(sha1));
+		fprintf(stderr, "Getting pack %s\n", sha1_to_hex(target->sha1));
+		fprintf(stderr, " which contains %s\n", sha1_to_hex(sha1));
 	}
 
 	preq = new_http_pack_request(target, repo->base);
@@ -479,7 +464,8 @@ static int fetch_object(struct walker *walker, unsigned char *sha1)
 	struct http_object_request *req;
 	struct list_head *pos, *head = &object_queue_head;
 
-	list_for_each(pos, head) {
+	list_for_each(pos, head)
+	{
 		obj_req = list_entry(pos, struct object_request, node);
 		if (!hashcmp(obj_req->sha1, sha1))
 			break;
@@ -521,8 +507,8 @@ static int fetch_object(struct walker *walker, unsigned char *sha1)
 	 * persistent connection and got CURLE_OK.
 	 */
 	if (req->http_code >= 300 && req->curl_result == CURLE_OK &&
-			(starts_with(req->url, "http://") ||
-			 starts_with(req->url, "https://"))) {
+	    (starts_with(req->url, "http://") ||
+	     starts_with(req->url, "https://"))) {
 		req->curl_result = CURLE_HTTP_RETURNED_ERROR;
 		xsnprintf(req->errorstr, sizeof(req->errorstr),
 			  "HTTP request failed");
@@ -530,8 +516,7 @@ static int fetch_object(struct walker *walker, unsigned char *sha1)
 
 	if (obj_req->state == ABORTED) {
 		ret = error("Request for %s aborted", hex);
-	} else if (req->curl_result != CURLE_OK &&
-		   req->http_code != 416) {
+	} else if (req->curl_result != CURLE_OK && req->http_code != 416) {
 		if (missing_target(req))
 			ret = -1; /* Be silent, it is probably in a pack. */
 		else
@@ -620,7 +605,7 @@ struct walker *get_http_walker(const char *url)
 	walker->data = data;
 
 #ifdef USE_CURL_MULTI
-	add_fill_function(walker, (int (*)(void *)) fill_active_slot);
+	add_fill_function(walker, (int (*)(void *))fill_active_slot);
 #endif
 
 	return walker;

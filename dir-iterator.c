@@ -19,10 +19,7 @@ struct dir_iterator_level {
 	 * (needed for directories, which have to be included in the
 	 * iteration and also iterated into):
 	 */
-	enum {
-		DIR_STATE_ITER,
-		DIR_STATE_RECURSE
-	} dir_state;
+	enum { DIR_STATE_ITER, DIR_STATE_RECURSE } dir_state;
 };
 
 /*
@@ -52,12 +49,10 @@ struct dir_iterator_int {
 
 int dir_iterator_advance(struct dir_iterator *dir_iterator)
 {
-	struct dir_iterator_int *iter =
-		(struct dir_iterator_int *)dir_iterator;
+	struct dir_iterator_int *iter = (struct dir_iterator_int *)dir_iterator;
 
 	while (1) {
-		struct dir_iterator_level *level =
-			&iter->levels[iter->levels_nr - 1];
+		struct dir_iterator_level *level = &iter->levels[iter->levels_nr - 1];
 		struct dirent *de;
 
 		if (!level->initialized) {
@@ -123,10 +118,12 @@ int dir_iterator_advance(struct dir_iterator *dir_iterator)
 				/* This level is exhausted; pop up a level. */
 				if (errno) {
 					warning("error reading directory %s: %s",
-						iter->base.path.buf, strerror(errno));
+						iter->base.path.buf,
+						strerror(errno));
 				} else if (closedir(level->dir))
 					warning("error closing directory %s: %s",
-						iter->base.path.buf, strerror(errno));
+						iter->base.path.buf,
+						strerror(errno));
 
 				level->dir = NULL;
 				if (--iter->levels_nr == 0)
@@ -150,10 +147,10 @@ int dir_iterator_advance(struct dir_iterator *dir_iterator)
 			 * We have to set these each time because
 			 * the path strbuf might have been realloc()ed.
 			 */
-			iter->base.relative_path =
-				iter->base.path.buf + iter->levels[0].prefix_len;
-			iter->base.basename =
-				iter->base.path.buf + level->prefix_len;
+			iter->base.relative_path = iter->base.path.buf +
+						   iter->levels[0].prefix_len;
+			iter->base.basename = iter->base.path.buf +
+					      level->prefix_len;
 			level->dir_state = DIR_STATE_ITER;
 
 			return ITER_OK;
@@ -166,8 +163,7 @@ int dir_iterator_abort(struct dir_iterator *dir_iterator)
 	struct dir_iterator_int *iter = (struct dir_iterator_int *)dir_iterator;
 
 	for (; iter->levels_nr; iter->levels_nr--) {
-		struct dir_iterator_level *level =
-			&iter->levels[iter->levels_nr - 1];
+		struct dir_iterator_level *level = &iter->levels[iter->levels_nr - 1];
 
 		if (level->dir && closedir(level->dir)) {
 			strbuf_setlen(&iter->base.path, level->prefix_len);

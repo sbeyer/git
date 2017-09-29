@@ -8,7 +8,7 @@ struct transport;
  * When called after returning the name for the last object, return -1
  * to signal EOF, otherwise return 0.
  */
-typedef int (*sha1_iterate_fn)(void *, unsigned char [20]);
+typedef int (*sha1_iterate_fn)(void *, unsigned char[20]);
 
 /*
  * Named-arguments struct for check_connected. All arguments are
@@ -40,7 +40,10 @@ struct check_connected_options {
 	const char **env;
 };
 
-#define CHECK_CONNECTED_INIT { 0 }
+#define CHECK_CONNECTED_INIT \
+	{                    \
+		0            \
+	}
 
 /*
  * Make sure that our object store has all the commits necessary to

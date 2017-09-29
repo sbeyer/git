@@ -23,13 +23,16 @@
  * combine_notes_concatenate(), which appends the contents of the new note to
  * the contents of the existing note.
  */
-typedef int (*combine_notes_fn)(unsigned char *cur_sha1, const unsigned char *new_sha1);
+typedef int (*combine_notes_fn)(unsigned char *cur_sha1,
+				const unsigned char *new_sha1);
 
 /* Common notes combinators */
-int combine_notes_concatenate(unsigned char *cur_sha1, const unsigned char *new_sha1);
+int combine_notes_concatenate(unsigned char *cur_sha1,
+			      const unsigned char *new_sha1);
 int combine_notes_overwrite(unsigned char *cur_sha1, const unsigned char *new_sha1);
 int combine_notes_ignore(unsigned char *cur_sha1, const unsigned char *new_sha1);
-int combine_notes_cat_sort_uniq(unsigned char *cur_sha1, const unsigned char *new_sha1);
+int combine_notes_cat_sort_uniq(unsigned char *cur_sha1,
+				const unsigned char *new_sha1);
 
 /*
  * Notes tree object
@@ -122,7 +125,7 @@ void init_notes(struct notes_tree *t, const char *notes_ref,
  * zero.
  */
 int add_note(struct notes_tree *t, const struct object_id *object_oid,
-		const struct object_id *note_oid, combine_notes_fn combine_notes);
+	     const struct object_id *note_oid, combine_notes_fn combine_notes);
 
 /*
  * Remove the given note object from the given notes_tree structure
@@ -140,8 +143,8 @@ int remove_note(struct notes_tree *t, const unsigned char *object_sha1);
  *
  * Return NULL if the given object has no notes.
  */
-const struct object_id *get_note(struct notes_tree *t,
-		const struct object_id *object_oid);
+const struct object_id *
+get_note(struct notes_tree *t, const struct object_id *object_oid);
 
 /*
  * Copy a note from one object to another in the given notes_tree.
@@ -155,9 +158,9 @@ const struct object_id *get_note(struct notes_tree *t,
  * are not persistent until a subsequent call to write_notes_tree() returns
  * zero.
  */
-int copy_note(struct notes_tree *t,
-	      const struct object_id *from_obj, const struct object_id *to_obj,
-	      int force, combine_notes_fn combine_notes);
+int copy_note(struct notes_tree *t, const struct object_id *from_obj,
+	      const struct object_id *to_obj, int force,
+	      combine_notes_fn combine_notes);
 
 /*
  * Flags controlling behaviour of for_each_note()
@@ -202,11 +205,10 @@ int copy_note(struct notes_tree *t,
  * - copy_note()
  * - free_notes()
  */
-typedef int each_note_fn(const struct object_id *object_oid,
-		const struct object_id *note_oid, char *note_path,
-		void *cb_data);
-int for_each_note(struct notes_tree *t, int flags, each_note_fn fn,
-		void *cb_data);
+typedef int
+each_note_fn(const struct object_id *object_oid,
+	     const struct object_id *note_oid, char *note_path, void *cb_data);
+int for_each_note(struct notes_tree *t, int flags, each_note_fn fn, void *cb_data);
 
 /*
  * Write the given notes_tree structure to the object database
@@ -277,8 +279,8 @@ void init_display_notes(struct display_notes_opt *opt);
  *
  * You *must* call init_display_notes() before using this function.
  */
-void format_display_notes(const struct object_id *object_oid,
-			  struct strbuf *sb, const char *output_encoding, int raw);
+void format_display_notes(const struct object_id *object_oid, struct strbuf *sb,
+			  const char *output_encoding, int raw);
 
 /*
  * Load the notes tree from each ref listed in 'refs'.  The output is

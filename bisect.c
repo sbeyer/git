@@ -18,14 +18,14 @@ static struct oid_array skipped_revs;
 
 static struct object_id *current_bad_oid;
 
-static const char *argv_checkout[] = {"checkout", "-q", NULL, "--", NULL};
-static const char *argv_show_branch[] = {"show-branch", NULL, NULL};
+static const char *argv_checkout[] = { "checkout", "-q", NULL, "--", NULL };
+static const char *argv_show_branch[] = { "show-branch", NULL, NULL };
 
 static const char *term_bad;
 static const char *term_good;
 
 /* Remember to update object flag allocation in object.h */
-#define COUNTED		(1u<<16)
+#define COUNTED (1u << 16)
 
 /*
  * This is a truly stupid algorithm, but it's only
@@ -74,12 +74,12 @@ static void clear_distance(struct commit_list *list)
 
 static inline int weight(struct commit_list *elem)
 {
-	return *((int*)(elem->item->util));
+	return *((int *)(elem->item->util));
 }
 
 static inline void weight_set(struct commit_list *elem, int weight)
 {
-	*((int*)(elem->item->util)) = weight;
+	*((int *)(elem->item->util)) = weight;
 }
 
 static int count_interesting_parents(struct commit *commit)
@@ -109,7 +109,9 @@ static inline int halfway(struct commit_list *p, int nr)
 	 * 3 is halfway of 6 but 2 and 4 are not.
 	 */
 	switch (2 * weight(p) - nr) {
-	case -1: case 0: case 1:
+	case -1:
+	case 0:
+	case 1:
 		return 1;
 	default:
 		return 0;
@@ -117,10 +119,13 @@ static inline int halfway(struct commit_list *p, int nr)
 }
 
 #if !DEBUG_BISECT
-#define show_list(a,b,c,d) do { ; } while (0)
+#define show_list(a, b, c, d) \
+	do {                  \
+		;             \
+	} while (0)
 #else
-static void show_list(const char *debug, int counted, int nr,
-		      struct commit_list *list)
+static void
+show_list(const char *debug, int counted, int nr, struct commit_list *list)
 {
 	struct commit_list *p;
 
@@ -136,8 +141,7 @@ static void show_list(const char *debug, int counted, int nr,
 		const char *subject_start;
 		int subject_len;
 
-		fprintf(stderr, "%c%c%c ",
-			(flags & TREESAME) ? ' ' : 'T',
+		fprintf(stderr, "%c%c%c ", (flags & TREESAME) ? ' ' : 'T',
 			(flags & UNINTERESTING) ? 'U' : ' ',
 			(flags & COUNTED) ? 'C' : ' ');
 		if (commit->util)
@@ -248,9 +252,8 @@ static struct commit_list *best_bisection_sorted(struct commit_list *list, int n
  * unknown.  After running count_distance() first, they will get zero
  * or positive distance.
  */
-static struct commit_list *do_find_bisection(struct commit_list *list,
-					     int nr, int *weights,
-					     int find_all)
+static struct commit_list *
+do_find_bisection(struct commit_list *list, int nr, int *weights, int find_all)
 {
 	int n, counted;
 	struct commit_list *p;
@@ -267,8 +270,8 @@ static struct commit_list *do_find_bisection(struct commit_list *list,
 			if (!(flags & TREESAME)) {
 				weight_set(p, 1);
 				counted++;
-				show_list("bisection 2 count one",
-					  counted, nr, list);
+				show_list("bisection 2 count one", counted, nr,
+					  list);
 			}
 			/*
 			 * otherwise, it is known not to reach any
@@ -338,12 +341,11 @@ static struct commit_list *do_find_bisection(struct commit_list *list,
 			 * otherwise inherit it from q directly.
 			 */
 			if (!(flags & TREESAME)) {
-				weight_set(p, weight(q)+1);
+				weight_set(p, weight(q) + 1);
 				counted++;
-				show_list("bisection 2 count one",
-					  counted, nr, list);
-			}
-			else
+				show_list("bisection 2 count one", counted, nr,
+					  list);
+			} else
 				weight_set(p, weight(q));
 
 			/* Does it happen to be at exactly half-way? */
@@ -360,9 +362,8 @@ static struct commit_list *do_find_bisection(struct commit_list *list,
 		return best_bisection_sorted(list, nr);
 }
 
-struct commit_list *find_bisection(struct commit_list *list,
-					  int *reaches, int *all,
-					  int find_all)
+struct commit_list *
+find_bisection(struct commit_list *list, int *reaches, int *all, int find_all)
 {
 	int nr, on_list;
 	struct commit_list *p, *best, *next, *last;
@@ -374,9 +375,7 @@ struct commit_list *find_bisection(struct commit_list *list,
 	 * Count the number of total and tree-changing items on the
 	 * list, while reversing the list.
 	 */
-	for (nr = on_list = 0, last = NULL, p = list;
-	     p;
-	     p = next) {
+	for (nr = on_list = 0, last = NULL, p = list; p; p = next) {
 		unsigned flags = p->item->object.flags;
 
 		next = p->next;
@@ -431,11 +430,12 @@ static int read_bisect_refs(void)
 	return for_each_ref_in("refs/bisect/", register_ref, NULL);
 }
 
-static GIT_PATH_FUNC(git_path_bisect_names, "BISECT_NAMES")
-static GIT_PATH_FUNC(git_path_bisect_expected_rev, "BISECT_EXPECTED_REV")
-static GIT_PATH_FUNC(git_path_bisect_terms, "BISECT_TERMS")
+static GIT_PATH_FUNC(git_path_bisect_names, "BISECT_NAMES") static GIT_PATH_FUNC(
+	git_path_bisect_expected_rev,
+	"BISECT_EXPECTED_REV") static GIT_PATH_FUNC(git_path_bisect_terms,
+						    "BISECT_TERMS")
 
-static void read_bisect_paths(struct argv_array *array)
+	static void read_bisect_paths(struct argv_array *array)
 {
 	struct strbuf str = STRBUF_INIT;
 	const char *filename = git_path_bisect_names();
@@ -479,11 +479,9 @@ static char *join_sha1_array_hex(struct oid_array *array, char delim)
  * first commit is not skipped". In this case *skipped_first is set back
  * to 0 just before the function returns.
  */
-struct commit_list *filter_skipped(struct commit_list *list,
-				   struct commit_list **tried,
-				   int show_all,
-				   int *count,
-				   int *skipped_first)
+struct commit_list *
+filter_skipped(struct commit_list *list, struct commit_list **tried,
+	       int show_all, int *count, int *skipped_first)
 {
 	struct commit_list *filtered = NULL, **f = &filtered;
 
@@ -537,9 +535,10 @@ struct commit_list *filter_skipped(struct commit_list *list,
  * is increased by one between each call, but that should not matter
  * for this application.
  */
-static unsigned get_prn(unsigned count) {
+static unsigned get_prn(unsigned count)
+{
 	count = count * 1103515245 + 12345;
-	return (count/65536) % PRN_MODULO;
+	return (count / 65536) % PRN_MODULO;
 }
 
 /*
@@ -587,8 +586,8 @@ static struct commit_list *skip_away(struct commit_list *list, int count)
 	return list;
 }
 
-static struct commit_list *managed_skipped(struct commit_list *list,
-					   struct commit_list **tried)
+static struct commit_list *
+managed_skipped(struct commit_list *list, struct commit_list **tried)
 {
 	int count, skipped_first;
 
@@ -605,9 +604,9 @@ static struct commit_list *managed_skipped(struct commit_list *list,
 	return skip_away(list, count);
 }
 
-static void bisect_rev_setup(struct rev_info *revs, const char *prefix,
-			     const char *bad_format, const char *good_format,
-			     int read_paths)
+static void
+bisect_rev_setup(struct rev_info *revs, const char *prefix,
+		 const char *bad_format, const char *good_format, int read_paths)
 {
 	struct argv_array rev_argv = ARGV_ARRAY_INIT;
 	int i;
@@ -638,16 +637,17 @@ static void bisect_common(struct rev_info *revs)
 		mark_edges_uninteresting(revs, NULL);
 }
 
-static void exit_if_skipped_commits(struct commit_list *tried,
-				    const struct object_id *bad)
+static void
+exit_if_skipped_commits(struct commit_list *tried, const struct object_id *bad)
 {
 	if (!tried)
 		return;
 
 	printf("There are only 'skip'ped commits left to test.\n"
-	       "The first %s commit could be any of:\n", term_bad);
+	       "The first %s commit could be any of:\n",
+	       term_bad);
 
-	for ( ; tried; tried = tried->next)
+	for (; tried; tried = tried->next)
 		printf("%s\n", oid_to_hex(&tried->item->object.oid));
 
 	if (bad)
@@ -685,11 +685,13 @@ static int bisect_checkout(const struct object_id *bisect_rev, int no_checkout)
 	char bisect_rev_hex[GIT_MAX_HEXSZ + 1];
 
 	memcpy(bisect_rev_hex, oid_to_hex(bisect_rev), GIT_SHA1_HEXSZ + 1);
-	update_ref(NULL, "BISECT_EXPECTED_REV", bisect_rev->hash, NULL, 0, UPDATE_REFS_DIE_ON_ERR);
+	update_ref(NULL, "BISECT_EXPECTED_REV", bisect_rev->hash, NULL, 0,
+		   UPDATE_REFS_DIE_ON_ERR);
 
 	argv_checkout[2] = bisect_rev_hex;
 	if (no_checkout) {
-		update_ref(NULL, "BISECT_HEAD", bisect_rev->hash, NULL, 0, UPDATE_REFS_DIE_ON_ERR);
+		update_ref(NULL, "BISECT_HEAD", bisect_rev->hash, NULL, 0,
+			   UPDATE_REFS_DIE_ON_ERR);
 	} else {
 		int res;
 		res = run_command_v_opt(argv_checkout, RUN_GIT_CMD);
@@ -729,27 +731,31 @@ static void handle_bad_merge_base(void)
 		char *bad_hex = oid_to_hex(current_bad_oid);
 		char *good_hex = join_sha1_array_hex(&good_revs, ' ');
 		if (!strcmp(term_bad, "bad") && !strcmp(term_good, "good")) {
-			fprintf(stderr, _("The merge base %s is bad.\n"
-				"This means the bug has been fixed "
-				"between %s and [%s].\n"),
+			fprintf(stderr,
+				_("The merge base %s is bad.\n"
+				  "This means the bug has been fixed "
+				  "between %s and [%s].\n"),
 				bad_hex, bad_hex, good_hex);
 		} else if (!strcmp(term_bad, "new") && !strcmp(term_good, "old")) {
-			fprintf(stderr, _("The merge base %s is new.\n"
-				"The property has changed "
-				"between %s and [%s].\n"),
+			fprintf(stderr,
+				_("The merge base %s is new.\n"
+				  "The property has changed "
+				  "between %s and [%s].\n"),
 				bad_hex, bad_hex, good_hex);
 		} else {
-			fprintf(stderr, _("The merge base %s is %s.\n"
-				"This means the first '%s' commit is "
-				"between %s and [%s].\n"),
+			fprintf(stderr,
+				_("The merge base %s is %s.\n"
+				  "This means the first '%s' commit is "
+				  "between %s and [%s].\n"),
 				bad_hex, term_bad, term_good, bad_hex, good_hex);
 		}
 		exit(3);
 	}
 
-	fprintf(stderr, _("Some %s revs are not ancestors of the %s rev.\n"
-		"git bisect cannot work properly in this case.\n"
-		"Maybe you mistook %s and %s revs?\n"),
+	fprintf(stderr,
+		_("Some %s revs are not ancestors of the %s rev.\n"
+		  "git bisect cannot work properly in this case.\n"
+		  "Maybe you mistook %s and %s revs?\n"),
 		term_good, term_bad, term_good, term_bad);
 	exit(1);
 }
@@ -761,10 +767,10 @@ static void handle_skipped_merge_base(const struct object_id *mb)
 	char *good_hex = join_sha1_array_hex(&good_revs, ' ');
 
 	warning(_("the merge base between %s and [%s] "
-		"must be skipped.\n"
-		"So we cannot be sure the first %s commit is "
-		"between %s and %s.\n"
-		"We continue anyway."),
+		  "must be skipped.\n"
+		  "So we cannot be sure the first %s commit is "
+		  "between %s and %s.\n"
+		  "We continue anyway."),
 		bad_hex, good_hex, term_bad, mb_hex, bad_hex);
 	free(good_hex);
 }
@@ -864,11 +870,10 @@ static void check_good_are_ancestors_of_bad(const char *prefix, int no_checkout)
 	/* Create file BISECT_ANCESTORS_OK. */
 	fd = open(filename, O_CREAT | O_TRUNC | O_WRONLY, 0600);
 	if (fd < 0)
-		warning_errno(_("could not create file '%s'"),
-			      filename);
+		warning_errno(_("could not create file '%s'"), filename);
 	else
 		close(fd);
- done:
+done:
 	free(filename);
 }
 
@@ -955,7 +960,7 @@ int bisect_next_all(const char *prefix, int no_checkout)
 	bisect_common(&revs);
 
 	revs.commits = find_bisection(revs.commits, &reaches, &all,
-				       !!skipped_revs.nr);
+				      !!skipped_revs.nr);
 	revs.commits = managed_skipped(revs.commits, &tried);
 
 	if (!revs.commits) {
@@ -966,15 +971,13 @@ int bisect_next_all(const char *prefix, int no_checkout)
 		exit_if_skipped_commits(tried, NULL);
 
 		printf(_("%s was both %s and %s\n"),
-		       oid_to_hex(current_bad_oid),
-		       term_good,
-		       term_bad);
+		       oid_to_hex(current_bad_oid), term_good, term_bad);
 		exit(1);
 	}
 
 	if (!all) {
 		fprintf(stderr, _("No testable commit found.\n"
-			"Maybe you started with bad path parameters?\n"));
+				  "Maybe you started with bad path parameters?\n"));
 		exit(4);
 	}
 
@@ -983,7 +986,7 @@ int bisect_next_all(const char *prefix, int no_checkout)
 	if (!oidcmp(bisect_rev, current_bad_oid)) {
 		exit_if_skipped_commits(tried, current_bad_oid);
 		printf("%s is the first %s commit\n", oid_to_hex(bisect_rev),
-			term_bad);
+		       term_bad);
 		show_diff_tree(prefix, revs.commits->item);
 		/* This means the bisection process succeeded. */
 		exit(10);
@@ -992,15 +995,15 @@ int bisect_next_all(const char *prefix, int no_checkout)
 	nr = all - reaches - 1;
 	steps = estimate_bisect_steps(all);
 
-	steps_msg = xstrfmt(Q_("(roughly %d step)", "(roughly %d steps)",
-		  steps), steps);
+	steps_msg = xstrfmt(Q_("(roughly %d step)", "(roughly %d steps)", steps),
+			    steps);
 	/*
 	 * TRANSLATORS: the last %s will be replaced with "(roughly %d
 	 * steps)" translation.
 	 */
 	printf(Q_("Bisecting: %d revision left to test after this %s\n",
-		  "Bisecting: %d revisions left to test after this %s\n",
-		  nr), nr, steps_msg);
+		  "Bisecting: %d revisions left to test after this %s\n", nr),
+	       nr, steps_msg);
 	free(steps_msg);
 
 	return bisect_checkout(bisect_rev, no_checkout);

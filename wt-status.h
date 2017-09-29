@@ -29,8 +29,8 @@ enum untracked_status_type {
 
 /* from where does this commit originate */
 enum commit_whence {
-	FROM_COMMIT,     /* normal */
-	FROM_MERGE,      /* commit came from merge */
+	FROM_COMMIT, /* normal */
+	FROM_MERGE, /* commit came from merge */
 	FROM_CHERRY_PICK /* commit came from cherry-pick */
 };
 
@@ -42,7 +42,7 @@ struct wt_status_change_data {
 	int mode_head, mode_index, mode_worktree;
 	struct object_id oid_head, oid_index;
 	char *head_path;
-	unsigned dirty_submodule       : 2;
+	unsigned dirty_submodule : 2;
 	unsigned new_submodule_commits : 1;
 };
 
@@ -125,15 +125,16 @@ int wt_status_check_rebase(const struct worktree *wt,
 int wt_status_check_bisect(const struct worktree *wt,
 			   struct wt_status_state *state);
 
-__attribute__((format (printf, 3, 4)))
-void status_printf_ln(struct wt_status *s, const char *color, const char *fmt, ...);
-__attribute__((format (printf, 3, 4)))
-void status_printf(struct wt_status *s, const char *color, const char *fmt, ...);
+__attribute__((format(printf, 3, 4))) void
+status_printf_ln(struct wt_status *s, const char *color, const char *fmt, ...);
+__attribute__((format(printf, 3, 4))) void
+status_printf(struct wt_status *s, const char *color, const char *fmt, ...);
 
-/* The following functions expect that the caller took care of reading the index. */
+/* The following functions expect that the caller took care of reading the
+ * index. */
 int has_unstaged_changes(int ignore_submodules);
 int has_uncommitted_changes(int ignore_submodules);
 int require_clean_work_tree(const char *action, const char *hint,
-	int ignore_submodules, int gently);
+			    int ignore_submodules, int gently);
 
 #endif /* STATUS_H */

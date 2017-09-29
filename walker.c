@@ -22,8 +22,7 @@ void walker_say(struct walker *walker, const char *fmt, ...)
 static void report_missing(const struct object *obj)
 {
 	fprintf(stderr, "Cannot obtain needed %s %s\n",
-		obj->type ? typename(obj->type): "object",
-		oid_to_hex(&obj->oid));
+		obj->type ? typename(obj->type) : "object", oid_to_hex(&obj->oid));
 	if (!is_null_sha1(current_commit_sha1))
 		fprintf(stderr, "while processing commit %s.\n",
 			sha1_to_hex(current_commit_sha1));
@@ -50,8 +49,7 @@ static int process_tree(struct walker *walker, struct tree *tree)
 			struct tree *tree = lookup_tree(entry.oid);
 			if (tree)
 				obj = &tree->object;
-		}
-		else {
+		} else {
 			struct blob *blob = lookup_blob(entry.oid);
 			if (blob)
 				obj = &blob->object;
@@ -64,9 +62,9 @@ static int process_tree(struct walker *walker, struct tree *tree)
 }
 
 /* Remember to update object flag allocation in object.h */
-#define COMPLETE	(1U << 0)
-#define SEEN		(1U << 1)
-#define TO_SCAN		(1U << 2)
+#define COMPLETE (1U << 0)
+#define SEEN (1U << 1)
+#define TO_SCAN (1U << 2)
 
 static struct commit_list *complete = NULL;
 
@@ -146,8 +144,7 @@ static int process(struct walker *walker, struct object *obj)
 	if (has_object_file(&obj->oid)) {
 		/* We already have it, so we should scan it now. */
 		obj->flags |= TO_SCAN;
-	}
-	else {
+	} else {
 		if (obj->flags & COMPLETE)
 			return 0;
 		walker->prefetch(walker, obj->oid.hash);
@@ -173,7 +170,7 @@ static int loop(struct walker *walker)
 		/* If we are not scanning this object, we placed it in
 		 * the queue because we needed to fetch it first.
 		 */
-		if (! (obj->flags & TO_SCAN)) {
+		if (!(obj->flags & TO_SCAN)) {
 			if (walker->fetch(walker, obj->oid.hash)) {
 				report_missing(obj);
 				return -1;
@@ -187,7 +184,8 @@ static int loop(struct walker *walker)
 	return 0;
 }
 
-static int interpret_target(struct walker *walker, char *target, unsigned char *sha1)
+static int
+interpret_target(struct walker *walker, char *target, unsigned char *sha1)
 {
 	if (!get_sha1_hex(target, sha1))
 		return 0;
@@ -219,7 +217,8 @@ int walker_targets_stdin(char ***target, const char ***write_ref)
 {
 	int targets = 0, targets_alloc = 0;
 	struct strbuf buf = STRBUF_INIT;
-	*target = NULL; *write_ref = NULL;
+	*target = NULL;
+	*write_ref = NULL;
 	while (1) {
 		char *rf_one = NULL;
 		char *tg_one;
@@ -249,7 +248,7 @@ void walker_targets_free(int targets, char **target, const char **write_ref)
 	while (targets--) {
 		free(target[targets]);
 		if (write_ref)
-			free((char *) write_ref[targets]);
+			free((char *)write_ref[targets]);
 	}
 }
 
@@ -280,7 +279,8 @@ int walker_fetch(struct walker *walker, int targets, char **target,
 
 	for (i = 0; i < targets; i++) {
 		if (interpret_target(walker, target[i], &sha1[20 * i])) {
-			error("Could not interpret response from server '%s' as something to pull", target[i]);
+			error("Could not interpret response from server '%s' as something to pull",
+			      target[i]);
 			goto done;
 		}
 		if (process(walker, lookup_unknown_object(&sha1[20 * i])))
@@ -305,8 +305,7 @@ int walker_fetch(struct walker *walker, int targets, char **target,
 		strbuf_addf(&refname, "refs/%s", write_ref[i]);
 		if (ref_transaction_update(transaction, refname.buf,
 					   &sha1[20 * i], NULL, 0,
-					   msg ? msg : "fetch (unknown)",
-					   &err)) {
+					   msg ? msg : "fetch (unknown)", &err)) {
 			error("%s", err.buf);
 			goto done;
 		}

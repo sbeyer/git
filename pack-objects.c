@@ -4,8 +4,7 @@
 #include "pack-objects.h"
 
 static uint32_t locate_object_entry_hash(struct packing_data *pdata,
-					 const unsigned char *sha1,
-					 int *found)
+					 const unsigned char *sha1, int *found)
 {
 	uint32_t i, mask = (pdata->index_size - 1);
 
@@ -53,8 +52,7 @@ static void rehash_objects(struct packing_data *pdata)
 
 	for (i = 0; i < pdata->nr_objects; i++) {
 		int found;
-		uint32_t ix = locate_object_entry_hash(pdata,
-						       entry->idx.oid.hash,
+		uint32_t ix = locate_object_entry_hash(pdata, entry->idx.oid.hash,
 						       &found);
 
 		if (found)
@@ -66,8 +64,7 @@ static void rehash_objects(struct packing_data *pdata)
 }
 
 struct object_entry *packlist_find(struct packing_data *pdata,
-				   const unsigned char *sha1,
-				   uint32_t *index_pos)
+				   const unsigned char *sha1, uint32_t *index_pos)
 {
 	uint32_t i;
 	int found;
@@ -87,13 +84,12 @@ struct object_entry *packlist_find(struct packing_data *pdata,
 }
 
 struct object_entry *packlist_alloc(struct packing_data *pdata,
-				    const unsigned char *sha1,
-				    uint32_t index_pos)
+				    const unsigned char *sha1, uint32_t index_pos)
 {
 	struct object_entry *new_entry;
 
 	if (pdata->nr_objects >= pdata->nr_alloc) {
-		pdata->nr_alloc = (pdata->nr_alloc  + 1024) * 3 / 2;
+		pdata->nr_alloc = (pdata->nr_alloc + 1024) * 3 / 2;
 		REALLOC_ARRAY(pdata->objects, pdata->nr_alloc);
 	}
 

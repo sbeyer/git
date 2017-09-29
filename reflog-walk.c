@@ -15,13 +15,13 @@ struct complete_reflogs {
 		timestamp_t timestamp;
 		int tz;
 		char *message;
-	} *items;
+	} * items;
 	int nr, alloc;
 };
 
 static int read_one_reflog(struct object_id *ooid, struct object_id *noid,
-		const char *email, timestamp_t timestamp, int tz,
-		const char *message, void *cb_data)
+			   const char *email, timestamp_t timestamp, int tz,
+			   const char *message, void *cb_data)
 {
 	struct complete_reflogs *array = cb_data;
 	struct reflog_info *item;
@@ -56,8 +56,8 @@ static void free_complete_reflog(struct complete_reflogs *array)
 
 static struct complete_reflogs *read_complete_reflog(const char *ref)
 {
-	struct complete_reflogs *reflogs =
-		xcalloc(1, sizeof(struct complete_reflogs));
+	struct complete_reflogs *reflogs = xcalloc(1,
+						   sizeof(struct complete_reflogs));
 	reflogs->ref = xstrdup(ref);
 	for_each_reflog_ent(ref, read_one_reflog, reflogs);
 	if (reflogs->nr == 0) {
@@ -84,8 +84,8 @@ static struct complete_reflogs *read_complete_reflog(const char *ref)
 	return reflogs;
 }
 
-static int get_reflog_recno_by_time(struct complete_reflogs *array,
-	timestamp_t timestamp)
+static int
+get_reflog_recno_by_time(struct complete_reflogs *array, timestamp_t timestamp)
 {
 	int i;
 	for (i = array->nr - 1; i >= 0; i--)
@@ -117,8 +117,8 @@ void init_reflog_walk(struct reflog_walk_info **info)
 	(*info)->complete_reflogs.strdup_strings = 1;
 }
 
-int add_reflog_for_walk(struct reflog_walk_info *info,
-		struct commit *commit, const char *name)
+int add_reflog_for_walk(struct reflog_walk_info *info, struct commit *commit,
+			const char *name)
 {
 	timestamp_t timestamp = 0;
 	int recno = -1;
@@ -129,7 +129,7 @@ int add_reflog_for_walk(struct reflog_walk_info *info,
 	enum selector_type selector = SELECTOR_NONE;
 
 	if (commit->object.flags & UNINTERESTING)
-		die ("Cannot walk reflogs for %s", name);
+		die("Cannot walk reflogs for %s", name);
 
 	branch = xstrdup(name);
 	if (at && at[1] == '{') {
@@ -140,8 +140,7 @@ int add_reflog_for_walk(struct reflog_walk_info *info,
 			recno = -1;
 			timestamp = approxidate(at + 2);
 			selector = SELECTOR_DATE;
-		}
-		else
+		} else
 			selector = SELECTOR_INDEX;
 	} else
 		recno = 0;
@@ -155,15 +154,13 @@ int add_reflog_for_walk(struct reflog_walk_info *info,
 			free(branch);
 			branch = resolve_refdup("HEAD", 0, oid.hash, NULL);
 			if (!branch)
-				die ("No current branch");
-
+				die("No current branch");
 		}
 		reflogs = read_complete_reflog(branch);
 		if (!reflogs || reflogs->nr == 0) {
 			struct object_id oid;
 			char *b;
-			int ret = dwim_log(branch, strlen(branch),
-					   oid.hash, &b);
+			int ret = dwim_log(branch, strlen(branch), oid.hash, &b);
 			if (ret > 1)
 				free(b);
 			else if (ret == 1) {
@@ -178,8 +175,7 @@ int add_reflog_for_walk(struct reflog_walk_info *info,
 			free(branch);
 			return -1;
 		}
-		string_list_insert(&info->complete_reflogs, branch)->util
-			= reflogs;
+		string_list_insert(&info->complete_reflogs, branch)->util = reflogs;
 	}
 	free(branch);
 
@@ -201,10 +197,8 @@ int add_reflog_for_walk(struct reflog_walk_info *info,
 	return 0;
 }
 
-void get_reflog_selector(struct strbuf *sb,
-			 struct reflog_walk_info *reflog_info,
-			 const struct date_mode *dmode, int force_date,
-			 int shorten)
+void get_reflog_selector(struct strbuf *sb, struct reflog_walk_info *reflog_info,
+			 const struct date_mode *dmode, int force_date, int shorten)
 {
 	struct commit_reflog *commit_reflog = reflog_info->last_commit_reflog;
 	struct reflog_info *info;
@@ -215,8 +209,8 @@ void get_reflog_selector(struct strbuf *sb,
 
 	if (shorten) {
 		if (!commit_reflog->reflogs->short_ref)
-			commit_reflog->reflogs->short_ref
-				= shorten_unambiguous_ref(commit_reflog->reflogs->ref, 0);
+			commit_reflog->reflogs->short_ref = shorten_unambiguous_ref(
+				commit_reflog->reflogs->ref, 0);
 		printed_ref = commit_reflog->reflogs->short_ref;
 	} else {
 		printed_ref = commit_reflog->reflogs->ref;
@@ -225,18 +219,17 @@ void get_reflog_selector(struct strbuf *sb,
 	strbuf_addf(sb, "%s@{", printed_ref);
 	if (commit_reflog->selector == SELECTOR_DATE ||
 	    (commit_reflog->selector == SELECTOR_NONE && force_date)) {
-		info = &commit_reflog->reflogs->items[commit_reflog->recno+1];
+		info = &commit_reflog->reflogs->items[commit_reflog->recno + 1];
 		strbuf_addstr(sb, show_date(info->timestamp, info->tz, dmode));
 	} else {
-		strbuf_addf(sb, "%d", commit_reflog->reflogs->nr
-			    - 2 - commit_reflog->recno);
+		strbuf_addf(sb, "%d",
+			    commit_reflog->reflogs->nr - 2 - commit_reflog->recno);
 	}
 
 	strbuf_addch(sb, '}');
 }
 
-void get_reflog_message(struct strbuf *sb,
-			struct reflog_walk_info *reflog_info)
+void get_reflog_message(struct strbuf *sb, struct reflog_walk_info *reflog_info)
 {
 	struct commit_reflog *commit_reflog = reflog_info->last_commit_reflog;
 	struct reflog_info *info;
@@ -245,7 +238,7 @@ void get_reflog_message(struct strbuf *sb,
 	if (!commit_reflog)
 		return;
 
-	info = &commit_reflog->reflogs->items[commit_reflog->recno+1];
+	info = &commit_reflog->reflogs->items[commit_reflog->recno + 1];
 	len = strlen(info->message);
 	if (len > 0)
 		len--; /* strip away trailing newline */
@@ -260,7 +253,7 @@ const char *get_reflog_ident(struct reflog_walk_info *reflog_info)
 	if (!commit_reflog)
 		return NULL;
 
-	info = &commit_reflog->reflogs->items[commit_reflog->recno+1];
+	info = &commit_reflog->reflogs->items[commit_reflog->recno + 1];
 	return info->email;
 }
 
@@ -272,7 +265,7 @@ timestamp_t get_reflog_timestamp(struct reflog_walk_info *reflog_info)
 	if (!commit_reflog)
 		return 0;
 
-	info = &commit_reflog->reflogs->items[commit_reflog->recno+1];
+	info = &commit_reflog->reflogs->items[commit_reflog->recno + 1];
 	return info->timestamp;
 }
 
@@ -284,12 +277,11 @@ void show_reflog_message(struct reflog_walk_info *reflog_info, int oneline,
 		struct reflog_info *info;
 		struct strbuf selector = STRBUF_INIT;
 
-		info = &commit_reflog->reflogs->items[commit_reflog->recno+1];
+		info = &commit_reflog->reflogs->items[commit_reflog->recno + 1];
 		get_reflog_selector(&selector, reflog_info, dmode, force_date, 0);
 		if (oneline) {
 			printf("%s: %s", selector.buf, info->message);
-		}
-		else {
+		} else {
 			printf("Reflog: %s (%s)\nReflog message: %s",
 			       selector.buf, info->email, info->message);
 		}

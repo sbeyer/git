@@ -105,13 +105,12 @@ extern const char git_more_info_string[];
 extern void prune_packed_objects(int);
 
 struct fmt_merge_msg_opts {
-	unsigned add_title:1,
-		credit_people:1;
+	unsigned add_title : 1, credit_people : 1;
 	int shortlog_len;
 };
 
-extern int fmt_merge_msg(struct strbuf *in, struct strbuf *out,
-			 struct fmt_merge_msg_opts *);
+extern int
+fmt_merge_msg(struct strbuf *in, struct strbuf *out, struct fmt_merge_msg_opts *);
 
 /**
  * If a built-in has DELAY_PAGER_CONFIG set, the built-in should call this early
@@ -230,7 +229,8 @@ extern int cmd_update_index(int argc, const char **argv, const char *prefix);
 extern int cmd_update_ref(int argc, const char **argv, const char *prefix);
 extern int cmd_update_server_info(int argc, const char **argv, const char *prefix);
 extern int cmd_upload_archive(int argc, const char **argv, const char *prefix);
-extern int cmd_upload_archive_writer(int argc, const char **argv, const char *prefix);
+extern int
+cmd_upload_archive_writer(int argc, const char **argv, const char *prefix);
 extern int cmd_var(int argc, const char **argv, const char *prefix);
 extern int cmd_verify_commit(int argc, const char **argv, const char *prefix);
 extern int cmd_verify_tag(int argc, const char **argv, const char *prefix);

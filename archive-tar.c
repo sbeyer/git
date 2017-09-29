@@ -8,16 +8,16 @@
 #include "streaming.h"
 #include "run-command.h"
 
-#define RECORDSIZE	(512)
-#define BLOCKSIZE	(RECORDSIZE * 20)
+#define RECORDSIZE (512)
+#define BLOCKSIZE (RECORDSIZE * 20)
 
 static char block[BLOCKSIZE];
 static unsigned long offset;
 
 static int tar_umask = 002;
 
-static int write_tar_filter_archive(const struct archiver *ar,
-				    struct archiver_args *args);
+static int
+write_tar_filter_archive(const struct archiver *ar, struct archiver_args *args);
 
 /*
  * This is the max value that a ustar size header can specify, as it is fixed
@@ -79,7 +79,7 @@ static void finish_record(void)
 {
 	unsigned long tail;
 	tail = offset % RECORDSIZE;
-	if (tail)  {
+	if (tail) {
 		memset(block + offset, 0, RECORDSIZE - tail);
 		offset += RECORDSIZE - tail;
 	}
@@ -141,7 +141,7 @@ static int stream_blocked(const unsigned char *sha1)
  * string and appends it to a struct strbuf.
  */
 static void strbuf_append_ext_header(struct strbuf *sb, const char *keyword,
-                                     const char *value, unsigned int valuelen)
+				     const char *value, unsigned int valuelen)
 {
 	int len, tmp;
 
@@ -160,13 +160,12 @@ static void strbuf_append_ext_header(struct strbuf *sb, const char *keyword,
  * Like strbuf_append_ext_header, but for numeric values.
  */
 static void strbuf_append_ext_header_uint(struct strbuf *sb,
-					  const char *keyword,
-					  uintmax_t value)
+					  const char *keyword, uintmax_t value)
 {
 	char buf[40]; /* big enough for 2^128 in decimal, plus NUL */
 	int len;
 
-	len = xsnprintf(buf, sizeof(buf), "%"PRIuMAX, value);
+	len = xsnprintf(buf, sizeof(buf), "%" PRIuMAX, value);
 	strbuf_append_ext_header(sb, keyword, buf, len);
 }
 
@@ -196,13 +195,14 @@ static size_t get_path_prefix(const char *path, size_t pathlen, size_t maxlen)
 	return i;
 }
 
-static void prepare_header(struct archiver_args *args,
-			   struct ustar_header *header,
+static void prepare_header(struct archiver_args *args, struct ustar_header *header,
 			   unsigned int mode, unsigned long size)
 {
 	xsnprintf(header->mode, sizeof(header->mode), "%07o", mode & 07777);
-	xsnprintf(header->size, sizeof(header->size), "%011lo", S_ISREG(mode) ? size : 0);
-	xsnprintf(header->mtime, sizeof(header->mtime), "%011lo", (unsigned long) args->time);
+	xsnprintf(header->size, sizeof(header->size), "%011lo",
+		  S_ISREG(mode) ? size : 0);
+	xsnprintf(header->mtime, sizeof(header->mtime), "%011lo",
+		  (unsigned long)args->time);
 
 	xsnprintf(header->uid, sizeof(header->uid), "%07o", 0);
 	xsnprintf(header->gid, sizeof(header->gid), "%07o", 0);
@@ -214,28 +214,28 @@ static void prepare_header(struct archiver_args *args,
 	memcpy(header->magic, "ustar", 6);
 	memcpy(header->version, "00", 2);
 
-	xsnprintf(header->chksum, sizeof(header->chksum), "%07o", ustar_header_chksum(header));
+	xsnprintf(header->chksum, sizeof(header->chksum), "%07o",
+		  ustar_header_chksum(header));
 }
 
-static void write_extended_header(struct archiver_args *args,
-				  const unsigned char *sha1,
-				  const void *buffer, unsigned long size)
+static void
+write_extended_header(struct archiver_args *args, const unsigned char *sha1,
+		      const void *buffer, unsigned long size)
 {
 	struct ustar_header header;
 	unsigned int mode;
 	memset(&header, 0, sizeof(header));
 	*header.typeflag = TYPEFLAG_EXT_HEADER;
 	mode = 0100666;
-	xsnprintf(header.name, sizeof(header.name), "%s.paxheader", sha1_to_hex(sha1));
+	xsnprintf(header.name, sizeof(header.name), "%s.paxheader",
+		  sha1_to_hex(sha1));
 	prepare_header(args, &header, mode, size);
 	write_blocked(&header, sizeof(header));
 	write_blocked(buffer, size);
 }
 
-static int write_tar_entry(struct archiver_args *args,
-			   const unsigned char *sha1,
-			   const char *path, size_t pathlen,
-			   unsigned int mode)
+static int write_tar_entry(struct archiver_args *args, const unsigned char *sha1,
+			   const char *path, size_t pathlen, unsigned int mode)
 {
 	struct ustar_header header;
 	struct strbuf ext_header = STRBUF_INIT;
@@ -256,12 +256,11 @@ static int write_tar_entry(struct archiver_args *args,
 		*header.typeflag = TYPEFLAG_REG;
 		mode = (mode | ((mode & 0100) ? 0777 : 0666)) & ~tar_umask;
 	} else {
-		return error("unsupported file mode: 0%o (SHA1: %s)",
-			     mode, sha1_to_hex(sha1));
+		return error("unsupported file mode: 0%o (SHA1: %s)", mode,
+			     sha1_to_hex(sha1));
 	}
 	if (pathlen > sizeof(header.name)) {
-		size_t plen = get_path_prefix(path, pathlen,
-					      sizeof(header.prefix));
+		size_t plen = get_path_prefix(path, pathlen, sizeof(header.prefix));
 		size_t rest = pathlen - plen - 1;
 		if (plen > 0 && rest <= sizeof(header.name)) {
 			memcpy(header.prefix, path, plen);
@@ -269,19 +268,19 @@ static int write_tar_entry(struct archiver_args *args,
 		} else {
 			xsnprintf(header.name, sizeof(header.name), "%s.data",
 				  sha1_to_hex(sha1));
-			strbuf_append_ext_header(&ext_header, "path",
-						 path, pathlen);
+			strbuf_append_ext_header(&ext_header, "path", path,
+						 pathlen);
 		}
 	} else
 		memcpy(header.name, path, pathlen);
 
 	if (S_ISREG(mode) && !args->convert &&
-	    sha1_object_info(sha1, &size) == OBJ_BLOB &&
-	    size > big_file_threshold)
+	    sha1_object_info(sha1, &size) == OBJ_BLOB && size > big_file_threshold)
 		buffer = NULL;
 	else if (S_ISLNK(mode) || S_ISREG(mode)) {
 		enum object_type type;
-		buffer = sha1_file_to_archive(args, path, sha1, old_mode, &type, &size);
+		buffer = sha1_file_to_archive(args, path, sha1, old_mode, &type,
+					      &size);
 		if (!buffer)
 			return error("cannot read %s", sha1_to_hex(sha1));
 	} else {
@@ -294,7 +293,7 @@ static int write_tar_entry(struct archiver_args *args,
 			xsnprintf(header.linkname, sizeof(header.linkname),
 				  "see %s.paxheader", sha1_to_hex(sha1));
 			strbuf_append_ext_header(&ext_header, "linkpath",
-			                         buffer, size);
+						 buffer, size);
 		} else
 			memcpy(header.linkname, buffer, size);
 	}
@@ -308,8 +307,7 @@ static int write_tar_entry(struct archiver_args *args,
 	prepare_header(args, &header, mode, size_in_header);
 
 	if (ext_header.len > 0) {
-		write_extended_header(args, sha1, ext_header.buf,
-				      ext_header.len);
+		write_extended_header(args, sha1, ext_header.buf, ext_header.len);
 	}
 	strbuf_release(&ext_header);
 	write_blocked(&header, sizeof(header));
@@ -334,8 +332,7 @@ static void write_global_extended_header(struct archiver_args *args)
 		strbuf_append_ext_header(&ext_header, "comment",
 					 sha1_to_hex(sha1), 40);
 	if (args->time > USTAR_MAX_MTIME) {
-		strbuf_append_ext_header_uint(&ext_header, "mtime",
-					      args->time);
+		strbuf_append_ext_header_uint(&ext_header, "mtime", args->time);
 		args->time = USTAR_MAX_MTIME;
 	}
 
@@ -420,8 +417,7 @@ static int git_tar_config(const char *var, const char *value, void *cb)
 	return tar_filter_config(var, value, cb);
 }
 
-static int write_tar_archive(const struct archiver *ar,
-			     struct archiver_args *args)
+static int write_tar_archive(const struct archiver *ar, struct archiver_args *args)
 {
 	int err = 0;
 
@@ -432,8 +428,8 @@ static int write_tar_archive(const struct archiver *ar,
 	return err;
 }
 
-static int write_tar_filter_archive(const struct archiver *ar,
-				    struct archiver_args *args)
+static int
+write_tar_filter_archive(const struct archiver *ar, struct archiver_args *args)
 {
 	struct strbuf cmd = STRBUF_INIT;
 	struct child_process filter = CHILD_PROCESS_INIT;
@@ -470,11 +466,7 @@ static int write_tar_filter_archive(const struct archiver *ar,
 	return r;
 }
 
-static struct archiver tar_archiver = {
-	"tar",
-	write_tar_archive,
-	ARCHIVER_REMOTE
-};
+static struct archiver tar_archiver = { "tar", write_tar_archive, ARCHIVER_REMOTE };
 
 void init_tar_archiver(void)
 {

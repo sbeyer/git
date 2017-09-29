@@ -13,7 +13,7 @@
 static const char bundle_signature[] = "# v2 git bundle\n";
 
 static void add_to_ref_list(const struct object_id *oid, const char *name,
-		struct ref_list *list)
+			    struct ref_list *list)
 {
 	ALLOC_GROW(list->list, list->nr + 1, list->alloc);
 	oidcpy(&list->list[list->nr].oid, oid);
@@ -21,8 +21,8 @@ static void add_to_ref_list(const struct object_id *oid, const char *name,
 	list->nr++;
 }
 
-static int parse_bundle_header(int fd, struct bundle_header *header,
-			       const char *report_path)
+static int
+parse_bundle_header(int fd, struct bundle_header *header, const char *report_path)
 {
 	struct strbuf buf = STRBUF_INIT;
 	int status = 0;
@@ -38,8 +38,8 @@ static int parse_bundle_header(int fd, struct bundle_header *header,
 	}
 
 	/* The bundle header ends with an empty line */
-	while (!strbuf_getwholeline_fd(&buf, fd, '\n') &&
-	       buf.len && buf.buf[0] != '\n') {
+	while (!strbuf_getwholeline_fd(&buf, fd, '\n') && buf.len &&
+	       buf.buf[0] != '\n') {
 		struct object_id oid;
 		int is_prereq = 0;
 		const char *p;
@@ -55,12 +55,12 @@ static int parse_bundle_header(int fd, struct bundle_header *header,
 		 * Prerequisites have object name that is optionally
 		 * followed by SP and subject line.
 		 */
-		if (parse_oid_hex(buf.buf, &oid, &p) ||
-		    (*p && !isspace(*p)) ||
+		if (parse_oid_hex(buf.buf, &oid, &p) || (*p && !isspace(*p)) ||
 		    (!is_prereq && !*p)) {
 			if (report_path)
 				error(_("unrecognized header: %s%s (%d)"),
-				      (is_prereq ? "-" : ""), buf.buf, (int)buf.len);
+				      (is_prereq ? "-" : ""), buf.buf,
+				      (int)buf.len);
 			status = -1;
 			break;
 		} else {
@@ -71,7 +71,7 @@ static int parse_bundle_header(int fd, struct bundle_header *header,
 		}
 	}
 
- abort:
+abort:
 	if (status) {
 		close(fd);
 		fd = -1;
@@ -116,14 +116,13 @@ static int list_refs(struct ref_list *r, int argc, const char **argv)
 			if (j == argc)
 				continue;
 		}
-		printf("%s %s\n", oid_to_hex(&r->list[i].oid),
-				r->list[i].name);
+		printf("%s %s\n", oid_to_hex(&r->list[i].oid), r->list[i].name);
 	}
 	return 0;
 }
 
 /* Remember to update object flag allocation in object.h */
-#define PREREQ_MARK (1u<<16)
+#define PREREQ_MARK (1u << 16)
 
 int verify_bundle(struct bundle_header *header, int verbose)
 {
@@ -133,7 +132,7 @@ int verify_bundle(struct bundle_header *header, int verbose)
 	 */
 	struct ref_list *p = &header->prerequisites;
 	struct rev_info revs;
-	const char *argv[] = {NULL, "--all", NULL};
+	const char *argv[] = { NULL, "--all", NULL };
 	struct object_array refs;
 	struct commit *commit;
 	int i, ret = 0, req_nr;
@@ -178,7 +177,7 @@ int verify_bundle(struct bundle_header *header, int verbose)
 			if (++ret == 1)
 				error("%s", message);
 			error("%s %s", oid_to_hex(&refs.objects[i].item->oid),
-				refs.objects[i].name);
+			      refs.objects[i].name);
 		}
 
 	/* Clean up objects used, as they will be reused. */
@@ -191,8 +190,7 @@ int verify_bundle(struct bundle_header *header, int verbose)
 
 		r = &header->references;
 		printf_ln(Q_("The bundle contains this ref:",
-			     "The bundle contains these %d refs:",
-			     r->nr),
+			     "The bundle contains these %d refs:", r->nr),
 			  r->nr);
 		list_refs(r, 0, NULL);
 		r = &header->prerequisites;
@@ -200,8 +198,7 @@ int verify_bundle(struct bundle_header *header, int verbose)
 			printf_ln(_("The bundle records a complete history."));
 		} else {
 			printf_ln(Q_("The bundle requires this ref:",
-				     "The bundle requires these %d refs:",
-				     r->nr),
+				     "The bundle requires these %d refs:", r->nr),
 				  r->nr);
 			list_refs(r, 0, NULL);
 		}
@@ -237,12 +234,11 @@ static int is_tag_in_date_range(struct object *tag, struct rev_info *revs)
 		goto out;
 	date = parse_timestamp(line, NULL, 10);
 	result = (revs->max_age == -1 || revs->max_age < date) &&
-		(revs->min_age == -1 || revs->min_age > date);
+		 (revs->min_age == -1 || revs->min_age > date);
 out:
 	free(buf);
 	return result;
 }
-
 
 /* Write the pack data to bundle_fd, then close it if it is > 1. */
 static int write_pack_data(int bundle_fd, struct rev_info *revs)
@@ -250,10 +246,9 @@ static int write_pack_data(int bundle_fd, struct rev_info *revs)
 	struct child_process pack_objects = CHILD_PROCESS_INIT;
 	int i;
 
-	argv_array_pushl(&pack_objects.args,
-			 "pack-objects", "--all-progress-implied",
-			 "--stdout", "--thin", "--delta-base-offset",
-			 NULL);
+	argv_array_pushl(&pack_objects.args, "pack-objects",
+			 "--all-progress-implied", "--stdout", "--thin",
+			 "--delta-base-offset", NULL);
 	pack_objects.in = -1;
 	pack_objects.out = bundle_fd;
 	pack_objects.git_cmd = 1;
@@ -264,7 +259,8 @@ static int write_pack_data(int bundle_fd, struct rev_info *revs)
 		struct object *object = revs->pending.objects[i].item;
 		if (object->flags & UNINTERESTING)
 			write_or_die(pack_objects.in, "^", 1);
-		write_or_die(pack_objects.in, oid_to_hex(&object->oid), GIT_SHA1_HEXSZ);
+		write_or_die(pack_objects.in, oid_to_hex(&object->oid),
+			     GIT_SHA1_HEXSZ);
 		write_or_die(pack_objects.in, "\n", 1);
 	}
 	close(pack_objects.in);
@@ -273,8 +269,7 @@ static int write_pack_data(int bundle_fd, struct rev_info *revs)
 	return 0;
 }
 
-static int compute_and_write_prerequisites(int bundle_fd,
-					   struct rev_info *revs,
+static int compute_and_write_prerequisites(int bundle_fd, struct rev_info *revs,
 					   int argc, const char **argv)
 {
 	struct child_process rls = CHILD_PROCESS_INIT;
@@ -282,9 +277,8 @@ static int compute_and_write_prerequisites(int bundle_fd,
 	FILE *rls_fout;
 	int i;
 
-	argv_array_pushl(&rls.args,
-			 "rev-list", "--boundary", "--pretty=oneline",
-			 NULL);
+	argv_array_pushl(&rls.args, "rev-list", "--boundary",
+			 "--pretty=oneline", NULL);
 	for (i = 1; i < argc; i++)
 		argv_array_push(&rls.args, argv[i]);
 	rls.out = -1;
@@ -303,8 +297,7 @@ static int compute_and_write_prerequisites(int bundle_fd,
 				add_pending_object(revs, object, buf.buf);
 			}
 		} else if (!get_oid_hex(buf.buf, &oid)) {
-			struct object *object = parse_object_or_die(&oid,
-								    buf.buf);
+			struct object *object = parse_object_or_die(&oid, buf.buf);
 			object->flags |= SHOWN;
 		}
 	}
@@ -345,7 +338,7 @@ static int write_bundle_refs(int bundle_fd, struct rev_info *revs)
 		display_ref = (flag & REF_ISSYMREF) ? e->name : ref;
 
 		if (e->item->type == OBJ_TAG &&
-				!is_tag_in_date_range(e->item, revs)) {
+		    !is_tag_in_date_range(e->item, revs)) {
 			e->item->flags |= UNINTERESTING;
 			goto skip_write_ref;
 		}
@@ -400,7 +393,7 @@ static int write_bundle_refs(int bundle_fd, struct rev_info *revs)
 		write_or_die(bundle_fd, " ", 1);
 		write_or_die(bundle_fd, display_ref, strlen(display_ref));
 		write_or_die(bundle_fd, "\n", 1);
- skip_write_ref:
+	skip_write_ref:
 		free(ref);
 	}
 
@@ -409,8 +402,8 @@ static int write_bundle_refs(int bundle_fd, struct rev_info *revs)
 	return ref_count;
 }
 
-int create_bundle(struct bundle_header *header, const char *path,
-		  int argc, const char **argv)
+int create_bundle(struct bundle_header *header, const char *path, int argc,
+		  const char **argv)
 {
 	static struct lock_file lock;
 	int bundle_fd = -1;
@@ -484,8 +477,8 @@ err:
 
 int unbundle(struct bundle_header *header, int bundle_fd, int flags)
 {
-	const char *argv_index_pack[] = {"index-pack",
-					 "--fix-thin", "--stdin", NULL, NULL};
+	const char *argv_index_pack[] = { "index-pack", "--fix-thin", "--stdin",
+					  NULL, NULL };
 	struct child_process ip = CHILD_PROCESS_INIT;
 
 	if (flags & BUNDLE_VERBOSE)

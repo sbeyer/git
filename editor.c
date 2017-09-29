@@ -57,7 +57,7 @@ int launch_editor(const char *path, struct strbuf *buffer, const char *const *en
 			raise(sig);
 		if (ret)
 			return error("There was a problem with the editor '%s'.",
-					editor);
+				     editor);
 	}
 
 	if (!buffer)

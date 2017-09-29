@@ -8,13 +8,13 @@
 #include "prio-queue.h"
 #include "diff.h"
 
-#define PICKAXE_BLAME_MOVE		01
-#define PICKAXE_BLAME_COPY		02
-#define PICKAXE_BLAME_COPY_HARDER	04
-#define PICKAXE_BLAME_COPY_HARDEST	010
+#define PICKAXE_BLAME_MOVE 01
+#define PICKAXE_BLAME_COPY 02
+#define PICKAXE_BLAME_COPY_HARDER 04
+#define PICKAXE_BLAME_COPY_HARDEST 010
 
-#define BLAME_DEFAULT_MOVE_SCORE	20
-#define BLAME_DEFAULT_COPY_SCORE	40
+#define BLAME_DEFAULT_MOVE_SCORE 20
+#define BLAME_DEFAULT_COPY_SCORE 40
 
 /*
  * One blob in a commit that is being suspected
@@ -143,8 +143,8 @@ struct blame_scoreboard {
 	int debug;
 
 	/* callbacks */
-	void(*on_sanity_fail)(struct blame_scoreboard *, int);
-	void(*found_guilty_entry)(struct blame_entry *, void *);
+	void (*on_sanity_fail)(struct blame_scoreboard *, int);
+	void (*found_guilty_entry)(struct blame_entry *, void *);
 
 	void *found_guilty_entry_data;
 };
@@ -163,13 +163,17 @@ extern void blame_origin_decref(struct blame_origin *o);
 
 extern void blame_coalesce(struct blame_scoreboard *sb);
 extern void blame_sort_final(struct blame_scoreboard *sb);
-extern unsigned blame_entry_score(struct blame_scoreboard *sb, struct blame_entry *e);
+extern unsigned
+blame_entry_score(struct blame_scoreboard *sb, struct blame_entry *e);
 extern void assign_blame(struct blame_scoreboard *sb, int opt);
 extern const char *blame_nth_line(struct blame_scoreboard *sb, long lno);
 
 extern void init_scoreboard(struct blame_scoreboard *sb);
-extern void setup_scoreboard(struct blame_scoreboard *sb, const char *path, struct blame_origin **orig);
+extern void setup_scoreboard(struct blame_scoreboard *sb, const char *path,
+			     struct blame_origin **orig);
 
-extern struct blame_entry *blame_entry_prepend(struct blame_entry *head, long start, long end, struct blame_origin *o);
+extern struct blame_entry *
+blame_entry_prepend(struct blame_entry *head, long start, long end,
+		    struct blame_origin *o);
 
 #endif /* BLAME_H */

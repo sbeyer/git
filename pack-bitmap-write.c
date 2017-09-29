@@ -48,8 +48,7 @@ void bitmap_writer_show_progress(int show)
 /**
  * Build the initial type index for the packfile
  */
-void bitmap_writer_build_type_index(struct pack_idx_entry **index,
-				    uint32_t index_nr)
+void bitmap_writer_build_type_index(struct pack_idx_entry **index, uint32_t index_nr)
 {
 	uint32_t i;
 
@@ -73,8 +72,7 @@ void bitmap_writer_build_type_index(struct pack_idx_entry **index,
 			break;
 
 		default:
-			real_type = sha1_object_info(entry->idx.oid.hash,
-						     NULL);
+			real_type = sha1_object_info(entry->idx.oid.hash, NULL);
 			break;
 		}
 
@@ -97,8 +95,7 @@ void bitmap_writer_build_type_index(struct pack_idx_entry **index,
 
 		default:
 			die("Missing type information for %s (%d/%d)",
-			    oid_to_hex(&entry->idx.oid), real_type,
-			    entry->type);
+			    oid_to_hex(&entry->idx.oid), real_type, entry->type);
 		}
 	}
 }
@@ -109,7 +106,8 @@ void bitmap_writer_build_type_index(struct pack_idx_entry **index,
 static struct object **seen_objects;
 static unsigned int seen_objects_nr, seen_objects_alloc;
 
-static inline void push_bitmapped_commit(struct commit *commit, struct ewah_bitmap *reused)
+static inline void
+push_bitmapped_commit(struct commit *commit, struct ewah_bitmap *reused)
 {
 	if (writer.selected_nr >= writer.selected_alloc) {
 		writer.selected_alloc = (writer.selected_alloc + 32) * 2;
@@ -144,7 +142,8 @@ static uint32_t find_object_pos(const unsigned char *sha1)
 
 	if (!entry) {
 		die("Failed to write bitmap index. Packfile doesn't have full closure "
-			"(object %s is missing)", sha1_to_hex(sha1));
+		    "(object %s is missing)",
+		    sha1_to_hex(sha1));
 	}
 
 	return entry->in_pack_pos;
@@ -162,8 +161,7 @@ static void show_commit(struct commit *commit, void *data)
 	mark_as_seen((struct object *)commit);
 }
 
-static int
-add_to_include_set(struct bitmap *base, struct commit *commit)
+static int add_to_include_set(struct bitmap *base, struct commit *commit)
 {
 	khiter_t hash_pos;
 	uint32_t bitmap_pos = find_object_pos(commit->object.oid.hash);
@@ -182,8 +180,7 @@ add_to_include_set(struct bitmap *base, struct commit *commit)
 	return 1;
 }
 
-static int
-should_include(struct commit *commit, void *_data)
+static int should_include(struct commit *commit, void *_data)
 {
 	struct bitmap *base = _data;
 
@@ -224,7 +221,8 @@ static void compute_xor_offsets(void)
 				break;
 
 			test_xor = ewah_pool_new();
-			ewah_xor(writer.selected[curr].bitmap, stored->bitmap, test_xor);
+			ewah_xor(writer.selected[curr].bitmap, stored->bitmap,
+				 test_xor);
 
 			if (test_xor->buffer_size < best_bitmap->buffer_size) {
 				if (best_bitmap != stored->bitmap)
@@ -256,7 +254,8 @@ void bitmap_writer_build(struct packing_data *to_pack)
 	writer.to_pack = to_pack;
 
 	if (writer.show_progress)
-		writer.progress = start_progress("Building bitmaps", writer.selected_nr);
+		writer.progress = start_progress("Building bitmaps",
+						 writer.selected_nr);
 
 	init_revisions(&revs, NULL);
 	revs.tag_objects = 1;
@@ -285,8 +284,8 @@ void bitmap_writer_build(struct packing_data *to_pack)
 			    (need_reset ||
 			     !in_merge_bases(writer.selected[i + 1].commit,
 					     stored->commit))) {
-			    bitmap_reset(base);
-			    reset_all_seen();
+				bitmap_reset(base);
+				reset_all_seen();
 			}
 
 			add_pending_object(&revs, object, "");
@@ -380,8 +379,7 @@ static struct ewah_bitmap *find_reused_bitmap(const unsigned char *sha1)
 }
 
 void bitmap_writer_select_commits(struct commit **indexed_commits,
-				  unsigned int indexed_commits_nr,
-				  int max_bitmaps)
+				  unsigned int indexed_commits_nr, int max_bitmaps)
 {
 	unsigned int i = 0, j, next;
 
@@ -419,8 +417,10 @@ void bitmap_writer_select_commits(struct commit **indexed_commits,
 			for (j = 0; j <= next; ++j) {
 				struct commit *cm = indexed_commits[i + j];
 
-				reused_bitmap = find_reused_bitmap(cm->object.oid.hash);
-				if (reused_bitmap || (cm->object.flags & NEEDS_BITMAP) != 0) {
+				reused_bitmap = find_reused_bitmap(
+					cm->object.oid.hash);
+				if (reused_bitmap ||
+				    (cm->object.flags & NEEDS_BITMAP) != 0) {
 					chosen = cm;
 					break;
 				}
@@ -438,7 +438,6 @@ void bitmap_writer_select_commits(struct commit **indexed_commits,
 
 	stop_progress(&writer.progress);
 }
-
 
 static int sha1write_ewah_helper(void *f, const void *buf, size_t len)
 {
@@ -462,17 +461,17 @@ static const unsigned char *sha1_access(size_t pos, void *table)
 	return index[pos]->oid.hash;
 }
 
-static void write_selected_commits_v1(struct sha1file *f,
-				      struct pack_idx_entry **index,
-				      uint32_t index_nr)
+static void
+write_selected_commits_v1(struct sha1file *f, struct pack_idx_entry **index,
+			  uint32_t index_nr)
 {
 	int i;
 
 	for (i = 0; i < writer.selected_nr; ++i) {
 		struct bitmapped_commit *stored = &writer.selected[i];
 
-		int commit_pos =
-			sha1_pos(stored->commit->object.oid.hash, index, index_nr, sha1_access);
+		int commit_pos = sha1_pos(stored->commit->object.oid.hash,
+					  index, index_nr, sha1_access);
 
 		if (commit_pos < 0)
 			die("BUG: trying to write commit not in index");
@@ -485,8 +484,7 @@ static void write_selected_commits_v1(struct sha1file *f,
 	}
 }
 
-static void write_hash_cache(struct sha1file *f,
-			     struct pack_idx_entry **index,
+static void write_hash_cache(struct sha1file *f, struct pack_idx_entry **index,
 			     uint32_t index_nr)
 {
 	uint32_t i;
@@ -503,10 +501,8 @@ void bitmap_writer_set_checksum(unsigned char *sha1)
 	hashcpy(writer.pack_checksum, sha1);
 }
 
-void bitmap_writer_finish(struct pack_idx_entry **index,
-			  uint32_t index_nr,
-			  const char *filename,
-			  uint16_t options)
+void bitmap_writer_finish(struct pack_idx_entry **index, uint32_t index_nr,
+			  const char *filename, uint16_t options)
 {
 	static uint16_t default_version = 1;
 	static uint16_t flags = BITMAP_OPT_FULL_DAG;
@@ -541,7 +537,8 @@ void bitmap_writer_finish(struct pack_idx_entry **index,
 		die_errno("unable to make temporary bitmap file readable");
 
 	if (rename(tmp_file.buf, filename))
-		die_errno("unable to rename temporary bitmap file to '%s'", filename);
+		die_errno("unable to rename temporary bitmap file to '%s'",
+			  filename);
 
 	strbuf_release(&tmp_file);
 }

@@ -59,24 +59,21 @@ struct worktree;
 #define RESOLVE_REF_NO_RECURSE 0x02
 #define RESOLVE_REF_ALLOW_BAD_NAME 0x04
 
-const char *refs_resolve_ref_unsafe(struct ref_store *refs,
-				    const char *refname,
-				    int resolve_flags,
-				    unsigned char *sha1,
-				    int *flags);
+const char *
+refs_resolve_ref_unsafe(struct ref_store *refs, const char *refname,
+			int resolve_flags, unsigned char *sha1, int *flags);
 const char *resolve_ref_unsafe(const char *refname, int resolve_flags,
 			       unsigned char *sha1, int *flags);
 
-char *refs_resolve_refdup(struct ref_store *refs,
-			  const char *refname, int resolve_flags,
-			  unsigned char *sha1, int *flags);
+char *refs_resolve_refdup(struct ref_store *refs, const char *refname,
+			  int resolve_flags, unsigned char *sha1, int *flags);
 char *resolve_refdup(const char *refname, int resolve_flags,
 		     unsigned char *sha1, int *flags);
 
 int refs_read_ref_full(struct ref_store *refs, const char *refname,
 		       int resolve_flags, unsigned char *sha1, int *flags);
-int read_ref_full(const char *refname, int resolve_flags,
-		  unsigned char *sha1, int *flags);
+int read_ref_full(const char *refname, int resolve_flags, unsigned char *sha1,
+		  int *flags);
 int read_ref(const char *refname, unsigned char *sha1);
 
 /*
@@ -97,8 +94,7 @@ int read_ref(const char *refname, unsigned char *sha1);
  * extras and skip must be sorted.
  */
 
-int refs_verify_refname_available(struct ref_store *refs,
-				  const char *refname,
+int refs_verify_refname_available(struct ref_store *refs, const char *refname,
 				  const struct string_list *extras,
 				  const struct string_list *skip,
 				  struct strbuf *err);
@@ -119,8 +115,7 @@ extern int refs_init_db(struct strbuf *err);
  * Symbolic references are considered unpeelable, even if they
  * ultimately resolve to a peelable tag.
  */
-int refs_peel_ref(struct ref_store *refs, const char *refname,
-		  unsigned char *sha1);
+int refs_peel_ref(struct ref_store *refs, const char *refname, unsigned char *sha1);
 int peel_ref(const char *refname, unsigned char *sha1);
 
 /**
@@ -264,8 +259,8 @@ struct ref_transaction;
  * arguments is only guaranteed to be valid for the duration of a
  * single callback invocation.
  */
-typedef int each_ref_fn(const char *refname,
-			const struct object_id *oid, int flags, void *cb_data);
+typedef int each_ref_fn(const char *refname, const struct object_id *oid,
+			int flags, void *cb_data);
 
 /*
  * The following functions invoke the specified callback function for
@@ -276,25 +271,19 @@ typedef int each_ref_fn(const char *refname,
  * modifies the reference also returns a nonzero value to immediately
  * stop the iteration. Returned references are sorted.
  */
-int refs_head_ref(struct ref_store *refs,
-		  each_ref_fn fn, void *cb_data);
-int refs_for_each_ref(struct ref_store *refs,
-		      each_ref_fn fn, void *cb_data);
+int refs_head_ref(struct ref_store *refs, each_ref_fn fn, void *cb_data);
+int refs_for_each_ref(struct ref_store *refs, each_ref_fn fn, void *cb_data);
 int refs_for_each_ref_in(struct ref_store *refs, const char *prefix,
 			 each_ref_fn fn, void *cb_data);
-int refs_for_each_tag_ref(struct ref_store *refs,
-			  each_ref_fn fn, void *cb_data);
-int refs_for_each_branch_ref(struct ref_store *refs,
-			     each_ref_fn fn, void *cb_data);
-int refs_for_each_remote_ref(struct ref_store *refs,
-			     each_ref_fn fn, void *cb_data);
+int refs_for_each_tag_ref(struct ref_store *refs, each_ref_fn fn, void *cb_data);
+int refs_for_each_branch_ref(struct ref_store *refs, each_ref_fn fn, void *cb_data);
+int refs_for_each_remote_ref(struct ref_store *refs, each_ref_fn fn, void *cb_data);
 
 int head_ref(each_ref_fn fn, void *cb_data);
 int for_each_ref(each_ref_fn fn, void *cb_data);
 int for_each_ref_in(const char *prefix, each_ref_fn fn, void *cb_data);
 int refs_for_each_fullref_in(struct ref_store *refs, const char *prefix,
-			     each_ref_fn fn, void *cb_data,
-			     unsigned int broken);
+			     each_ref_fn fn, void *cb_data, unsigned int broken);
 int for_each_fullref_in(const char *prefix, each_ref_fn fn, void *cb_data,
 			unsigned int broken);
 int for_each_tag_ref(each_ref_fn fn, void *cb_data);
@@ -327,7 +316,7 @@ void warn_dangling_symrefs(FILE *fp, const char *msg_fmt,
  * PACK_REFS_ALL:   Pack _all_ refs, not just tags and already packed refs
  */
 #define PACK_REFS_PRUNE 0x0001
-#define PACK_REFS_ALL   0x0002
+#define PACK_REFS_ALL 0x0002
 
 /*
  * Write a packed-refs file for the current repository.
@@ -342,16 +331,14 @@ int refs_pack_refs(struct ref_store *refs, unsigned int flags);
  *
  * Other flags are reserved for internal use.
  */
-#define REF_NODEREF	0x01
+#define REF_NODEREF 0x01
 #define REF_FORCE_CREATE_REFLOG 0x40
 
 /*
  * Flags that can be passed in to ref_transaction_update
  */
 #define REF_TRANSACTION_UPDATE_ALLOWED_FLAGS \
-	REF_ISPRUNING |                      \
-	REF_FORCE_CREATE_REFLOG |            \
-	REF_NODEREF
+	REF_ISPRUNING | REF_FORCE_CREATE_REFLOG | REF_NODEREF
 
 /*
  * Setup reflog before using. Fill in err and return -1 on failure.
@@ -361,9 +348,8 @@ int refs_create_reflog(struct ref_store *refs, const char *refname,
 int safe_create_reflog(const char *refname, int force_create, struct strbuf *err);
 
 /** Reads log for the value of ref during at_time. **/
-int read_ref_at(const char *refname, unsigned int flags,
-		timestamp_t at_time, int cnt,
-		unsigned char *sha1, char **msg,
+int read_ref_at(const char *refname, unsigned int flags, timestamp_t at_time,
+		int cnt, unsigned char *sha1, char **msg,
 		timestamp_t *cutoff_time, int *cutoff_tz, int *cutoff_cnt);
 
 /** Check if a particular reflog exists */
@@ -378,10 +364,8 @@ int reflog_exists(const char *refname);
  * be NULL_SHA1. msg and flags are passed through to
  * ref_transaction_delete().
  */
-int refs_delete_ref(struct ref_store *refs, const char *msg,
-		    const char *refname,
-		    const unsigned char *old_sha1,
-		    unsigned int flags);
+int refs_delete_ref(struct ref_store *refs, const char *msg, const char *refname,
+		    const unsigned char *old_sha1, unsigned int flags);
 int delete_ref(const char *msg, const char *refname,
 	       const unsigned char *old_sha1, unsigned int flags);
 
@@ -393,27 +377,25 @@ int delete_ref(const char *msg, const char *refname,
  */
 int refs_delete_refs(struct ref_store *refs, const char *msg,
 		     struct string_list *refnames, unsigned int flags);
-int delete_refs(const char *msg, struct string_list *refnames,
-		unsigned int flags);
+int delete_refs(const char *msg, struct string_list *refnames, unsigned int flags);
 
 /** Delete a reflog */
 int refs_delete_reflog(struct ref_store *refs, const char *refname);
 int delete_reflog(const char *refname);
 
 /* iterate over reflog entries */
-typedef int each_reflog_ent_fn(
-		struct object_id *old_oid, struct object_id *new_oid,
-		const char *committer, timestamp_t timestamp,
-		int tz, const char *msg, void *cb_data);
+typedef int
+each_reflog_ent_fn(struct object_id *old_oid, struct object_id *new_oid,
+		   const char *committer, timestamp_t timestamp, int tz,
+		   const char *msg, void *cb_data);
 
 int refs_for_each_reflog_ent(struct ref_store *refs, const char *refname,
 			     each_reflog_ent_fn fn, void *cb_data);
-int refs_for_each_reflog_ent_reverse(struct ref_store *refs,
-				     const char *refname,
-				     each_reflog_ent_fn fn,
-				     void *cb_data);
+int refs_for_each_reflog_ent_reverse(struct ref_store *refs, const char *refname,
+				     each_reflog_ent_fn fn, void *cb_data);
 int for_each_reflog_ent(const char *refname, each_reflog_ent_fn fn, void *cb_data);
-int for_each_reflog_ent_reverse(const char *refname, each_reflog_ent_fn fn, void *cb_data);
+int for_each_reflog_ent_reverse(const char *refname, each_reflog_ent_fn fn,
+				void *cb_data);
 
 /*
  * Calls the specified function for each reflog file until it returns nonzero,
@@ -458,8 +440,8 @@ enum action_on_err {
  * Begin a reference transaction.  The reference transaction must
  * be freed by calling ref_transaction_free().
  */
-struct ref_transaction *ref_store_transaction_begin(struct ref_store *refs,
-						    struct strbuf *err);
+struct ref_transaction *
+ref_store_transaction_begin(struct ref_store *refs, struct strbuf *err);
 struct ref_transaction *ref_transaction_begin(struct strbuf *err);
 
 /*
@@ -518,11 +500,9 @@ struct ref_transaction *ref_transaction_begin(struct strbuf *err);
  * information.
  */
 int ref_transaction_update(struct ref_transaction *transaction,
-			   const char *refname,
-			   const unsigned char *new_sha1,
-			   const unsigned char *old_sha1,
-			   unsigned int flags, const char *msg,
-			   struct strbuf *err);
+			   const char *refname, const unsigned char *new_sha1,
+			   const unsigned char *old_sha1, unsigned int flags,
+			   const char *msg, struct strbuf *err);
 
 /*
  * Add a reference creation to transaction. new_sha1 is the value that
@@ -533,11 +513,9 @@ int ref_transaction_update(struct ref_transaction *transaction,
  * See the above comment "Reference transaction updates" for more
  * information.
  */
-int ref_transaction_create(struct ref_transaction *transaction,
-			   const char *refname,
-			   const unsigned char *new_sha1,
-			   unsigned int flags, const char *msg,
-			   struct strbuf *err);
+int ref_transaction_create(struct ref_transaction *transaction, const char *refname,
+			   const unsigned char *new_sha1, unsigned int flags,
+			   const char *msg, struct strbuf *err);
 
 /*
  * Add a reference deletion to transaction. If old_sha1 is non-NULL,
@@ -547,11 +525,9 @@ int ref_transaction_create(struct ref_transaction *transaction,
  * See the above comment "Reference transaction updates" for more
  * information.
  */
-int ref_transaction_delete(struct ref_transaction *transaction,
-			   const char *refname,
-			   const unsigned char *old_sha1,
-			   unsigned int flags, const char *msg,
-			   struct strbuf *err);
+int ref_transaction_delete(struct ref_transaction *transaction, const char *refname,
+			   const unsigned char *old_sha1, unsigned int flags,
+			   const char *msg, struct strbuf *err);
 
 /*
  * Verify, within a transaction, that refname has the value old_sha1,
@@ -562,10 +538,8 @@ int ref_transaction_delete(struct ref_transaction *transaction,
  * information.
  */
 int ref_transaction_verify(struct ref_transaction *transaction,
-			   const char *refname,
-			   const unsigned char *old_sha1,
-			   unsigned int flags,
-			   struct strbuf *err);
+			   const char *refname, const unsigned char *old_sha1,
+			   unsigned int flags, struct strbuf *err);
 
 /* Naming conflict (for example, the ref names A and A/B conflict). */
 #define TRANSACTION_NAME_CONFLICT -1
@@ -598,15 +572,13 @@ int ref_transaction_prepare(struct ref_transaction *transaction,
  * transaction, write an error message to `err`, and return one of the
  * `TRANSACTION_*` constants
  */
-int ref_transaction_commit(struct ref_transaction *transaction,
-			   struct strbuf *err);
+int ref_transaction_commit(struct ref_transaction *transaction, struct strbuf *err);
 
 /*
  * Abort `transaction`, which has been begun and possibly prepared,
  * but not yet committed.
  */
-int ref_transaction_abort(struct ref_transaction *transaction,
-			  struct strbuf *err);
+int ref_transaction_abort(struct ref_transaction *transaction, struct strbuf *err);
 
 /*
  * Like ref_transaction_commit(), but optimized for creating
@@ -642,8 +614,8 @@ int update_ref(const char *msg, const char *refname,
 	       const unsigned char *new_sha1, const unsigned char *old_sha1,
 	       unsigned int flags, enum action_on_err onerr);
 int update_ref_oid(const char *msg, const char *refname,
-	       const struct object_id *new_oid, const struct object_id *old_oid,
-	       unsigned int flags, enum action_on_err onerr);
+		   const struct object_id *new_oid, const struct object_id *old_oid,
+		   unsigned int flags, enum action_on_err onerr);
 
 int parse_hide_refs_config(const char *var, const char *value, const char *);
 
@@ -689,13 +661,11 @@ enum expire_reflog_flags {
  *     unlocked again.
  */
 typedef void reflog_expiry_prepare_fn(const char *refname,
-				      const struct object_id *oid,
-				      void *cb_data);
-typedef int reflog_expiry_should_prune_fn(struct object_id *ooid,
-					  struct object_id *noid,
-					  const char *email,
-					  timestamp_t timestamp, int tz,
-					  const char *message, void *cb_data);
+				      const struct object_id *oid, void *cb_data);
+typedef int
+reflog_expiry_should_prune_fn(struct object_id *ooid, struct object_id *noid,
+			      const char *email, timestamp_t timestamp, int tz,
+			      const char *message, void *cb_data);
 typedef void reflog_expiry_cleanup_fn(void *cb_data);
 
 /*
@@ -704,20 +674,15 @@ typedef void reflog_expiry_cleanup_fn(void *cb_data);
  * enum expire_reflog_flags. The three function pointers are described
  * above. On success, return zero.
  */
-int refs_reflog_expire(struct ref_store *refs,
-		       const char *refname,
-		       const unsigned char *sha1,
-		       unsigned int flags,
+int refs_reflog_expire(struct ref_store *refs, const char *refname,
+		       const unsigned char *sha1, unsigned int flags,
 		       reflog_expiry_prepare_fn prepare_fn,
 		       reflog_expiry_should_prune_fn should_prune_fn,
-		       reflog_expiry_cleanup_fn cleanup_fn,
-		       void *policy_cb_data);
+		       reflog_expiry_cleanup_fn cleanup_fn, void *policy_cb_data);
 int reflog_expire(const char *refname, const unsigned char *sha1,
-		  unsigned int flags,
-		  reflog_expiry_prepare_fn prepare_fn,
+		  unsigned int flags, reflog_expiry_prepare_fn prepare_fn,
 		  reflog_expiry_should_prune_fn should_prune_fn,
-		  reflog_expiry_cleanup_fn cleanup_fn,
-		  void *policy_cb_data);
+		  reflog_expiry_cleanup_fn cleanup_fn, void *policy_cb_data);
 
 int ref_storage_backend_exists(const char *name);
 

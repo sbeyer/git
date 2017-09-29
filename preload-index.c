@@ -6,8 +6,8 @@
 #include "dir.h"
 
 #ifdef NO_PTHREADS
-static void preload_index(struct index_state *index,
-			  const struct pathspec *pathspec)
+static void
+preload_index(struct index_state *index, const struct pathspec *pathspec)
 {
 	; /* nothing */
 }
@@ -57,7 +57,8 @@ static void *preload_thread(void *_data)
 			continue;
 		if (!ce_path_match(ce, &p->pathspec, NULL))
 			continue;
-		if (threaded_has_symlink_leading_path(&cache, ce->name, ce_namelen(ce)))
+		if (threaded_has_symlink_leading_path(&cache, ce->name,
+						      ce_namelen(ce)))
 			continue;
 		if (lstat(ce->name, &st))
 			continue;
@@ -69,8 +70,8 @@ static void *preload_thread(void *_data)
 	return NULL;
 }
 
-static void preload_index(struct index_state *index,
-			  const struct pathspec *pathspec)
+static void
+preload_index(struct index_state *index, const struct pathspec *pathspec)
 {
 	int threads, i, work, offset;
 	struct thread_data data[MAX_PARALLEL];
@@ -87,7 +88,7 @@ static void preload_index(struct index_state *index,
 	work = DIV_ROUND_UP(index->cache_nr, threads);
 	memset(&data, 0, sizeof(data));
 	for (i = 0; i < threads; i++) {
-		struct thread_data *p = data+i;
+		struct thread_data *p = data + i;
 		p->index = index;
 		if (pathspec)
 			copy_pathspec(&p->pathspec, pathspec);
@@ -98,15 +99,14 @@ static void preload_index(struct index_state *index,
 			die("unable to create threaded lstat");
 	}
 	for (i = 0; i < threads; i++) {
-		struct thread_data *p = data+i;
+		struct thread_data *p = data + i;
 		if (pthread_join(p->pthread, NULL))
 			die("unable to join threaded lstat");
 	}
 }
 #endif
 
-int read_index_preload(struct index_state *index,
-		       const struct pathspec *pathspec)
+int read_index_preload(struct index_state *index, const struct pathspec *pathspec)
 {
 	int retval = read_index(index);
 

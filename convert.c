@@ -18,9 +18,9 @@
  */
 
 /* Stat bits: When BIN is set, the txt bits are unset */
-#define CONVERT_STAT_BITS_TXT_LF    0x1
-#define CONVERT_STAT_BITS_TXT_CRLF  0x2
-#define CONVERT_STAT_BITS_BIN       0x4
+#define CONVERT_STAT_BITS_TXT_LF 0x1
+#define CONVERT_STAT_BITS_TXT_CRLF 0x2
+#define CONVERT_STAT_BITS_BIN 0x4
 
 enum crlf_action {
 	CRLF_UNDEFINED,
@@ -41,7 +41,8 @@ struct text_stat {
 	unsigned printable, nonprintable;
 };
 
-static void gather_stats(const char *buf, unsigned long size, struct text_stat *stats)
+static void
+gather_stats(const char *buf, unsigned long size, struct text_stat *stats)
 {
 	unsigned long i;
 
@@ -50,7 +51,7 @@ static void gather_stats(const char *buf, unsigned long size, struct text_stat *
 	for (i = 0; i < size; i++) {
 		unsigned char c = buf[i];
 		if (c == '\r') {
-			if (i+1 < size && buf[i+1] == '\n') {
+			if (i + 1 < size && buf[i + 1] == '\n') {
 				stats->crlf++;
 				i++;
 			} else
@@ -67,7 +68,10 @@ static void gather_stats(const char *buf, unsigned long size, struct text_stat *
 		else if (c < 32) {
 			switch (c) {
 				/* BS, HT, ESC and FF */
-			case '\b': case '\t': case '\033': case '\014':
+			case '\b':
+			case '\t':
+			case '\033':
+			case '\014':
 				stats->printable++;
 				break;
 			case 0:
@@ -76,13 +80,12 @@ static void gather_stats(const char *buf, unsigned long size, struct text_stat *
 			default:
 				stats->nonprintable++;
 			}
-		}
-		else
+		} else
 			stats->printable++;
 	}
 
 	/* If file ends with EOF then don't count this EOF as non-printable. */
-	if (size >= 1 && buf[size-1] == '\032')
+	if (size >= 1 && buf[size - 1] == '\032')
 		stats->nonprintable--;
 }
 
@@ -113,7 +116,7 @@ static unsigned int gather_convert_stats(const char *data, unsigned long size)
 	if (stats.crlf)
 		ret |= CONVERT_STAT_BITS_TXT_CRLF;
 	if (stats.lonelf)
-		ret |=  CONVERT_STAT_BITS_TXT_LF;
+		ret |= CONVERT_STAT_BITS_TXT_LF;
 
 	return ret;
 }
@@ -136,8 +139,8 @@ static const char *gather_convert_stats_ascii(const char *data, unsigned long si
 	}
 }
 
-const char *get_cached_convert_stats_ascii(const struct index_state *istate,
-					   const char *path)
+const char *
+get_cached_convert_stats_ascii(const struct index_state *istate, const char *path)
 {
 	const char *ret;
 	unsigned long sz;
@@ -194,27 +197,29 @@ static enum eol output_eol(enum crlf_action crlf_action)
 }
 
 static void check_safe_crlf(const char *path, enum crlf_action crlf_action,
-			    struct text_stat *old_stats, struct text_stat *new_stats,
-			    enum safe_crlf checksafe)
+			    struct text_stat *old_stats,
+			    struct text_stat *new_stats, enum safe_crlf checksafe)
 {
-	if (old_stats->crlf && !new_stats->crlf ) {
+	if (old_stats->crlf && !new_stats->crlf) {
 		/*
 		 * CRLFs would not be restored by checkout
 		 */
 		if (checksafe == SAFE_CRLF_WARN)
 			warning(_("CRLF will be replaced by LF in %s.\n"
 				  "The file will have its original line"
-				  " endings in your working directory."), path);
+				  " endings in your working directory."),
+				path);
 		else /* i.e. SAFE_CRLF_FAIL */
 			die(_("CRLF would be replaced by LF in %s."), path);
-	} else if (old_stats->lonelf && !new_stats->lonelf ) {
+	} else if (old_stats->lonelf && !new_stats->lonelf) {
 		/*
 		 * CRLFs would be added by checkout
 		 */
 		if (checksafe == SAFE_CRLF_WARN)
 			warning(_("LF will be replaced by CRLF in %s.\n"
 				  "The file will have its original line"
-				  " endings in your working directory."), path);
+				  " endings in your working directory."),
+				path);
 		else /* i.e. SAFE_CRLF_FAIL */
 			die(_("LF would be replaced by CRLF in %s"), path);
 	}
@@ -243,7 +248,8 @@ static int will_convert_lf_to_crlf(size_t len, struct text_stat *stats,
 	if (!stats->lonelf)
 		return 0;
 
-	if (crlf_action == CRLF_AUTO || crlf_action == CRLF_AUTO_INPUT || crlf_action == CRLF_AUTO_CRLF) {
+	if (crlf_action == CRLF_AUTO || crlf_action == CRLF_AUTO_INPUT ||
+	    crlf_action == CRLF_AUTO_CRLF) {
 		/* If we have any CR or CRLF line endings, we do not touch it */
 		/* This is the new safer autocrlf-handling */
 		if (stats->lonecr || stats->crlf)
@@ -253,20 +259,17 @@ static int will_convert_lf_to_crlf(size_t len, struct text_stat *stats,
 			return 0;
 	}
 	return 1;
-
 }
 
-static int crlf_to_git(const struct index_state *istate,
-		       const char *path, const char *src, size_t len,
-		       struct strbuf *buf,
+static int crlf_to_git(const struct index_state *istate, const char *path,
+		       const char *src, size_t len, struct strbuf *buf,
 		       enum crlf_action crlf_action, enum safe_crlf checksafe)
 {
 	struct text_stat stats;
 	char *dst;
 	int convert_crlf_into_lf;
 
-	if (crlf_action == CRLF_BINARY ||
-	    (src && !len))
+	if (crlf_action == CRLF_BINARY || (src && !len))
 		return 0;
 
 	/*
@@ -280,7 +283,8 @@ static int crlf_to_git(const struct index_state *istate,
 	/* Optimization: No CRLF? Nothing to convert, regardless. */
 	convert_crlf_into_lf = !!stats.crlf;
 
-	if (crlf_action == CRLF_AUTO || crlf_action == CRLF_AUTO_INPUT || crlf_action == CRLF_AUTO_CRLF) {
+	if (crlf_action == CRLF_AUTO || crlf_action == CRLF_AUTO_INPUT ||
+	    crlf_action == CRLF_AUTO_CRLF) {
 		if (convert_is_binary(len, &stats))
 			return 0;
 		/*
@@ -293,8 +297,7 @@ static int crlf_to_git(const struct index_state *istate,
 		    has_cr_in_index(istate, path))
 			convert_crlf_into_lf = 0;
 	}
-	if ((checksafe == SAFE_CRLF_WARN ||
-	    (checksafe == SAFE_CRLF_FAIL)) && len) {
+	if ((checksafe == SAFE_CRLF_WARN || (checksafe == SAFE_CRLF_FAIL)) && len) {
 		struct text_stat new_stats;
 		memcpy(&new_stats, &stats, sizeof(new_stats));
 		/* simulate "git add" */
@@ -323,7 +326,8 @@ static int crlf_to_git(const struct index_state *istate,
 	if (strbuf_avail(buf) + buf->len < len)
 		strbuf_grow(buf, len - buf->len);
 	dst = buf->buf;
-	if (crlf_action == CRLF_AUTO || crlf_action == CRLF_AUTO_INPUT || crlf_action == CRLF_AUTO_CRLF) {
+	if (crlf_action == CRLF_AUTO || crlf_action == CRLF_AUTO_INPUT ||
+	    crlf_action == CRLF_AUTO_CRLF) {
 		/*
 		 * If we guessed, we already know we rejected a file with
 		 * lone CR, and we can strip a CR without looking at what
@@ -337,7 +341,7 @@ static int crlf_to_git(const struct index_state *istate,
 	} else {
 		do {
 			unsigned char c = *src++;
-			if (! (c == '\r' && (1 < len && *src == '\n')))
+			if (!(c == '\r' && (1 < len && *src == '\n')))
 				*dst++ = c;
 		} while (--len);
 	}
@@ -374,7 +378,7 @@ static int crlf_to_worktree(const char *path, const char *src, size_t len,
 			strbuf_addstr(buf, "\r\n");
 		}
 		len -= nl + 1 - src;
-		src  = nl + 1;
+		src = nl + 1;
 	}
 	strbuf_add(buf, src, len);
 
@@ -404,8 +408,14 @@ static int filter_buffer_or_fd(int in, int out, void *data)
 	struct strbuf cmd = STRBUF_INIT;
 	struct strbuf path = STRBUF_INIT;
 	struct strbuf_expand_dict_entry dict[] = {
-		{ "f", NULL, },
-		{ NULL, NULL, },
+		{
+			"f",
+			NULL,
+		},
+		{
+			NULL,
+			NULL,
+		},
 	};
 
 	/* quote the path to preserve spaces, etc. */
@@ -425,14 +435,15 @@ static int filter_buffer_or_fd(int in, int out, void *data)
 
 	if (start_command(&child_process)) {
 		strbuf_release(&cmd);
-		return error("cannot fork to run external filter '%s'", params->cmd);
+		return error("cannot fork to run external filter '%s'",
+			     params->cmd);
 	}
 
 	sigchain_push(SIGPIPE, SIG_IGN);
 
 	if (params->src) {
-		write_err = (write_in_full(child_process.in,
-					   params->src, params->size) < 0);
+		write_err = (write_in_full(child_process.in, params->src,
+					   params->size) < 0);
 		if (errno == EPIPE)
 			write_err = 0;
 	} else {
@@ -456,8 +467,8 @@ static int filter_buffer_or_fd(int in, int out, void *data)
 	return (write_err || status);
 }
 
-static int apply_single_file_filter(const char *path, const char *src, size_t len, int fd,
-                        struct strbuf *dst, const char *cmd)
+static int apply_single_file_filter(const char *path, const char *src, size_t len,
+				    int fd, struct strbuf *dst, const char *cmd)
 {
 	/*
 	 * Create a pipeline to have the command filter the buffer's
@@ -482,7 +493,7 @@ static int apply_single_file_filter(const char *path, const char *src, size_t le
 
 	fflush(NULL);
 	if (start_async(&async))
-		return 0;	/* error was already reported */
+		return 0; /* error was already reported */
 
 	if (strbuf_read(&nbuf, async.out, len) < 0) {
 		err = error("read from external filter '%s' failed", cmd);
@@ -501,9 +512,9 @@ static int apply_single_file_filter(const char *path, const char *src, size_t le
 	return !err;
 }
 
-#define CAP_CLEAN    (1u<<0)
-#define CAP_SMUDGE   (1u<<1)
-#define CAP_DELAY    (1u<<2)
+#define CAP_CLEAN (1u << 0)
+#define CAP_SMUDGE (1u << 1)
+#define CAP_DELAY (1u << 2)
 
 struct cmd2process {
 	struct subprocess_entry subprocess; /* must be the first member! */
@@ -515,22 +526,21 @@ static struct hashmap subprocess_map;
 
 static int start_multi_file_filter_fn(struct subprocess_entry *subprocess)
 {
-	static int versions[] = {2, 0};
-	static struct subprocess_capability capabilities[] = {
-		{ "clean",  CAP_CLEAN  },
-		{ "smudge", CAP_SMUDGE },
-		{ "delay",  CAP_DELAY  },
-		{ NULL, 0 }
-	};
+	static int versions[] = { 2, 0 };
+	static struct subprocess_capability capabilities[] =
+		{ { "clean", CAP_CLEAN },
+		  { "smudge", CAP_SMUDGE },
+		  { "delay", CAP_DELAY },
+		  { NULL, 0 } };
 	struct cmd2process *entry = (struct cmd2process *)subprocess;
 	return subprocess_handshake(subprocess, "git-filter", versions, NULL,
-				    capabilities,
-				    &entry->supported_capabilities);
+				    capabilities, &entry->supported_capabilities);
 }
 
 static void handle_filter_error(const struct strbuf *filter_status,
 				struct cmd2process *entry,
-				const unsigned int wanted_capability) {
+				const unsigned int wanted_capability)
+{
 	if (!strcmp(filter_status->buf, "error"))
 		; /* The filter signaled a problem with the file. */
 	else if (!strcmp(filter_status->buf, "abort") && wanted_capability) {
@@ -539,11 +549,12 @@ static void handle_filter_error(const struct strbuf *filter_status,
 		 * files with the same command for the lifetime of the current
 		 * Git process.
 		 */
-		 entry->supported_capabilities &= ~wanted_capability;
+		entry->supported_capabilities &= ~wanted_capability;
 	} else {
 		/*
 		 * Something went wrong with the protocol filter.
-		 * Force shutdown and restart if another blob requires filtering.
+		 * Force shutdown and restart if another blob requires
+		 * filtering.
 		 */
 		error("external filter '%s' failed", entry->subprocess.cmd);
 		subprocess_stop(&subprocess_map, &entry->subprocess);
@@ -569,7 +580,8 @@ static int apply_multi_file_filter(const char *path, const char *src, size_t len
 		hashmap_init(&subprocess_map, cmd2process_cmp, NULL, 0);
 		entry = NULL;
 	} else {
-		entry = (struct cmd2process *)subprocess_find_entry(&subprocess_map, cmd);
+		entry = (struct cmd2process *)subprocess_find_entry(&subprocess_map,
+								    cmd);
 	}
 
 	fflush(NULL);
@@ -578,7 +590,8 @@ static int apply_multi_file_filter(const char *path, const char *src, size_t len
 		entry = xmalloc(sizeof(*entry));
 		entry->supported_capabilities = 0;
 
-		if (subprocess_start(&subprocess_map, &entry->subprocess, cmd, start_multi_file_filter_fn)) {
+		if (subprocess_start(&subprocess_map, &entry->subprocess, cmd,
+				     start_multi_file_filter_fn)) {
 			free(entry);
 			return 0;
 		}
@@ -612,8 +625,8 @@ static int apply_multi_file_filter(const char *path, const char *src, size_t len
 	if (err)
 		goto done;
 
-	if ((entry->supported_capabilities & CAP_DELAY) &&
-	    dco && dco->state == CE_CAN_DELAY) {
+	if ((entry->supported_capabilities & CAP_DELAY) && dco &&
+	    dco->state == CE_CAN_DELAY) {
 		can_delay = 1;
 		err = packet_write_fmt_gently(process->in, "can-delay=1\n");
 		if (err)
@@ -666,7 +679,6 @@ done:
 	return !err;
 }
 
-
 int async_query_available_blobs(const char *cmd, struct string_list *available_paths)
 {
 	int err;
@@ -679,14 +691,15 @@ int async_query_available_blobs(const char *cmd, struct string_list *available_p
 	entry = (struct cmd2process *)subprocess_find_entry(&subprocess_map, cmd);
 	if (!entry) {
 		error("external filter '%s' is not available anymore although "
-		      "not all paths have been filtered", cmd);
+		      "not all paths have been filtered",
+		      cmd);
 		return 0;
 	}
 	process = &entry->subprocess.process;
 	sigchain_push(SIGPIPE, SIG_IGN);
 
-	err = packet_write_fmt_gently(
-		process->in, "command=list_available_blobs\n");
+	err = packet_write_fmt_gently(process->in,
+				      "command=list_available_blobs\n");
 	if (err)
 		goto done;
 
@@ -723,12 +736,12 @@ static struct convert_driver {
 	const char *clean;
 	const char *process;
 	int required;
-} *user_convert, **user_convert_tail;
+} * user_convert, **user_convert_tail;
 
-static int apply_filter(const char *path, const char *src, size_t len,
-			int fd, struct strbuf *dst, struct convert_driver *drv,
-			const unsigned int wanted_capability,
-			struct delayed_checkout *dco)
+static int
+apply_filter(const char *path, const char *src, size_t len, int fd,
+	     struct strbuf *dst, struct convert_driver *drv,
+	     const unsigned int wanted_capability, struct delayed_checkout *dco)
 {
 	const char *cmd = NULL;
 
@@ -747,7 +760,8 @@ static int apply_filter(const char *path, const char *src, size_t len,
 		return apply_single_file_filter(path, src, len, fd, dst, cmd);
 	else if (drv->process && *drv->process)
 		return apply_multi_file_filter(path, src, len, fd, dst,
-			drv->process, wanted_capability, dco);
+					       drv->process, wanted_capability,
+					       dco);
 
 	return 0;
 }
@@ -843,7 +857,7 @@ static int count_ident(const char *cp, unsigned long size)
 }
 
 static int ident_to_git(const char *path, const char *src, size_t len,
-                        struct strbuf *buf, int ident)
+			struct strbuf *buf, int ident)
 {
 	char *dst, *dollar;
 
@@ -864,7 +878,7 @@ static int ident_to_git(const char *path, const char *src, size_t len,
 		memmove(dst, src, dollar + 1 - src);
 		dst += dollar + 1 - src;
 		len -= dollar + 1 - src;
-		src  = dollar + 1;
+		src = dollar + 1;
 
 		if (len > 3 && !memcmp(src, "Id:", 3)) {
 			dollar = memchr(src + 3, '$', len - 3);
@@ -878,7 +892,7 @@ static int ident_to_git(const char *path, const char *src, size_t len,
 			memcpy(dst, "Id$", 3);
 			dst += 3;
 			len -= dollar + 1 - src;
-			src  = dollar + 1;
+			src = dollar + 1;
 		}
 	}
 	memmove(dst, src, len);
@@ -887,7 +901,7 @@ static int ident_to_git(const char *path, const char *src, size_t len,
 }
 
 static int ident_to_worktree(const char *path, const char *src, size_t len,
-                             struct strbuf *buf, int ident)
+			     struct strbuf *buf, int ident)
 {
 	unsigned char sha1[20];
 	char *to_free = NULL, *dollar, *spc;
@@ -913,7 +927,7 @@ static int ident_to_worktree(const char *path, const char *src, size_t len,
 			break;
 		strbuf_add(buf, src, dollar + 1 - src);
 		len -= dollar + 1 - src;
-		src  = dollar + 1;
+		src = dollar + 1;
 
 		/* step 2: does it looks like a bit like Id:xxx$ or Id$ ? */
 		if (len < 3 || memcmp("Id", src, 2))
@@ -925,15 +939,17 @@ static int ident_to_worktree(const char *path, const char *src, size_t len,
 			len -= 3;
 		} else if (src[2] == ':') {
 			/*
-			 * It's possible that an expanded Id has crept its way into the
-			 * repository, we cope with that by stripping the expansion out.
-			 * This is probably not a good idea, since it will cause changes
-			 * on checkout, which won't go away by stash, but let's keep it
-			 * for git-style ids.
+			 * It's possible that an expanded Id has crept its way
+			 * into the repository, we cope with that by stripping
+			 * the expansion out. This is probably not a good idea,
+			 * since it will cause changes on checkout, which won't
+			 * go away by stash, but let's keep it for git-style
+			 * ids.
 			 */
 			dollar = memchr(src + 3, '$', len - 3);
 			if (!dollar) {
-				/* incomplete keyword, no more '$', so just quit the loop */
+				/* incomplete keyword, no more '$', so just quit
+				 * the loop */
 				break;
 			}
 
@@ -943,7 +959,7 @@ static int ident_to_worktree(const char *path, const char *src, size_t len,
 			}
 
 			spc = memchr(src + 4, ' ', dollar - src - 4);
-			if (spc && spc < dollar-1) {
+			if (spc && spc < dollar - 1) {
 				/* There are spaces in unexpected places.
 				 * This is probably an id from some other
 				 * versioning system. Keep it for now.
@@ -952,7 +968,7 @@ static int ident_to_worktree(const char *path, const char *src, size_t len,
 			}
 
 			len -= dollar + 1 - src;
-			src  = dollar + 1;
+			src = dollar + 1;
 		} else {
 			/* it wasn't a "Id$" or "Id:xxxx$" */
 			continue;
@@ -1022,7 +1038,8 @@ static int git_path_check_ident(struct attr_check_item *check)
 struct conv_attrs {
 	struct convert_driver *drv;
 	enum crlf_action attr_action; /* What attr says */
-	enum crlf_action crlf_action; /* When no attr is set, use core.autocrlf */
+	enum crlf_action crlf_action; /* When no attr is set, use core.autocrlf
+				       */
 	int ident;
 };
 
@@ -1031,8 +1048,8 @@ static void convert_attrs(struct conv_attrs *ca, const char *path)
 	static struct attr_check *check;
 
 	if (!check) {
-		check = attr_check_initl("crlf", "ident", "filter",
-					 "eol", "text", NULL);
+		check = attr_check_initl("crlf", "ident", "filter", "eol",
+					 "text", NULL);
 		user_convert_tail = &user_convert;
 		git_config(read_convert_config, NULL);
 	}
@@ -1064,7 +1081,8 @@ static void convert_attrs(struct conv_attrs *ca, const char *path)
 	/* Save attr and make a decision for action */
 	ca->attr_action = ca->crlf_action;
 	if (ca->crlf_action == CRLF_TEXT)
-		ca->crlf_action = text_eol_is_crlf() ? CRLF_TEXT_CRLF : CRLF_TEXT_INPUT;
+		ca->crlf_action = text_eol_is_crlf() ? CRLF_TEXT_CRLF :
+						       CRLF_TEXT_INPUT;
 	if (ca->crlf_action == CRLF_UNDEFINED && auto_crlf == AUTO_CRLF_FALSE)
 		ca->crlf_action = CRLF_BINARY;
 	if (ca->crlf_action == CRLF_UNDEFINED && auto_crlf == AUTO_CRLF_TRUE)
@@ -1118,9 +1136,9 @@ const char *get_convert_attr_ascii(const char *path)
 	return "";
 }
 
-int convert_to_git(const struct index_state *istate,
-		   const char *path, const char *src, size_t len,
-                   struct strbuf *dst, enum safe_crlf checksafe)
+int convert_to_git(const struct index_state *istate, const char *path,
+		   const char *src, size_t len, struct strbuf *dst,
+		   enum safe_crlf checksafe)
 {
 	int ret = 0;
 	struct conv_attrs ca;
@@ -1136,7 +1154,8 @@ int convert_to_git(const struct index_state *istate,
 		len = dst->len;
 	}
 	if (checksafe != SAFE_CRLF_KEEP_CRLF) {
-		ret |= crlf_to_git(istate, path, src, len, dst, ca.crlf_action, checksafe);
+		ret |= crlf_to_git(istate, path, src, len, dst, ca.crlf_action,
+				   checksafe);
 		if (ret && dst) {
 			src = dst->buf;
 			len = dst->len;
@@ -1145,9 +1164,8 @@ int convert_to_git(const struct index_state *istate,
 	return ret | ident_to_git(path, src, len, dst, ca.ident);
 }
 
-void convert_to_git_filter_fd(const struct index_state *istate,
-			      const char *path, int fd, struct strbuf *dst,
-			      enum safe_crlf checksafe)
+void convert_to_git_filter_fd(const struct index_state *istate, const char *path,
+			      int fd, struct strbuf *dst, enum safe_crlf checksafe)
 {
 	struct conv_attrs ca;
 	convert_attrs(&ca, path);
@@ -1158,13 +1176,15 @@ void convert_to_git_filter_fd(const struct index_state *istate,
 	if (!apply_filter(path, NULL, 0, fd, dst, ca.drv, CAP_CLEAN, NULL))
 		die("%s: clean filter '%s' failed", path, ca.drv->name);
 
-	crlf_to_git(istate, path, dst->buf, dst->len, dst, ca.crlf_action, checksafe);
+	crlf_to_git(istate, path, dst->buf, dst->len, dst, ca.crlf_action,
+		    checksafe);
 	ident_to_git(path, dst->buf, dst->len, dst, ca.ident);
 }
 
-static int convert_to_working_tree_internal(const char *path, const char *src,
-					    size_t len, struct strbuf *dst,
-					    int normalizing, struct delayed_checkout *dco)
+static int
+convert_to_working_tree_internal(const char *path, const char *src, size_t len,
+				 struct strbuf *dst, int normalizing,
+				 struct delayed_checkout *dco)
 {
 	int ret = 0, ret_filter = 0;
 	struct conv_attrs ca;
@@ -1189,22 +1209,21 @@ static int convert_to_working_tree_internal(const char *path, const char *src,
 		}
 	}
 
-	ret_filter = apply_filter(
-		path, src, len, -1, dst, ca.drv, CAP_SMUDGE, dco);
+	ret_filter = apply_filter(path, src, len, -1, dst, ca.drv, CAP_SMUDGE, dco);
 	if (!ret_filter && ca.drv && ca.drv->required)
 		die("%s: smudge filter %s failed", path, ca.drv->name);
 
 	return ret | ret_filter;
 }
 
-int async_convert_to_working_tree(const char *path, const char *src,
-				  size_t len, struct strbuf *dst,
-				  void *dco)
+int async_convert_to_working_tree(const char *path, const char *src, size_t len,
+				  struct strbuf *dst, void *dco)
 {
 	return convert_to_working_tree_internal(path, src, len, dst, 0, dco);
 }
 
-int convert_to_working_tree(const char *path, const char *src, size_t len, struct strbuf *dst)
+int convert_to_working_tree(const char *path, const char *src, size_t len,
+			    struct strbuf *dst)
 {
 	return convert_to_working_tree_internal(path, src, len, dst, 0, NULL);
 }
@@ -1217,7 +1236,8 @@ int renormalize_buffer(const struct index_state *istate, const char *path,
 		src = dst->buf;
 		len = dst->len;
 	}
-	return ret | convert_to_git(istate, path, src, len, dst, SAFE_CRLF_RENORMALIZE);
+	return ret |
+	       convert_to_git(istate, path, src, len, dst, SAFE_CRLF_RENORMALIZE);
 }
 
 /*****************************************************************
@@ -1226,9 +1246,8 @@ int renormalize_buffer(const struct index_state *istate, const char *path,
  *
  *****************************************************************/
 
-typedef int (*filter_fn)(struct stream_filter *,
-			 const char *input, size_t *isize_p,
-			 char *output, size_t *osize_p);
+typedef int (*filter_fn)(struct stream_filter *, const char *input,
+			 size_t *isize_p, char *output, size_t *osize_p);
 typedef void (*free_fn)(struct stream_filter *);
 
 struct stream_filter_vtbl {
@@ -1240,9 +1259,8 @@ struct stream_filter {
 	struct stream_filter_vtbl *vtbl;
 };
 
-static int null_filter_fn(struct stream_filter *filter,
-			  const char *input, size_t *isize_p,
-			  char *output, size_t *osize_p)
+static int null_filter_fn(struct stream_filter *filter, const char *input,
+			  size_t *isize_p, char *output, size_t *osize_p)
 {
 	size_t count;
 
@@ -1278,20 +1296,18 @@ int is_null_stream_filter(struct stream_filter *filter)
 	return filter == &null_filter_singleton;
 }
 
-
 /*
  * LF-to-CRLF filter
  */
 
 struct lf_to_crlf_filter {
 	struct stream_filter filter;
-	unsigned has_held:1;
+	unsigned has_held : 1;
 	char held;
 };
 
-static int lf_to_crlf_filter_fn(struct stream_filter *filter,
-				const char *input, size_t *isize_p,
-				char *output, size_t *osize_p)
+static int lf_to_crlf_filter_fn(struct stream_filter *filter, const char *input,
+				size_t *isize_p, char *output, size_t *osize_p)
 {
 	size_t count, o = 0;
 	struct lf_to_crlf_filter *lf_to_crlf = (struct lf_to_crlf_filter *)filter;
@@ -1398,11 +1414,10 @@ struct cascade_filter {
 	int end, ptr;
 };
 
-static int cascade_filter_fn(struct stream_filter *filter,
-			     const char *input, size_t *isize_p,
-			     char *output, size_t *osize_p)
+static int cascade_filter_fn(struct stream_filter *filter, const char *input,
+			     size_t *isize_p, char *output, size_t *osize_p)
 {
-	struct cascade_filter *cas = (struct cascade_filter *) filter;
+	struct cascade_filter *cas = (struct cascade_filter *)filter;
 	size_t filled = 0;
 	size_t sz = *osize_p;
 	size_t to_feed, remaining;
@@ -1416,9 +1431,8 @@ static int cascade_filter_fn(struct stream_filter *filter,
 		/* do we already have something to feed two with? */
 		if (cas->ptr < cas->end) {
 			to_feed = cas->end - cas->ptr;
-			if (stream_filter(cas->two,
-					  cas->buf + cas->ptr, &to_feed,
-					  output + filled, &remaining))
+			if (stream_filter(cas->two, cas->buf + cas->ptr,
+					  &to_feed, output + filled, &remaining))
 				return -1;
 			cas->ptr += (cas->end - cas->ptr) - to_feed;
 			filled = sz - remaining;
@@ -1430,9 +1444,7 @@ static int cascade_filter_fn(struct stream_filter *filter,
 		if (input && !to_feed)
 			break;
 		remaining = sizeof(cas->buf);
-		if (stream_filter(cas->one,
-				  input, &to_feed,
-				  cas->buf, &remaining))
+		if (stream_filter(cas->one, input, &to_feed, cas->buf, &remaining))
 			return -1;
 		cas->end = sizeof(cas->buf) - remaining;
 		cas->ptr = 0;
@@ -1449,9 +1461,8 @@ static int cascade_filter_fn(struct stream_filter *filter,
 		/* tell two to drain; we have nothing more to give it */
 		to_feed = 0;
 		remaining = sz - filled;
-		if (stream_filter(cas->two,
-				  NULL, &to_feed,
-				  output + filled, &remaining))
+		if (stream_filter(cas->two, NULL, &to_feed, output + filled,
+				  &remaining))
 			return -1;
 		if (remaining == (sz - filled))
 			break; /* completely drained two */
@@ -1474,8 +1485,8 @@ static struct stream_filter_vtbl cascade_vtbl = {
 	cascade_free_fn,
 };
 
-static struct stream_filter *cascade_filter(struct stream_filter *one,
-					    struct stream_filter *two)
+static struct stream_filter *
+cascade_filter(struct stream_filter *one, struct stream_filter *two)
 {
 	struct cascade_filter *cascade;
 
@@ -1511,13 +1522,14 @@ static int is_foreign_ident(const char *str)
 	if (!skip_prefix(str, "$Id: ", &str))
 		return 0;
 	for (i = 0; str[i]; i++) {
-		if (isspace(str[i]) && str[i+1] != '$')
+		if (isspace(str[i]) && str[i + 1] != '$')
 			return 1;
 	}
 	return 0;
 }
 
-static void ident_drain(struct ident_filter *ident, char **output_p, size_t *osize_p)
+static void
+ident_drain(struct ident_filter *ident, char **output_p, size_t *osize_p)
 {
 	size_t to_drain = ident->left.len;
 
@@ -1533,9 +1545,8 @@ static void ident_drain(struct ident_filter *ident, char **output_p, size_t *osi
 		ident->state = 0;
 }
 
-static int ident_filter_fn(struct stream_filter *filter,
-			   const char *input, size_t *isize_p,
-			   char *output, size_t *osize_p)
+static int ident_filter_fn(struct stream_filter *filter, const char *input,
+			   size_t *isize_p, char *output, size_t *osize_p)
 {
 	struct ident_filter *ident = (struct ident_filter *)filter;
 	static const char head[] = "$Id";
@@ -1583,8 +1594,7 @@ static int ident_filter_fn(struct stream_filter *filter,
 			continue;
 		}
 
-		if (ident->state < sizeof(head) &&
-		    head[ident->state] == ch) {
+		if (ident->state < sizeof(head) && head[ident->state] == ch) {
 			ident->state++;
 			continue;
 		}
@@ -1630,8 +1640,7 @@ static struct stream_filter *ident_filter(const unsigned char *sha1)
 {
 	struct ident_filter *ident = xmalloc(sizeof(*ident));
 
-	xsnprintf(ident->ident, sizeof(ident->ident),
-		  ": %s $", sha1_to_hex(sha1));
+	xsnprintf(ident->ident, sizeof(ident->ident), ": %s $", sha1_to_hex(sha1));
 	strbuf_init(&ident->left, 0);
 	ident->filter.vtbl = &ident_vtbl;
 	ident->state = 0;
@@ -1674,9 +1683,8 @@ void free_stream_filter(struct stream_filter *filter)
 	filter->vtbl->free(filter);
 }
 
-int stream_filter(struct stream_filter *filter,
-		  const char *input, size_t *isize_p,
-		  char *output, size_t *osize_p)
+int stream_filter(struct stream_filter *filter, const char *input,
+		  size_t *isize_p, char *output, size_t *osize_p)
 {
 	return filter->vtbl->filter(filter, input, isize_p, output, osize_p);
 }

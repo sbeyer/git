@@ -60,10 +60,9 @@ static void packet_trace(const char *buf, unsigned int len, int write)
 		return;
 
 	/* +32 is just a guess for header + quoting */
-	strbuf_init(&out, len+32);
+	strbuf_init(&out, len + 32);
 
-	strbuf_addf(&out, "packet: %12s%c ",
-		    get_trace_prefix(), write ? '>' : '<');
+	strbuf_addf(&out, "packet: %12s%c ", get_trace_prefix(), write ? '>' : '<');
 
 	/* XXX we should really handle printable utf8 */
 	for (i = 0; i < len; i++) {
@@ -109,12 +108,12 @@ static void set_packet_header(char *buf, const int size)
 {
 	static char hexchar[] = "0123456789abcdef";
 
-	#define hex(a) (hexchar[(a) & 15])
+#define hex(a) (hexchar[(a)&15])
 	buf[0] = hex(size >> 12);
 	buf[1] = hex(size >> 8);
 	buf[2] = hex(size >> 4);
 	buf[3] = hex(size);
-	#undef hex
+#undef hex
 }
 
 static void format_packet(struct strbuf *out, const char *fmt, va_list args)
@@ -133,8 +132,7 @@ static void format_packet(struct strbuf *out, const char *fmt, va_list args)
 	packet_trace(out->buf + orig_len + 4, n - 4, 1);
 }
 
-static int packet_write_fmt_1(int fd, int gently,
-			      const char *fmt, va_list args)
+static int packet_write_fmt_1(int fd, int gently, const char *fmt, va_list args)
 {
 	static struct strbuf buf = STRBUF_INIT;
 
@@ -229,7 +227,8 @@ int write_packetized_from_buf(const char *src_in, size_t len, int fd_out)
 			bytes_to_write = len - bytes_written;
 		if (bytes_to_write == 0)
 			break;
-		err = packet_write_gently(fd_out, src_in + bytes_written, bytes_to_write);
+		err = packet_write_gently(fd_out, src_in + bytes_written,
+					  bytes_to_write);
 		bytes_written += bytes_to_write;
 	}
 	if (!err)
@@ -237,8 +236,8 @@ int write_packetized_from_buf(const char *src_in, size_t len, int fd_out)
 	return err;
 }
 
-static int get_packet_data(int fd, char **src_buf, size_t *src_size,
-			   void *dst, unsigned size, int options)
+static int get_packet_data(int fd, char **src_buf, size_t *src_size, void *dst,
+			   unsigned size, int options)
 {
 	ssize_t ret;
 
@@ -274,8 +273,8 @@ static int packet_length(const char *linelen)
 	return (val < 0) ? val : (val << 8) | hex2chr(linelen + 2);
 }
 
-int packet_read(int fd, char **src_buf, size_t *src_len,
-		char *buffer, unsigned size, int options)
+int packet_read(int fd, char **src_buf, size_t *src_len, char *buffer,
+		unsigned size, int options)
 {
 	int len, ret;
 	char linelen[4];
@@ -297,8 +296,7 @@ int packet_read(int fd, char **src_buf, size_t *src_len,
 	if (ret < 0)
 		return ret;
 
-	if ((options & PACKET_READ_CHOMP_NEWLINE) &&
-	    len && buffer[len-1] == '\n')
+	if ((options & PACKET_READ_CHOMP_NEWLINE) && len && buffer[len - 1] == '\n')
 		len--;
 
 	buffer[len] = 0;
@@ -306,13 +304,11 @@ int packet_read(int fd, char **src_buf, size_t *src_len,
 	return len;
 }
 
-static char *packet_read_line_generic(int fd,
-				      char **src, size_t *src_len,
-				      int *dst_len)
+static char *
+packet_read_line_generic(int fd, char **src, size_t *src_len, int *dst_len)
 {
-	int len = packet_read(fd, src, src_len,
-			      packet_buffer, sizeof(packet_buffer),
-			      PACKET_READ_CHOMP_NEWLINE);
+	int len = packet_read(fd, src, src_len, packet_buffer,
+			      sizeof(packet_buffer), PACKET_READ_CHOMP_NEWLINE);
 	if (dst_len)
 		*dst_len = len;
 	return (len > 0) ? packet_buffer : NULL;
@@ -325,9 +321,8 @@ char *packet_read_line(int fd, int *len_p)
 
 int packet_read_line_gently(int fd, int *dst_len, char **dst_line)
 {
-	int len = packet_read(fd, NULL, NULL,
-			      packet_buffer, sizeof(packet_buffer),
-			      PACKET_READ_CHOMP_NEWLINE|PACKET_READ_GENTLE_ON_EOF);
+	int len = packet_read(fd, NULL, NULL, packet_buffer, sizeof(packet_buffer),
+			      PACKET_READ_CHOMP_NEWLINE | PACKET_READ_GENTLE_ON_EOF);
 	if (dst_len)
 		*dst_len = len;
 	if (dst_line)
@@ -350,13 +345,16 @@ ssize_t read_packetized_to_strbuf(int fd_in, struct strbuf *sb_out)
 	for (;;) {
 		strbuf_grow(sb_out, LARGE_PACKET_DATA_MAX);
 		packet_len = packet_read(fd_in, NULL, NULL,
-			/* strbuf_grow() above always allocates one extra byte to
-			 * store a '\0' at the end of the string. packet_read()
-			 * writes a '\0' extra byte at the end, too. Let it know
-			 * that there is already room for the extra byte.
-			 */
-			sb_out->buf + sb_out->len, LARGE_PACKET_DATA_MAX+1,
-			PACKET_READ_GENTLE_ON_EOF);
+					 /* strbuf_grow() above always allocates
+					  * one extra byte to store a '\0' at
+					  * the end of the string. packet_read()
+					  * writes a '\0' extra byte at the end,
+					  * too. Let it know that there is
+					  * already room for the extra byte.
+					  */
+					 sb_out->buf + sb_out->len,
+					 LARGE_PACKET_DATA_MAX + 1,
+					 PACKET_READ_GENTLE_ON_EOF);
 		if (packet_len <= 0)
 			break;
 		sb_out->len += packet_len;

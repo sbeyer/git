@@ -51,8 +51,8 @@ static int get_trace_fd(struct trace_key *key)
 
 	trace = getenv(key->key);
 
-	if (!trace || !strcmp(trace, "") ||
-	    !strcmp(trace, "0") || !strcasecmp(trace, "false"))
+	if (!trace || !strcmp(trace, "") || !strcmp(trace, "0") ||
+	    !strcasecmp(trace, "false"))
 		key->fd = 0;
 	else if (!strcmp(trace, "1") || !strcasecmp(trace, "true"))
 		key->fd = STDERR_FILENO;
@@ -61,8 +61,8 @@ static int get_trace_fd(struct trace_key *key)
 	else if (is_absolute_path(trace)) {
 		int fd = open(trace, O_WRONLY | O_APPEND | O_CREAT, 0666);
 		if (fd == -1) {
-			warning("could not open '%s' for tracing: %s",
-				trace, strerror(errno));
+			warning("could not open '%s' for tracing: %s", trace,
+				strerror(errno));
 			trace_disable(key);
 		} else {
 			key->fd = fd;
@@ -91,8 +91,8 @@ void trace_disable(struct trace_key *key)
 	key->need_close = 0;
 }
 
-static int prepare_trace_line(const char *file, int line,
-			      struct trace_key *key, struct strbuf *buf)
+static int prepare_trace_line(const char *file, int line, struct trace_key *key,
+			      struct strbuf *buf)
 {
 	static struct trace_key trace_bare = TRACE_KEY_INIT(BARE);
 	struct timeval tv;
@@ -102,7 +102,7 @@ static int prepare_trace_line(const char *file, int line,
 	if (!trace_want(key))
 		return 0;
 
-	set_try_to_free_routine(NULL);	/* is never reset */
+	set_try_to_free_routine(NULL); /* is never reset */
 
 	/* unit tests may want to disable additional trace output */
 	if (trace_want(&trace_bare))
@@ -113,7 +113,7 @@ static int prepare_trace_line(const char *file, int line,
 	secs = tv.tv_sec;
 	localtime_r(&secs, &tm);
 	strbuf_addf(buf, "%02d:%02d:%02d.%06ld ", tm.tm_hour, tm.tm_min,
-		    tm.tm_sec, (long) tv.tv_usec);
+		    tm.tm_sec, (long)tv.tv_usec);
 
 #ifdef HAVE_VARIADIC_MACROS
 	/* print file:line */
@@ -130,8 +130,8 @@ static void trace_write(struct trace_key *key, const void *buf, unsigned len)
 {
 	if (write_in_full(get_trace_fd(key), buf, len) < 0) {
 		normalize_trace_key(&key);
-		warning("unable to write trace for %s: %s",
-			key->key, strerror(errno));
+		warning("unable to write trace for %s: %s", key->key,
+			strerror(errno));
 		trace_disable(key);
 	}
 }
@@ -162,9 +162,8 @@ static void trace_vprintf_fl(const char *file, int line, struct trace_key *key,
 	print_trace_line(key, &buf);
 }
 
-static void trace_argv_vprintf_fl(const char *file, int line,
-				  const char **argv, const char *format,
-				  va_list ap)
+static void trace_argv_vprintf_fl(const char *file, int line, const char **argv,
+				  const char *format, va_list ap)
 {
 	struct strbuf buf = STRBUF_INIT;
 
@@ -191,16 +190,15 @@ void trace_strbuf_fl(const char *file, int line, struct trace_key *key,
 
 static struct trace_key trace_perf_key = TRACE_KEY_INIT(PERFORMANCE);
 
-static void trace_performance_vprintf_fl(const char *file, int line,
-					 uint64_t nanos, const char *format,
-					 va_list ap)
+static void trace_performance_vprintf_fl(const char *file, int line, uint64_t nanos,
+					 const char *format, va_list ap)
 {
 	struct strbuf buf = STRBUF_INIT;
 
 	if (!prepare_trace_line(file, line, &trace_perf_key, &buf))
 		return;
 
-	strbuf_addf(&buf, "performance: %.9f s", (double) nanos / 1000000000);
+	strbuf_addf(&buf, "performance: %.9f s", (double)nanos / 1000000000);
 
 	if (format && *format) {
 		strbuf_addstr(&buf, ": ");
@@ -253,8 +251,7 @@ void trace_performance_since(uint64_t start, const char *format, ...)
 {
 	va_list ap;
 	va_start(ap, format);
-	trace_performance_vprintf_fl(NULL, 0, getnanotime() - start,
-				     format, ap);
+	trace_performance_vprintf_fl(NULL, 0, getnanotime() - start, format, ap);
 	va_end(ap);
 }
 
@@ -279,7 +276,7 @@ void trace_argv_printf_fl(const char *file, int line, const char **argv,
 }
 
 void trace_performance_fl(const char *file, int line, uint64_t nanos,
-			      const char *format, ...)
+			  const char *format, ...)
 {
 	va_list ap;
 	va_start(ap, format);
@@ -288,7 +285,6 @@ void trace_performance_fl(const char *file, int line, uint64_t nanos,
 }
 
 #endif /* HAVE_VARIADIC_MACROS */
-
 
 static const char *quote_crnl(const char *path)
 {
@@ -301,9 +297,15 @@ static const char *quote_crnl(const char *path)
 
 	while (*path) {
 		switch (*path) {
-		case '\\': strbuf_addstr(&new_path, "\\\\"); break;
-		case '\n': strbuf_addstr(&new_path, "\\n"); break;
-		case '\r': strbuf_addstr(&new_path, "\\r"); break;
+		case '\\':
+			strbuf_addstr(&new_path, "\\\\");
+			break;
+		case '\n':
+			strbuf_addstr(&new_path, "\\n");
+			break;
+		case '\r':
+			strbuf_addstr(&new_path, "\\r");
+			break;
 		default:
 			strbuf_addch(&new_path, *path);
 		}
@@ -331,7 +333,8 @@ void trace_repo_setup(const char *prefix)
 		prefix = "(null)";
 
 	trace_printf_key(&key, "setup: git_dir: %s\n", quote_crnl(get_git_dir()));
-	trace_printf_key(&key, "setup: git_common_dir: %s\n", quote_crnl(get_git_common_dir()));
+	trace_printf_key(&key, "setup: git_common_dir: %s\n",
+			 quote_crnl(get_git_common_dir()));
 	trace_printf_key(&key, "setup: worktree: %s\n", quote_crnl(git_work_tree));
 	trace_printf_key(&key, "setup: cwd: %s\n", quote_crnl(cwd));
 	trace_printf_key(&key, "setup: prefix: %s\n", quote_crnl(prefix));
@@ -351,10 +354,10 @@ static inline uint64_t highres_nanos(void)
 	struct timespec ts;
 	if (clock_gettime(CLOCK_MONOTONIC, &ts))
 		return 0;
-	return (uint64_t) ts.tv_sec * 1000000000 + ts.tv_nsec;
+	return (uint64_t)ts.tv_sec * 1000000000 + ts.tv_nsec;
 }
 
-#elif defined (GIT_WINDOWS_NATIVE)
+#elif defined(GIT_WINDOWS_NATIVE)
 
 static inline uint64_t highres_nanos(void)
 {
@@ -367,7 +370,7 @@ static inline uint64_t highres_nanos(void)
 			return 0;
 
 		/* high_ns = number of ns per cnt.HighPart */
-		high_ns = (1000000000LL << 32) / (uint64_t) cnt.QuadPart;
+		high_ns = (1000000000LL << 32) / (uint64_t)cnt.QuadPart;
 
 		/*
 		 * Number of ns per cnt.LowPart is 10^9 / frequency (or
@@ -386,19 +389,18 @@ static inline uint64_t highres_nanos(void)
 	/* if QPF worked on initialization, we expect QPC to work as well */
 	QueryPerformanceCounter(&cnt);
 
-	return (high_ns * cnt.HighPart) +
-	       ((scaled_low_ns * cnt.LowPart) >> scale);
+	return (high_ns * cnt.HighPart) + ((scaled_low_ns * cnt.LowPart) >> scale);
 }
 
 #else
-# define highres_nanos() 0
+#define highres_nanos() 0
 #endif
 
 static inline uint64_t gettimeofday_nanos(void)
 {
 	struct timeval tv;
 	gettimeofday(&tv, NULL);
-	return (uint64_t) tv.tv_sec * 1000000000 + tv.tv_usec * 1000;
+	return (uint64_t)tv.tv_sec * 1000000000 + tv.tv_usec * 1000;
 }
 
 /*

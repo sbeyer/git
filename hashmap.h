@@ -110,7 +110,8 @@ extern unsigned int strhash(const char *buf);
 extern unsigned int strihash(const char *buf);
 extern unsigned int memhash(const void *buf, size_t len);
 extern unsigned int memihash(const void *buf, size_t len);
-extern unsigned int memihash_cont(unsigned int hash_seed, const void *buf, size_t len);
+extern unsigned int
+memihash_cont(unsigned int hash_seed, const void *buf, size_t len);
 
 /*
  * Converts a cryptographic hash (e.g. SHA-1) into an int-sized hash code
@@ -167,9 +168,8 @@ struct hashmap_entry {
  *
  * The `hashmap_cmp_fn_data` entry is the pointer given in the init function.
  */
-typedef int (*hashmap_cmp_fn)(const void *hashmap_cmp_fn_data,
-			      const void *entry, const void *entry_or_key,
-			      const void *keydata);
+typedef int (*hashmap_cmp_fn)(const void *hashmap_cmp_fn_data, const void *entry,
+			      const void *entry_or_key, const void *keydata);
 
 /*
  * struct hashmap is the hash table structure. Members can be used as follows,
@@ -218,10 +218,8 @@ struct hashmap {
  * parameter may be used to preallocate a sufficiently large table and thus
  * prevent expensive resizing. If 0, the table is dynamically resized.
  */
-extern void hashmap_init(struct hashmap *map,
-			 hashmap_cmp_fn equals_function,
-			 const void *equals_function_data,
-			 size_t initial_size);
+extern void hashmap_init(struct hashmap *map, hashmap_cmp_fn equals_function,
+			 const void *equals_function_data, size_t initial_size);
 
 /*
  * Frees a hashmap structure and allocated memory.
@@ -286,8 +284,8 @@ static inline unsigned int hashmap_get_size(struct hashmap *map)
  * If an entry with matching hash code is found, `key` and `keydata` are passed
  * to `hashmap_cmp_fn` to decide whether the entry matches the key.
  */
-extern void *hashmap_get(const struct hashmap *map, const void *key,
-			 const void *keydata);
+extern void *
+hashmap_get(const struct hashmap *map, const void *key, const void *keydata);
 
 /*
  * Returns the hashmap entry for the specified hash code and key data,
@@ -302,8 +300,7 @@ extern void *hashmap_get(const struct hashmap *map, const void *key,
  * structure that should not be used in the comparison.
  */
 static inline void *hashmap_get_from_hash(const struct hashmap *map,
-					  unsigned int hash,
-					  const void *keydata)
+					  unsigned int hash, const void *keydata)
 {
 	struct hashmap_entry key;
 	hashmap_entry_init(&key, hash);
@@ -315,8 +312,8 @@ static inline void *hashmap_get_from_hash(const struct hashmap *map,
  * used to iterate over duplicate entries (see `hashmap_add`).
  *
  * `map` is the hashmap structure.
- * `entry` is the hashmap_entry to start the search from, obtained via a previous
- * call to `hashmap_get` or `hashmap_get_next`.
+ * `entry` is the hashmap_entry to start the search from, obtained via a
+ * previous call to `hashmap_get` or `hashmap_get_next`.
  */
 extern void *hashmap_get_next(const struct hashmap *map, const void *entry);
 
@@ -346,8 +343,8 @@ extern void *hashmap_put(struct hashmap *map, void *entry);
  *
  * Argument explanation is the same as in `hashmap_get`.
  */
-extern void *hashmap_remove(struct hashmap *map, const void *key,
-		const void *keydata);
+extern void *
+hashmap_remove(struct hashmap *map, const void *key, const void *keydata);
 
 /*
  * Returns the `bucket` an entry is stored in.
@@ -373,8 +370,8 @@ extern void hashmap_iter_init(struct hashmap *map, struct hashmap_iter *iter);
 extern void *hashmap_iter_next(struct hashmap_iter *iter);
 
 /* Initializes the iterator and returns the first entry, if any. */
-static inline void *hashmap_iter_first(struct hashmap *map,
-		struct hashmap_iter *iter)
+static inline void *
+hashmap_iter_first(struct hashmap *map, struct hashmap_iter *iter)
 {
 	hashmap_iter_init(map, iter);
 	return hashmap_iter_next(iter);

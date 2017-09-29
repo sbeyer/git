@@ -62,8 +62,7 @@ const char *write_idx_file(const char *index_name, struct pack_idx_entry **objec
 				last_obj_offset = objects[i]->offset;
 		}
 		QSORT(sorted_by_sha, nr_objects, sha1_compare);
-	}
-	else
+	} else
 		sorted_by_sha = list = last = NULL;
 
 	if (opts->flags & WRITE_IDX_VERIFY) {
@@ -76,7 +75,7 @@ const char *write_idx_file(const char *index_name, struct pack_idx_entry **objec
 			index_name = strbuf_detach(&tmp_file, NULL);
 		} else {
 			unlink(index_name);
-			fd = open(index_name, O_CREAT|O_EXCL|O_WRONLY, 0600);
+			fd = open(index_name, O_CREAT | O_EXCL | O_WRONLY, 0600);
 			if (fd < 0)
 				die_errno("unable to create '%s'", index_name);
 		}
@@ -84,7 +83,8 @@ const char *write_idx_file(const char *index_name, struct pack_idx_entry **objec
 	}
 
 	/* if last object's offset is >= 2^31 we should use index V2 */
-	index_version = need_large_offset(last_obj_offset, opts) ? 2 : opts->version;
+	index_version = need_large_offset(last_obj_offset, opts) ? 2 :
+								   opts->version;
 
 	/* index versions 2 and above need a header */
 	if (index_version >= 2) {
@@ -146,9 +146,9 @@ const char *write_idx_file(const char *index_name, struct pack_idx_entry **objec
 			struct pack_idx_entry *obj = *list++;
 			uint32_t offset;
 
-			offset = (need_large_offset(obj->offset, opts)
-				  ? (0x80000000 | nr_large_offset++)
-				  : obj->offset);
+			offset = (need_large_offset(obj->offset, opts) ?
+					  (0x80000000 | nr_large_offset++) :
+					  obj->offset);
 			offset = htonl(offset);
 			sha1write(f, &offset, 4);
 		}
@@ -170,8 +170,8 @@ const char *write_idx_file(const char *index_name, struct pack_idx_entry **objec
 	}
 
 	sha1write(f, sha1, 20);
-	sha1close(f, NULL, ((opts->flags & WRITE_IDX_VERIFY)
-			    ? CSUM_CLOSE : CSUM_FSYNC));
+	sha1close(f, NULL,
+		  ((opts->flags & WRITE_IDX_VERIFY) ? CSUM_CLOSE : CSUM_FSYNC));
 	return index_name;
 }
 
@@ -202,12 +202,10 @@ off_t write_pack_header(struct sha1file *f, uint32_t nr_entries)
  * partial_pack_sha1 can refer to the same buffer if the caller is not
  * interested in the resulting SHA1 of pack data above partial_pack_offset.
  */
-void fixup_pack_header_footer(int pack_fd,
-			 unsigned char *new_pack_sha1,
-			 const char *pack_name,
-			 uint32_t object_count,
-			 unsigned char *partial_pack_sha1,
-			 off_t partial_pack_offset)
+void fixup_pack_header_footer(int pack_fd, unsigned char *new_pack_sha1,
+			      const char *pack_name, uint32_t object_count,
+			      unsigned char *partial_pack_sha1,
+			      off_t partial_pack_offset)
 {
 	int aligned_sz, buf_sz = 8 * 1024;
 	git_SHA_CTX old_sha1_ctx, new_sha1_ctx;
@@ -234,7 +232,8 @@ void fixup_pack_header_footer(int pack_fd,
 	for (;;) {
 		ssize_t m, n;
 		m = (partial_pack_sha1 && partial_pack_offset < aligned_sz) ?
-			partial_pack_offset : aligned_sz;
+			    partial_pack_offset :
+			    aligned_sz;
 		n = xread(pack_fd, buf, m);
 		if (!n)
 			break;
@@ -256,7 +255,8 @@ void fixup_pack_header_footer(int pack_fd,
 			git_SHA1_Final(sha1, &old_sha1_ctx);
 			if (hashcmp(sha1, partial_pack_sha1) != 0)
 				die("Unexpected checksum for %s "
-				    "(disk corruption?)", pack_name);
+				    "(disk corruption?)",
+				    pack_name);
 			/*
 			 * Now let's compute the SHA1 of the remainder of the
 			 * pack, which also means making partial_pack_offset
@@ -337,10 +337,8 @@ struct sha1file *create_tmp_packfile(char **pack_tmp_name)
 	return sha1fd(fd, *pack_tmp_name);
 }
 
-void finish_tmp_packfile(struct strbuf *name_buffer,
-			 const char *pack_tmp_name,
-			 struct pack_idx_entry **written_list,
-			 uint32_t nr_written,
+void finish_tmp_packfile(struct strbuf *name_buffer, const char *pack_tmp_name,
+			 struct pack_idx_entry **written_list, uint32_t nr_written,
 			 struct pack_idx_option *pack_idx_opts,
 			 unsigned char sha1[])
 {

@@ -55,7 +55,8 @@ struct transport {
 
 	/*
 	 * These strings will be passed to the {pre, post}-receive hook,
-	 * on the remote side, if both sides support the push options capability.
+	 * on the remote side, if both sides support the push options
+	 * capability.
 	 */
 	const struct string_list *push_options;
 
@@ -103,7 +104,8 @@ struct transport {
 	 * process involved generating new commits.
 	 **/
 	int (*push_refs)(struct transport *transport, struct ref *refs, int flags);
-	int (*push)(struct transport *connection, int refspec_nr, const char **refspec, int flags);
+	int (*push)(struct transport *connection, int refspec_nr,
+		    const char **refspec, int flags);
 	int (*connect)(struct transport *connection, const char *name,
 		       const char *executable, int fd[2]);
 
@@ -131,22 +133,22 @@ struct transport {
 	enum transport_family family;
 };
 
-#define TRANSPORT_PUSH_ALL			(1<<0)
-#define TRANSPORT_PUSH_FORCE			(1<<1)
-#define TRANSPORT_PUSH_DRY_RUN			(1<<2)
-#define TRANSPORT_PUSH_MIRROR			(1<<3)
-#define TRANSPORT_PUSH_PORCELAIN		(1<<4)
-#define TRANSPORT_PUSH_SET_UPSTREAM		(1<<5)
-#define TRANSPORT_RECURSE_SUBMODULES_CHECK	(1<<6)
-#define TRANSPORT_PUSH_PRUNE			(1<<7)
-#define TRANSPORT_RECURSE_SUBMODULES_ON_DEMAND	(1<<8)
-#define TRANSPORT_PUSH_NO_HOOK			(1<<9)
-#define TRANSPORT_PUSH_FOLLOW_TAGS		(1<<10)
-#define TRANSPORT_PUSH_CERT_ALWAYS		(1<<11)
-#define TRANSPORT_PUSH_CERT_IF_ASKED		(1<<12)
-#define TRANSPORT_PUSH_ATOMIC			(1<<13)
-#define TRANSPORT_PUSH_OPTIONS			(1<<14)
-#define TRANSPORT_RECURSE_SUBMODULES_ONLY	(1<<15)
+#define TRANSPORT_PUSH_ALL (1 << 0)
+#define TRANSPORT_PUSH_FORCE (1 << 1)
+#define TRANSPORT_PUSH_DRY_RUN (1 << 2)
+#define TRANSPORT_PUSH_MIRROR (1 << 3)
+#define TRANSPORT_PUSH_PORCELAIN (1 << 4)
+#define TRANSPORT_PUSH_SET_UPSTREAM (1 << 5)
+#define TRANSPORT_RECURSE_SUBMODULES_CHECK (1 << 6)
+#define TRANSPORT_PUSH_PRUNE (1 << 7)
+#define TRANSPORT_RECURSE_SUBMODULES_ON_DEMAND (1 << 8)
+#define TRANSPORT_PUSH_NO_HOOK (1 << 9)
+#define TRANSPORT_PUSH_FOLLOW_TAGS (1 << 10)
+#define TRANSPORT_PUSH_CERT_ALWAYS (1 << 11)
+#define TRANSPORT_PUSH_CERT_IF_ASKED (1 << 12)
+#define TRANSPORT_PUSH_ATOMIC (1 << 13)
+#define TRANSPORT_PUSH_OPTIONS (1 << 14)
+#define TRANSPORT_RECURSE_SUBMODULES_ONLY (1 << 15)
 
 extern int transport_summary_width(const struct ref *refs);
 
@@ -217,17 +219,16 @@ void transport_check_allowed(const char *type);
 int transport_set_option(struct transport *transport, const char *name,
 			 const char *value);
 void transport_set_verbosity(struct transport *transport, int verbosity,
-	int force_progress);
+			     int force_progress);
 
-#define REJECT_NON_FF_HEAD     0x01
-#define REJECT_NON_FF_OTHER    0x02
-#define REJECT_ALREADY_EXISTS  0x04
-#define REJECT_FETCH_FIRST     0x08
-#define REJECT_NEEDS_FORCE     0x10
+#define REJECT_NON_FF_HEAD 0x01
+#define REJECT_NON_FF_OTHER 0x02
+#define REJECT_ALREADY_EXISTS 0x04
+#define REJECT_FETCH_FIRST 0x08
+#define REJECT_NEEDS_FORCE 0x10
 
-int transport_push(struct transport *connection,
-		   int refspec_nr, const char **refspec, int flags,
-		   unsigned int * reject_reasons);
+int transport_push(struct transport *connection, int refspec_nr,
+		   const char **refspec, int flags, unsigned int *reject_reasons);
 
 const struct ref *transport_get_remote_refs(struct transport *transport);
 
@@ -235,8 +236,7 @@ int transport_fetch_refs(struct transport *transport, struct ref *refs);
 void transport_unlock_pack(struct transport *transport);
 int transport_disconnect(struct transport *transport);
 char *transport_anonymize_url(const char *url);
-void transport_take_over(struct transport *transport,
-			 struct child_process *child);
+void transport_take_over(struct transport *transport, struct child_process *child);
 
 int transport_connect(struct transport *transport, const char *name,
 		      const char *exec, int fd[2]);
@@ -248,13 +248,15 @@ int bidirectional_transfer_loop(int input, int output);
 /* common methods used by transport.c and builtin/send-pack.c */
 void transport_verify_remote_names(int nr_heads, const char **heads);
 
-void transport_update_tracking_ref(struct remote *remote, struct ref *ref, int verbose);
+void transport_update_tracking_ref(struct remote *remote, struct ref *ref,
+				   int verbose);
 
 int transport_refs_pushed(struct ref *ref);
 
-void transport_print_push_status(const char *dest, struct ref *refs,
-		  int verbose, int porcelain, unsigned int *reject_reasons);
+void transport_print_push_status(const char *dest, struct ref *refs, int verbose,
+				 int porcelain, unsigned int *reject_reasons);
 
-typedef void alternate_ref_fn(const char *refname, const struct object_id *oid, void *);
+typedef void
+alternate_ref_fn(const char *refname, const struct object_id *oid, void *);
 extern void for_each_alternate_ref(alternate_ref_fn, void *);
 #endif

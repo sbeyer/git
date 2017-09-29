@@ -3,30 +3,30 @@
 
 struct object_entry {
 	struct pack_idx_entry idx;
-	unsigned long size;	/* uncompressed size */
-	struct packed_git *in_pack;	/* already in pack */
+	unsigned long size; /* uncompressed size */
+	struct packed_git *in_pack; /* already in pack */
 	off_t in_pack_offset;
-	struct object_entry *delta;	/* delta base object */
+	struct object_entry *delta; /* delta base object */
 	struct object_entry *delta_child; /* deltified objects who bases me */
 	struct object_entry *delta_sibling; /* other deltified objects who
 					     * uses the same base as me
 					     */
-	void *delta_data;	/* cached delta (uncompressed) */
-	unsigned long delta_size;	/* delta data size (uncompressed) */
-	unsigned long z_delta_size;	/* delta data size (compressed) */
+	void *delta_data; /* cached delta (uncompressed) */
+	unsigned long delta_size; /* delta data size (uncompressed) */
+	unsigned long z_delta_size; /* delta data size (compressed) */
 	enum object_type type;
-	enum object_type in_pack_type;	/* could be delta */
-	uint32_t hash;			/* name hint hash */
+	enum object_type in_pack_type; /* could be delta */
+	uint32_t hash; /* name hint hash */
 	unsigned int in_pack_pos;
 	unsigned char in_pack_header_size;
-	unsigned preferred_base:1; /*
-				    * we do not pack this, but is available
-				    * to be used as the base object to delta
-				    * objects against.
-				    */
-	unsigned no_try_delta:1;
-	unsigned tagged:1; /* near the very tip of refs */
-	unsigned filled:1; /* assigned write-order */
+	unsigned preferred_base : 1; /*
+				      * we do not pack this, but is available
+				      * to be used as the base object to delta
+				      * objects against.
+				      */
+	unsigned no_try_delta : 1;
+	unsigned tagged : 1; /* near the very tip of refs */
+	unsigned filled : 1; /* assigned write-order */
 
 	/*
 	 * State flags for depth-first search used for analyzing delta cycles.
@@ -34,11 +34,7 @@ struct object_entry {
 	 * The depth is measured in delta-links to the base (so if A is a delta
 	 * against B, then A has a depth of 1, and B a depth of 0).
 	 */
-	enum {
-		DFS_NONE = 0,
-		DFS_ACTIVE,
-		DFS_DONE
-	} dfs_state;
+	enum { DFS_NONE = 0, DFS_ACTIVE, DFS_DONE } dfs_state;
 	int depth;
 };
 
@@ -51,12 +47,10 @@ struct packing_data {
 };
 
 struct object_entry *packlist_alloc(struct packing_data *pdata,
-				    const unsigned char *sha1,
-				    uint32_t index_pos);
+				    const unsigned char *sha1, uint32_t index_pos);
 
 struct object_entry *packlist_find(struct packing_data *pdata,
-				   const unsigned char *sha1,
-				   uint32_t *index_pos);
+				   const unsigned char *sha1, uint32_t *index_pos);
 
 static inline uint32_t pack_name_hash(const char *name)
 {

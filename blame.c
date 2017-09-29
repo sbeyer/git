@@ -68,8 +68,6 @@ static struct blame_origin *get_origin(struct commit *commit, const char *path)
 	return make_origin(commit, path);
 }
 
-
-
 static void verify_working_tree_path(struct commit *work_tree, const char *path)
 {
 	struct commit_list *parents;
@@ -88,14 +86,14 @@ static void verify_working_tree_path(struct commit *work_tree, const char *path)
 	pos = cache_name_pos(path, strlen(path));
 	if (pos >= 0)
 		; /* path is in the index */
-	else if (-1 - pos < active_nr &&
-		 !strcmp(active_cache[-1 - pos]->name, path))
+	else if (-1 - pos < active_nr && !strcmp(active_cache[-1 - pos]->name, path))
 		; /* path is in the index, unmerged */
 	else
 		die("no such path '%s' in HEAD", path);
 }
 
-static struct commit_list **append_parent(struct commit_list **tail, const struct object_id *oid)
+static struct commit_list **
+append_parent(struct commit_list **tail, const struct object_id *oid)
 {
 	struct commit *parent;
 
@@ -120,7 +118,8 @@ static void append_merge_parents(struct commit_list **tail)
 	while (!strbuf_getwholeline_fd(&line, merge_head, '\n')) {
 		struct object_id oid;
 		if (line.len < GIT_SHA1_HEXSZ || get_oid_hex(line.buf, &oid))
-			die("unknown line in '%s': %s", git_path_merge_head(), line.buf);
+			die("unknown line in '%s': %s", git_path_merge_head(),
+			    line.buf);
 		tail = append_parent(tail, &oid);
 	}
 	close(merge_head);
@@ -143,9 +142,9 @@ static void set_commit_buffer_from_strbuf(struct commit *c, struct strbuf *sb)
  * Prepare a dummy commit that represents the work tree (or staged) item.
  * Note that annotating work tree item never works in the reverse.
  */
-static struct commit *fake_working_tree_commit(struct diff_options *opt,
-					       const char *path,
-					       const char *contents_from)
+static struct commit *
+fake_working_tree_commit(struct diff_options *opt, const char *path,
+			 const char *contents_from)
 {
 	struct commit *commit;
 	struct blame_origin *origin;
@@ -185,8 +184,10 @@ static struct commit *fake_working_tree_commit(struct diff_options *opt,
 		    "committer %s\n\n"
 		    "Version of %s from %s\n",
 		    ident, ident, path,
-		    (!contents_from ? path :
-		     (!strcmp(contents_from, "-") ? "standard input" : contents_from)));
+		    (!contents_from ?
+			     path :
+			     (!strcmp(contents_from, "-") ? "standard input" :
+							    contents_from)));
 	set_commit_buffer_from_strbuf(commit, &msg);
 
 	if (!contents_from || strcmp("-", contents_from)) {
@@ -199,8 +200,7 @@ static struct commit *fake_working_tree_commit(struct diff_options *opt,
 			if (stat(contents_from, &st) < 0)
 				die_errno("Cannot stat '%s'", contents_from);
 			read_from = contents_from;
-		}
-		else {
+		} else {
 			if (lstat(path, &st) < 0)
 				die_errno("Cannot lstat '%s'", path);
 			read_from = path;
@@ -210,9 +210,11 @@ static struct commit *fake_working_tree_commit(struct diff_options *opt,
 		switch (st.st_mode & S_IFMT) {
 		case S_IFREG:
 			if (DIFF_OPT_TST(opt, ALLOW_TEXTCONV) &&
-			    textconv_object(read_from, mode, &null_oid, 0, &buf_ptr, &buf_len))
+			    textconv_object(read_from, mode, &null_oid, 0,
+					    &buf_ptr, &buf_len))
 				strbuf_attach(&buf, buf_ptr, buf_len, buf_len + 1);
-			else if (strbuf_read_file(&buf, read_from, st.st_size) != st.st_size)
+			else if (strbuf_read_file(&buf, read_from, st.st_size) !=
+				 st.st_size)
 				die_errno("cannot open or read '%s'", read_from);
 			break;
 		case S_IFLNK:
@@ -222,8 +224,7 @@ static struct commit *fake_working_tree_commit(struct diff_options *opt,
 		default:
 			die("unsupported file type %s", read_from);
 		}
-	}
-	else {
+	} else {
 		/* Reading from stdin */
 		mode = 0;
 		if (strbuf_read(&buf, 0, 0) < 0)
@@ -259,21 +260,20 @@ static struct commit *fake_working_tree_commit(struct diff_options *opt,
 	ce->ce_flags = create_ce_flags(0);
 	ce->ce_namelen = len;
 	ce->ce_mode = create_ce_mode(mode);
-	add_cache_entry(ce, ADD_CACHE_OK_TO_ADD|ADD_CACHE_OK_TO_REPLACE);
+	add_cache_entry(ce, ADD_CACHE_OK_TO_ADD | ADD_CACHE_OK_TO_REPLACE);
 
 	cache_tree_invalidate_path(&the_index, path);
 
 	return commit;
 }
 
-
-
-static int diff_hunks(mmfile_t *file_a, mmfile_t *file_b,
-		      xdl_emit_hunk_consume_func_t hunk_func, void *cb_data, int xdl_opts)
+static int
+diff_hunks(mmfile_t *file_a, mmfile_t *file_b,
+	   xdl_emit_hunk_consume_func_t hunk_func, void *cb_data, int xdl_opts)
 {
-	xpparam_t xpp = {0};
-	xdemitconf_t xecfg = {0};
-	xdemitcb_t ecb = {NULL};
+	xpparam_t xpp = { 0 };
+	xdemitconf_t xecfg = { 0 };
+	xdemitcb_t ecb = { NULL };
 
 	xpp.flags = xdl_opts;
 	xecfg.hunk_func = hunk_func;
@@ -285,8 +285,8 @@ static int diff_hunks(mmfile_t *file_a, mmfile_t *file_b,
  * Given an origin, prepare mmfile_t structure to be used by the
  * diff machinery
  */
-static void fill_origin_blob(struct diff_options *opt,
-			     struct blame_origin *o, mmfile_t *file, int *num_read_blob)
+static void fill_origin_blob(struct diff_options *opt, struct blame_origin *o,
+			     mmfile_t *file, int *num_read_blob)
 {
 	if (!o->file.ptr) {
 		enum object_type type;
@@ -294,7 +294,8 @@ static void fill_origin_blob(struct diff_options *opt,
 
 		(*num_read_blob)++;
 		if (DIFF_OPT_TST(opt, ALLOW_TEXTCONV) &&
-		    textconv_object(o->path, o->mode, &o->blob_oid, 1, &file->ptr, &file_size))
+		    textconv_object(o->path, o->mode, &o->blob_oid, 1,
+				    &file->ptr, &file_size))
 			;
 		else
 			file->ptr = read_sha1_file(o->blob_oid.hash, &type,
@@ -303,11 +304,9 @@ static void fill_origin_blob(struct diff_options *opt,
 
 		if (!file->ptr)
 			die("Cannot read blob %s for path %s",
-			    oid_to_hex(&o->blob_oid),
-			    o->path);
+			    oid_to_hex(&o->blob_oid), o->path);
 		o->file = *file;
-	}
-	else
+	} else
 		*file = o->file;
 }
 
@@ -326,11 +325,10 @@ static void drop_origin_blob(struct blame_origin *o)
  * it avoids unnecessary writes.
  */
 
-static struct blame_entry *blame_merge(struct blame_entry *list1,
-				       struct blame_entry *list2)
+static struct blame_entry *
+blame_merge(struct blame_entry *list1, struct blame_entry *list2)
 {
-	struct blame_entry *p1 = list1, *p2 = list2,
-		**tail = &list1;
+	struct blame_entry *p1 = list1, *p2 = list2, **tail = &list1;
 
 	if (!p1)
 		return p2;
@@ -350,7 +348,7 @@ static struct blame_entry *blame_merge(struct blame_entry *list1,
 		*tail = p2;
 		do {
 			tail = &p2->next;
-			if ((p2 = *tail) == NULL)  {
+			if ((p2 = *tail) == NULL) {
 				*tail = p1;
 				return list1;
 			}
@@ -383,8 +381,9 @@ static void set_next_blame(void *p1, void *p2)
 
 static int compare_blame_final(const void *p1, const void *p2)
 {
-	return ((struct blame_entry *)p1)->lno > ((struct blame_entry *)p2)->lno
-		? 1 : -1;
+	return ((struct blame_entry *)p1)->lno > ((struct blame_entry *)p2)->lno ?
+		       1 :
+		       -1;
 }
 
 static int compare_blame_suspect(const void *p1, const void *p2)
@@ -410,9 +409,8 @@ void blame_sort_final(struct blame_scoreboard *sb)
 				  compare_blame_final);
 }
 
-static int compare_commits_by_reverse_commit_date(const void *a,
-						  const void *b,
-						  void *c)
+static int
+compare_commits_by_reverse_commit_date(const void *a, const void *b, void *c)
 {
 	return -compare_commits_by_commit_date(a, b, c);
 }
@@ -471,8 +469,8 @@ void blame_coalesce(struct blame_scoreboard *sb)
  * the commit priority queue of the score board.
  */
 
-static void queue_blames(struct blame_scoreboard *sb, struct blame_origin *porigin,
-			 struct blame_entry *sorted)
+static void queue_blames(struct blame_scoreboard *sb,
+			 struct blame_origin *porigin, struct blame_entry *sorted)
 {
 	if (porigin->suspects)
 		porigin->suspects = blame_merge(porigin->suspects, sorted);
@@ -502,14 +500,13 @@ static int fill_blob_sha1_and_mode(struct blame_origin *origin)
 {
 	if (!is_null_oid(&origin->blob_oid))
 		return 0;
-	if (get_tree_entry(origin->commit->object.oid.hash,
-			   origin->path,
+	if (get_tree_entry(origin->commit->object.oid.hash, origin->path,
 			   origin->blob_oid.hash, &origin->mode))
 		goto error_out;
 	if (sha1_object_info(origin->blob_oid.hash, NULL) != OBJ_BLOB)
 		goto error_out;
 	return 0;
- error_out:
+error_out:
 	oidclr(&origin->blob_oid);
 	origin->mode = S_IFINVALID;
 	return -1;
@@ -519,8 +516,8 @@ static int fill_blob_sha1_and_mode(struct blame_origin *origin)
  * We have an origin -- check if the same path exists in the
  * parent and return an origin structure to represent it.
  */
-static struct blame_origin *find_origin(struct commit *parent,
-				  struct blame_origin *origin)
+static struct blame_origin *
+find_origin(struct commit *parent, struct blame_origin *origin)
 {
 	struct blame_origin *porigin;
 	struct diff_options diff_opts;
@@ -533,7 +530,7 @@ static struct blame_origin *find_origin(struct commit *parent,
 			 * The same path between origin and its parent
 			 * without renaming -- the most common case.
 			 */
-			return blame_origin_incref (porigin);
+			return blame_origin_incref(porigin);
 		}
 
 	/* See if the origin->path is different between parent
@@ -547,8 +544,7 @@ static struct blame_origin *find_origin(struct commit *parent,
 	paths[0] = origin->path;
 	paths[1] = NULL;
 
-	parse_pathspec(&diff_opts.pathspec,
-		       PATHSPEC_ALL_MAGIC & ~PATHSPEC_LITERAL,
+	parse_pathspec(&diff_opts.pathspec, PATHSPEC_ALL_MAGIC & ~PATHSPEC_LITERAL,
 		       PATHSPEC_LITERAL_PATH, "", paths);
 	diff_setup_done(&diff_opts);
 
@@ -556,8 +552,7 @@ static struct blame_origin *find_origin(struct commit *parent,
 		do_diff_cache(&parent->tree->object.oid, &diff_opts);
 	else
 		diff_tree_oid(&parent->tree->object.oid,
-			      &origin->commit->tree->object.oid,
-			      "", &diff_opts);
+			      &origin->commit->tree->object.oid, "", &diff_opts);
 	diffcore_std(&diff_opts);
 
 	if (!diff_queued_diff.nr) {
@@ -585,8 +580,7 @@ static struct blame_origin *find_origin(struct commit *parent,
 			die("internal error in blame::find_origin");
 		switch (p->status) {
 		default:
-			die("internal error in blame::find_origin (%c)",
-			    p->status);
+			die("internal error in blame::find_origin (%c)", p->status);
 		case 'M':
 			porigin = get_origin(parent, origin->path);
 			oidcpy(&porigin->blob_oid, &p->one->oid);
@@ -607,8 +601,8 @@ static struct blame_origin *find_origin(struct commit *parent,
  * We have an origin -- find the path that corresponds to it in its
  * parent and return an origin structure to represent it.
  */
-static struct blame_origin *find_rename(struct commit *parent,
-				  struct blame_origin *origin)
+static struct blame_origin *
+find_rename(struct commit *parent, struct blame_origin *origin)
 {
 	struct blame_origin *porigin = NULL;
 	struct diff_options diff_opts;
@@ -625,8 +619,7 @@ static struct blame_origin *find_rename(struct commit *parent,
 		do_diff_cache(&parent->tree->object.oid, &diff_opts);
 	else
 		diff_tree_oid(&parent->tree->object.oid,
-			      &origin->commit->tree->object.oid,
-			      "", &diff_opts);
+			      &origin->commit->tree->object.oid, "", &diff_opts);
 	diffcore_std(&diff_opts);
 
 	for (i = 0; i < diff_queued_diff.nr; i++) {
@@ -647,8 +640,8 @@ static struct blame_origin *find_rename(struct commit *parent,
 /*
  * Append a new blame entry to a given output queue.
  */
-static void add_blame_entry(struct blame_entry ***queue,
-			    const struct blame_entry *src)
+static void
+add_blame_entry(struct blame_entry ***queue, const struct blame_entry *src)
 {
 	struct blame_entry *e = xmalloc(sizeof(*e));
 	memcpy(e, src, sizeof(*e));
@@ -664,8 +657,8 @@ static void add_blame_entry(struct blame_entry ***queue,
  * a malloced blame_entry that gets added to the given queue.  The
  * origin of dst loses a refcnt.
  */
-static void dup_entry(struct blame_entry ***queue,
-		      struct blame_entry *dst, struct blame_entry *src)
+static void dup_entry(struct blame_entry ***queue, struct blame_entry *dst,
+		      struct blame_entry *src)
 {
 	blame_origin_incref(src->suspect);
 	blame_origin_decref(dst->suspect);
@@ -694,13 +687,11 @@ const char *blame_nth_line(struct blame_scoreboard *sb, long lno)
  * Split e into potentially three parts; before this chunk, the chunk
  * to be blamed for the parent, and after that portion.
  */
-static void split_overlap(struct blame_entry *split,
-			  struct blame_entry *e,
-			  int tlno, int plno, int same,
-			  struct blame_origin *parent)
+static void split_overlap(struct blame_entry *split, struct blame_entry *e,
+			  int tlno, int plno, int same, struct blame_origin *parent)
 {
 	int chunk_end_lno;
-	memset(split, 0, sizeof(struct blame_entry [3]));
+	memset(split, 0, sizeof(struct blame_entry[3]));
 
 	if (e->s_lno < tlno) {
 		/* there is a pre-chunk part not blamed on parent */
@@ -710,8 +701,7 @@ static void split_overlap(struct blame_entry *split,
 		split[0].num_lines = tlno - e->s_lno;
 		split[1].lno = e->lno + tlno - e->s_lno;
 		split[1].s_lno = plno;
-	}
-	else {
+	} else {
 		split[1].lno = e->lno;
 		split[1].s_lno = plno + (e->s_lno - tlno);
 	}
@@ -723,8 +713,7 @@ static void split_overlap(struct blame_entry *split,
 		split[2].s_lno = e->s_lno + (same - e->s_lno);
 		split[2].num_lines = e->s_lno + e->num_lines - same;
 		chunk_end_lno = split[2].lno;
-	}
-	else
+	} else
 		chunk_end_lno = e->lno + e->num_lines;
 	split[1].num_lines = chunk_end_lno - split[1].lno;
 
@@ -742,10 +731,9 @@ static void split_overlap(struct blame_entry *split,
  * in split.  Any assigned blame is moved to queue to
  * reflect the split.
  */
-static void split_blame(struct blame_entry ***blamed,
-			struct blame_entry ***unblamed,
-			struct blame_entry *split,
-			struct blame_entry *e)
+static void
+split_blame(struct blame_entry ***blamed, struct blame_entry ***unblamed,
+	    struct blame_entry *split, struct blame_entry *e)
 {
 	if (split[0].suspect && split[2].suspect) {
 		/* The first part (reuse storage for the existing entry e) */
@@ -756,8 +744,7 @@ static void split_blame(struct blame_entry ***blamed,
 
 		/* ... and the middle part -- parent */
 		add_blame_entry(blamed, &split[1]);
-	}
-	else if (!split[0].suspect && !split[2].suspect)
+	} else if (!split[0].suspect && !split[2].suspect)
 		/*
 		 * The parent covers the entire area; reuse storage for
 		 * e and replace it with the parent.
@@ -767,8 +754,7 @@ static void split_blame(struct blame_entry ***blamed,
 		/* me and then parent */
 		dup_entry(unblamed, e, &split[0]);
 		add_blame_entry(blamed, &split[1]);
-	}
-	else {
+	} else {
 		/* parent and then me */
 		dup_entry(blamed, e, &split[1]);
 		add_blame_entry(unblamed, &split[2]);
@@ -797,8 +783,8 @@ static void decref_split(struct blame_entry *split)
  * _current_ element.
  */
 
-static struct blame_entry *reverse_blame(struct blame_entry *head,
-					 struct blame_entry *tail)
+static struct blame_entry *
+reverse_blame(struct blame_entry *head, struct blame_entry *tail)
 {
 	while (head) {
 		struct blame_entry *next = head->next;
@@ -820,8 +806,7 @@ static struct blame_entry *reverse_blame(struct blame_entry *head,
  * first suspect line number.
  */
 static void blame_chunk(struct blame_entry ***dstq, struct blame_entry ***srcq,
-			int tlno, int offset, int same,
-			struct blame_origin *parent)
+			int tlno, int offset, int same, struct blame_origin *parent)
 {
 	struct blame_entry *e = **srcq;
 	struct blame_entry *samep = NULL, *diffp = NULL;
@@ -836,7 +821,8 @@ static void blame_chunk(struct blame_entry ***dstq, struct blame_entry ***srcq,
 		if (e->s_lno + e->num_lines > tlno) {
 			/* Move second half to a new record */
 			int len = tlno - e->s_lno;
-			struct blame_entry *n = xcalloc(1, sizeof (struct blame_entry));
+			struct blame_entry *n = xcalloc(1,
+							sizeof(struct blame_entry));
 			n->suspect = e->suspect;
 			n->lno = e->lno + len;
 			n->s_lno = e->s_lno + len;
@@ -890,7 +876,8 @@ static void blame_chunk(struct blame_entry ***dstq, struct blame_entry ***srcq,
 			 * processed by later chunks
 			 */
 			int len = same - e->s_lno;
-			struct blame_entry *n = xcalloc(1, sizeof (struct blame_entry));
+			struct blame_entry *n = xcalloc(1,
+							sizeof(struct blame_entry));
 			n->suspect = blame_origin_incref(e->suspect);
 			n->lno = e->lno + len;
 			n->s_lno = e->s_lno + len;
@@ -919,8 +906,8 @@ struct blame_chunk_cb_data {
 };
 
 /* diff chunks are from parent to target */
-static int blame_chunk_cb(long start_a, long count_a,
-			  long start_b, long count_b, void *data)
+static int
+blame_chunk_cb(long start_a, long count_a, long start_b, long count_b, void *data)
 {
 	struct blame_chunk_cb_data *d = data;
 	if (start_a - start_b != d->offset)
@@ -936,9 +923,9 @@ static int blame_chunk_cb(long start_a, long count_a,
  * for the lines it is suspected to its parent.  Run diff to find
  * which lines came from parent and pass blame for them.
  */
-static void pass_blame_to_parent(struct blame_scoreboard *sb,
-				 struct blame_origin *target,
-				 struct blame_origin *parent)
+static void
+pass_blame_to_parent(struct blame_scoreboard *sb, struct blame_origin *target,
+		     struct blame_origin *parent)
 {
 	mmfile_t file_p, file_o;
 	struct blame_chunk_cb_data d;
@@ -949,7 +936,8 @@ static void pass_blame_to_parent(struct blame_scoreboard *sb,
 
 	d.parent = parent;
 	d.offset = 0;
-	d.dstq = &newdest; d.srcq = &target->suspects;
+	d.dstq = &newdest;
+	d.srcq = &target->suspects;
 
 	fill_origin_blob(&sb->revs->diffopt, parent, &file_p, &sb->num_read_blob);
 	fill_origin_blob(&sb->revs->diffopt, target, &file_o, &sb->num_read_blob);
@@ -1003,23 +991,24 @@ unsigned blame_entry_score(struct blame_scoreboard *sb, struct blame_entry *e)
  * so far, by comparing this and best_so_far and copying this into
  * bst_so_far as needed.
  */
-static void copy_split_if_better(struct blame_scoreboard *sb,
-				 struct blame_entry *best_so_far,
-				 struct blame_entry *this)
+static void
+copy_split_if_better(struct blame_scoreboard *sb,
+		     struct blame_entry *best_so_far, struct blame_entry *this)
 {
 	int i;
 
 	if (!this[1].suspect)
 		return;
 	if (best_so_far[1].suspect) {
-		if (blame_entry_score(sb, &this[1]) < blame_entry_score(sb, &best_so_far[1]))
+		if (blame_entry_score(sb, &this[1]) <
+		    blame_entry_score(sb, &best_so_far[1]))
 			return;
 	}
 
 	for (i = 0; i < 3; i++)
 		blame_origin_incref(this[i].suspect);
 	decref_split(best_so_far);
-	memcpy(best_so_far, this, sizeof(struct blame_entry [3]));
+	memcpy(best_so_far, this, sizeof(struct blame_entry[3]));
 }
 
 /*
@@ -1037,11 +1026,9 @@ static void copy_split_if_better(struct blame_scoreboard *sb,
  *
  * All line numbers are 0-based.
  */
-static void handle_split(struct blame_scoreboard *sb,
-			 struct blame_entry *ent,
+static void handle_split(struct blame_scoreboard *sb, struct blame_entry *ent,
 			 int tlno, int plno, int same,
-			 struct blame_origin *parent,
-			 struct blame_entry *split)
+			 struct blame_origin *parent, struct blame_entry *split)
 {
 	if (ent->num_lines <= tlno)
 		return;
@@ -1064,12 +1051,11 @@ struct handle_split_cb_data {
 	long tlno;
 };
 
-static int handle_split_cb(long start_a, long count_a,
-			   long start_b, long count_b, void *data)
+static int handle_split_cb(long start_a, long count_a, long start_b,
+			   long count_b, void *data)
 {
 	struct handle_split_cb_data *d = data;
-	handle_split(d->sb, d->ent, d->tlno, d->plno, start_b, d->parent,
-		     d->split);
+	handle_split(d->sb, d->ent, d->tlno, d->plno, start_b, d->parent, d->split);
 	d->plno = start_a + count_a;
 	d->tlno = start_b + count_b;
 	return 0;
@@ -1081,29 +1067,30 @@ static int handle_split_cb(long start_a, long count_a,
  * the parent.
  */
 static void find_copy_in_blob(struct blame_scoreboard *sb,
-			      struct blame_entry *ent,
-			      struct blame_origin *parent,
-			      struct blame_entry *split,
-			      mmfile_t *file_p)
+			      struct blame_entry *ent, struct blame_origin *parent,
+			      struct blame_entry *split, mmfile_t *file_p)
 {
 	const char *cp;
 	mmfile_t file_o;
 	struct handle_split_cb_data d;
 
 	memset(&d, 0, sizeof(d));
-	d.sb = sb; d.ent = ent; d.parent = parent; d.split = split;
+	d.sb = sb;
+	d.ent = ent;
+	d.parent = parent;
+	d.split = split;
 	/*
 	 * Prepare mmfile that contains only the lines in ent.
 	 */
 	cp = blame_nth_line(sb, ent->lno);
-	file_o.ptr = (char *) cp;
+	file_o.ptr = (char *)cp;
 	file_o.size = blame_nth_line(sb, ent->lno + ent->num_lines) - cp;
 
 	/*
 	 * file_o is a part of final image we are annotating.
 	 * file_p partially may match that image.
 	 */
-	memset(split, 0, sizeof(struct blame_entry [3]));
+	memset(split, 0, sizeof(struct blame_entry[3]));
 	if (diff_hunks(file_p, &file_o, handle_split_cb, &d, sb->xdl_opts))
 		die("unable to generate diff (%s)",
 		    oid_to_hex(&parent->commit->object.oid));
@@ -1116,10 +1103,9 @@ static void find_copy_in_blob(struct blame_scoreboard *sb,
  * Returns a pointer to the link pointing to the old head of the small list.
  */
 
-static struct blame_entry **filter_small(struct blame_scoreboard *sb,
-					 struct blame_entry **small,
-					 struct blame_entry **source,
-					 unsigned score_min)
+static struct blame_entry **
+filter_small(struct blame_scoreboard *sb, struct blame_entry **small,
+	     struct blame_entry **source, unsigned score_min)
 {
 	struct blame_entry *p = *source;
 	struct blame_entry *oldsmall = *small;
@@ -1143,11 +1129,10 @@ static struct blame_entry **filter_small(struct blame_scoreboard *sb,
  * See if lines currently target is suspected for can be attributed to
  * parent.
  */
-static void find_move_in_parent(struct blame_scoreboard *sb,
-				struct blame_entry ***blamed,
-				struct blame_entry **toosmall,
-				struct blame_origin *target,
-				struct blame_origin *parent)
+static void
+find_move_in_parent(struct blame_scoreboard *sb, struct blame_entry ***blamed,
+		    struct blame_entry **toosmall, struct blame_origin *target,
+		    struct blame_origin *parent)
 {
 	struct blame_entry *e, split[3];
 	struct blame_entry *unblamed = target->suspects;
@@ -1196,8 +1181,8 @@ struct blame_list {
  * Count the number of entries the target is suspected for,
  * and prepare a list of entry and the best split.
  */
-static struct blame_list *setup_blame_list(struct blame_entry *unblamed,
-					   int *num_ents_p)
+static struct blame_list *
+setup_blame_list(struct blame_entry *unblamed, int *num_ents_p)
 {
 	struct blame_entry *e;
 	int num_ents, i;
@@ -1219,13 +1204,10 @@ static struct blame_list *setup_blame_list(struct blame_entry *unblamed,
  * across file boundary from the parent commit.  porigin is the path
  * in the parent we already tried.
  */
-static void find_copy_in_parent(struct blame_scoreboard *sb,
-				struct blame_entry ***blamed,
-				struct blame_entry **toosmall,
-				struct blame_origin *target,
-				struct commit *parent,
-				struct blame_origin *porigin,
-				int opt)
+static void
+find_copy_in_parent(struct blame_scoreboard *sb, struct blame_entry ***blamed,
+		    struct blame_entry **toosmall, struct blame_origin *target,
+		    struct commit *parent, struct blame_origin *porigin, int opt)
 {
 	struct diff_options diff_opts;
 	int i, j;
@@ -1250,17 +1232,16 @@ static void find_copy_in_parent(struct blame_scoreboard *sb,
 	 * and this code needs to be after diff_setup_done(), which
 	 * usually makes find-copies-harder imply copy detection.
 	 */
-	if ((opt & PICKAXE_BLAME_COPY_HARDEST)
-	    || ((opt & PICKAXE_BLAME_COPY_HARDER)
-		&& (!porigin || strcmp(target->path, porigin->path))))
+	if ((opt & PICKAXE_BLAME_COPY_HARDEST) ||
+	    ((opt & PICKAXE_BLAME_COPY_HARDER) &&
+	     (!porigin || strcmp(target->path, porigin->path))))
 		DIFF_OPT_SET(&diff_opts, FIND_COPIES_HARDER);
 
 	if (is_null_oid(&target->commit->object.oid))
 		do_diff_cache(&parent->tree->object.oid, &diff_opts);
 	else
 		diff_tree_oid(&parent->tree->object.oid,
-			      &target->commit->tree->object.oid,
-			      "", &diff_opts);
+			      &target->commit->tree->object.oid, "", &diff_opts);
 
 	if (!DIFF_OPT_TST(&diff_opts, FIND_COPIES_HARDER))
 		diffcore_std(&diff_opts);
@@ -1286,15 +1267,15 @@ static void find_copy_in_parent(struct blame_scoreboard *sb,
 			norigin = get_origin(parent, p->one->path);
 			oidcpy(&norigin->blob_oid, &p->one->oid);
 			norigin->mode = p->one->mode;
-			fill_origin_blob(&sb->revs->diffopt, norigin, &file_p, &sb->num_read_blob);
+			fill_origin_blob(&sb->revs->diffopt, norigin, &file_p,
+					 &sb->num_read_blob);
 			if (!file_p.ptr)
 				continue;
 
 			for (j = 0; j < num_ents; j++) {
 				find_copy_in_blob(sb, blame_list[j].ent,
 						  norigin, this, &file_p);
-				copy_split_if_better(sb, blame_list[j].split,
-						     this);
+				copy_split_if_better(sb, blame_list[j].split, this);
 				decref_split(this);
 			}
 			blame_origin_decref(norigin);
@@ -1325,8 +1306,9 @@ static void find_copy_in_parent(struct blame_scoreboard *sb,
  * The blobs of origin and porigin exactly match, so everything
  * origin is suspected for can be blamed on the parent.
  */
-static void pass_whole_blame(struct blame_scoreboard *sb,
-			     struct blame_origin *origin, struct blame_origin *porigin)
+static void
+pass_whole_blame(struct blame_scoreboard *sb, struct blame_origin *origin,
+		 struct blame_origin *porigin)
 {
 	struct blame_entry *e, *suspects;
 
@@ -1350,12 +1332,11 @@ static void pass_whole_blame(struct blame_scoreboard *sb,
  * "parent" (and "porigin"), but what we mean is to find scapegoat to
  * exonerate ourselves.
  */
-static struct commit_list *first_scapegoat(struct rev_info *revs, struct commit *commit,
-					int reverse)
+static struct commit_list *
+first_scapegoat(struct rev_info *revs, struct commit *commit, int reverse)
 {
 	if (!reverse) {
-		if (revs->first_parent_only &&
-		    commit->parents &&
+		if (revs->first_parent_only && commit->parents &&
 		    commit->parents->next) {
 			free_commit_list(commit->parents->next);
 			commit->parents->next = NULL;
@@ -1374,12 +1355,12 @@ static int num_scapegoats(struct rev_info *revs, struct commit *commit, int reve
 /* Distribute collected unsorted blames to the respected sorted lists
  * in the various origins.
  */
-static void distribute_blame(struct blame_scoreboard *sb, struct blame_entry *blamed)
+static void
+distribute_blame(struct blame_scoreboard *sb, struct blame_entry *blamed)
 {
 	blamed = llist_mergesort(blamed, get_next_blame, set_next_blame,
 				 compare_blame_suspect);
-	while (blamed)
-	{
+	while (blamed) {
 		struct blame_origin *porigin = blamed->suspect;
 		struct blame_entry *suspects = NULL;
 		do {
@@ -1395,7 +1376,8 @@ static void distribute_blame(struct blame_scoreboard *sb, struct blame_entry *bl
 
 #define MAXSG 16
 
-static void pass_blame(struct blame_scoreboard *sb, struct blame_origin *origin, int opt)
+static void
+pass_blame(struct blame_scoreboard *sb, struct blame_origin *origin, int opt)
 {
 	struct rev_info *revs = sb->revs;
 	int i, pass, num_sg;
@@ -1419,12 +1401,12 @@ static void pass_blame(struct blame_scoreboard *sb, struct blame_origin *origin,
 	 * common cases, then we look for renames in the second pass.
 	 */
 	for (pass = 0; pass < 2 - sb->no_whole_file_rename; pass++) {
-		struct blame_origin *(*find)(struct commit *, struct blame_origin *);
+		struct blame_origin *(*find)(struct commit *,
+					     struct blame_origin *);
 		find = pass ? find_rename : find_origin;
 
 		for (i = 0, sg = first_scapegoat(revs, commit, sb->reverse);
-		     i < num_sg && sg;
-		     sg = sg->next, i++) {
+		     i < num_sg && sg; sg = sg->next, i++) {
 			struct commit *p = sg->item;
 			int j, same;
 
@@ -1441,8 +1423,8 @@ static void pass_blame(struct blame_scoreboard *sb, struct blame_origin *origin,
 				goto finish;
 			}
 			for (j = same = 0; j < i; j++)
-				if (sg_origin[j] &&
-				    !oidcmp(&sg_origin[j]->blob_oid, &porigin->blob_oid)) {
+				if (sg_origin[j] && !oidcmp(&sg_origin[j]->blob_oid,
+							    &porigin->blob_oid)) {
 					same = 1;
 					break;
 				}
@@ -1455,8 +1437,7 @@ static void pass_blame(struct blame_scoreboard *sb, struct blame_origin *origin,
 
 	sb->num_commits++;
 	for (i = 0, sg = first_scapegoat(revs, commit, sb->reverse);
-	     i < num_sg && sg;
-	     sg = sg->next, i++) {
+	     i < num_sg && sg; sg = sg->next, i++) {
 		struct blame_origin *porigin = sg_origin[i];
 		if (!porigin)
 			continue;
@@ -1476,12 +1457,12 @@ static void pass_blame(struct blame_scoreboard *sb, struct blame_origin *origin,
 		filter_small(sb, &toosmall, &origin->suspects, sb->move_score);
 		if (origin->suspects) {
 			for (i = 0, sg = first_scapegoat(revs, commit, sb->reverse);
-			     i < num_sg && sg;
-			     sg = sg->next, i++) {
+			     i < num_sg && sg; sg = sg->next, i++) {
 				struct blame_origin *porigin = sg_origin[i];
 				if (!porigin)
 					continue;
-				find_move_in_parent(sb, &blametail, &toosmall, origin, porigin);
+				find_move_in_parent(sb, &blametail, &toosmall,
+						    origin, porigin);
 				if (!origin->suspects)
 					break;
 			}
@@ -1493,21 +1474,22 @@ static void pass_blame(struct blame_scoreboard *sb, struct blame_origin *origin,
 	 */
 	if (opt & PICKAXE_BLAME_COPY) {
 		if (sb->copy_score > sb->move_score)
-			filter_small(sb, &toosmall, &origin->suspects, sb->copy_score);
+			filter_small(sb, &toosmall, &origin->suspects,
+				     sb->copy_score);
 		else if (sb->copy_score < sb->move_score) {
 			origin->suspects = blame_merge(origin->suspects, toosmall);
 			toosmall = NULL;
-			filter_small(sb, &toosmall, &origin->suspects, sb->copy_score);
+			filter_small(sb, &toosmall, &origin->suspects,
+				     sb->copy_score);
 		}
 		if (!origin->suspects)
 			goto finish;
 
 		for (i = 0, sg = first_scapegoat(revs, commit, sb->reverse);
-		     i < num_sg && sg;
-		     sg = sg->next, i++) {
+		     i < num_sg && sg; sg = sg->next, i++) {
 			struct blame_origin *porigin = sg_origin[i];
-			find_copy_in_parent(sb, &blametail, &toosmall,
-					    origin, sg->item, porigin, opt);
+			find_copy_in_parent(sb, &blametail, &toosmall, origin,
+					    sg->item, porigin, opt);
 			if (!origin->suspects)
 				goto finish;
 		}
@@ -1590,7 +1572,8 @@ void assign_blame(struct blame_scoreboard *sb, int opt)
 			for (;;) {
 				struct blame_entry *next = ent->next;
 				if (sb->found_guilty_entry)
-					sb->found_guilty_entry(ent, sb->found_guilty_entry_data);
+					sb->found_guilty_entry(
+						ent, sb->found_guilty_entry_data);
 				if (next) {
 					ent = next;
 					continue;
@@ -1642,8 +1625,7 @@ static int prepare_lines(struct blame_scoreboard *sb)
 	return sb->num_lines;
 }
 
-static struct commit *find_single_final(struct rev_info *revs,
-					const char **name_p)
+static struct commit *find_single_final(struct rev_info *revs, const char **name_p)
 {
 	int i;
 	struct commit *found = NULL;
@@ -1667,8 +1649,8 @@ static struct commit *find_single_final(struct rev_info *revs,
 	return found;
 }
 
-static struct commit *dwim_reverse_initial(struct rev_info *revs,
-					   const char **name_p)
+static struct commit *
+dwim_reverse_initial(struct rev_info *revs, const char **name_p)
 {
 	/*
 	 * DWIM "git blame --reverse ONE -- PATH" as
@@ -1704,8 +1686,8 @@ static struct commit *dwim_reverse_initial(struct rev_info *revs,
 	return (struct commit *)obj;
 }
 
-static struct commit *find_single_initial(struct rev_info *revs,
-					  const char **name_p)
+static struct commit *
+find_single_initial(struct rev_info *revs, const char **name_p)
 {
 	int i;
 	struct commit *found = NULL;
@@ -1725,7 +1707,7 @@ static struct commit *find_single_initial(struct rev_info *revs,
 		if (found)
 			die("More than one commit to dig up from, %s and %s?",
 			    revs->pending.objects[i].name, name);
-		found = (struct commit *) obj;
+		found = (struct commit *)obj;
 		name = revs->pending.objects[i].name;
 	}
 
@@ -1746,7 +1728,8 @@ void init_scoreboard(struct blame_scoreboard *sb)
 	sb->copy_score = BLAME_DEFAULT_COPY_SCORE;
 }
 
-void setup_scoreboard(struct blame_scoreboard *sb, const char *path, struct blame_origin **orig)
+void setup_scoreboard(struct blame_scoreboard *sb, const char *path,
+		      struct blame_origin **orig)
 {
 	const char *final_commit_name = NULL;
 	struct blame_origin *o;
@@ -1777,8 +1760,8 @@ void setup_scoreboard(struct blame_scoreboard *sb, const char *path, struct blam
 		 * or "--contents".
 		 */
 		setup_work_tree();
-		sb->final = fake_working_tree_commit(&sb->revs->diffopt,
-						     path, sb->contents_from);
+		sb->final = fake_working_tree_commit(&sb->revs->diffopt, path,
+						     sb->contents_from);
 		add_pending_object(sb->revs, &(sb->final->object), ":");
 	}
 
@@ -1819,15 +1802,14 @@ void setup_scoreboard(struct blame_scoreboard *sb, const char *path, struct blam
 		o = sb->final->util;
 		sb->final_buf = xmemdupz(o->file.ptr, o->file.size);
 		sb->final_buf_size = o->file.size;
-	}
-	else {
+	} else {
 		o = get_origin(sb->final, path);
 		if (fill_blob_sha1_and_mode(o))
 			die(_("no such path %s in %s"), path, final_commit_name);
 
 		if (DIFF_OPT_TST(&sb->revs->diffopt, ALLOW_TEXTCONV) &&
-		    textconv_object(path, o->mode, &o->blob_oid, 1, (char **) &sb->final_buf,
-				    &sb->final_buf_size))
+		    textconv_object(path, o->mode, &o->blob_oid, 1,
+				    (char **)&sb->final_buf, &sb->final_buf_size))
 			;
 		else
 			sb->final_buf = read_sha1_file(o->blob_oid.hash, &type,
@@ -1835,8 +1817,7 @@ void setup_scoreboard(struct blame_scoreboard *sb, const char *path, struct blam
 
 		if (!sb->final_buf)
 			die(_("cannot read blob %s for path %s"),
-			    oid_to_hex(&o->blob_oid),
-			    path);
+			    oid_to_hex(&o->blob_oid), path);
 	}
 	sb->num_read_blob++;
 	prepare_lines(sb);
@@ -1847,11 +1828,8 @@ void setup_scoreboard(struct blame_scoreboard *sb, const char *path, struct blam
 	free((char *)final_commit_name);
 }
 
-
-
-struct blame_entry *blame_entry_prepend(struct blame_entry *head,
-					long start, long end,
-					struct blame_origin *o)
+struct blame_entry *blame_entry_prepend(struct blame_entry *head, long start,
+					long end, struct blame_origin *o)
 {
 	struct blame_entry *new_head = xcalloc(1, sizeof(struct blame_entry));
 	new_head->lno = start;

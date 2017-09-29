@@ -14,23 +14,22 @@
 #define QUOTE_TCL 8
 
 #define FILTER_REFS_INCLUDE_BROKEN 0x0001
-#define FILTER_REFS_TAGS           0x0002
-#define FILTER_REFS_BRANCHES       0x0004
-#define FILTER_REFS_REMOTES        0x0008
-#define FILTER_REFS_OTHERS         0x0010
-#define FILTER_REFS_ALL            (FILTER_REFS_TAGS | FILTER_REFS_BRANCHES | \
-				    FILTER_REFS_REMOTES | FILTER_REFS_OTHERS)
-#define FILTER_REFS_DETACHED_HEAD  0x0020
-#define FILTER_REFS_KIND_MASK      (FILTER_REFS_ALL | FILTER_REFS_DETACHED_HEAD)
+#define FILTER_REFS_TAGS 0x0002
+#define FILTER_REFS_BRANCHES 0x0004
+#define FILTER_REFS_REMOTES 0x0008
+#define FILTER_REFS_OTHERS 0x0010
+#define FILTER_REFS_ALL                                                  \
+	(FILTER_REFS_TAGS | FILTER_REFS_BRANCHES | FILTER_REFS_REMOTES | \
+	 FILTER_REFS_OTHERS)
+#define FILTER_REFS_DETACHED_HEAD 0x0020
+#define FILTER_REFS_KIND_MASK (FILTER_REFS_ALL | FILTER_REFS_DETACHED_HEAD)
 
 struct atom_value;
 
 struct ref_sorting {
 	struct ref_sorting *next;
 	int atom; /* index into used_atom array (internal) */
-	unsigned reverse : 1,
-		ignore_case : 1,
-		version : 1;
+	unsigned reverse : 1, ignore_case : 1, version : 1;
 };
 
 struct ref_array_item {
@@ -55,21 +54,15 @@ struct ref_filter {
 	struct commit_list *with_commit;
 	struct commit_list *no_commit;
 
-	enum {
-		REF_FILTER_MERGED_NONE = 0,
-		REF_FILTER_MERGED_INCLUDE,
-		REF_FILTER_MERGED_OMIT
-	} merge;
+	enum { REF_FILTER_MERGED_NONE = 0,
+	       REF_FILTER_MERGED_INCLUDE,
+	       REF_FILTER_MERGED_OMIT } merge;
 	struct commit *merge_commit;
 
-	unsigned int with_commit_tag_algo : 1,
-		match_as_path : 1,
-		ignore_case : 1,
-		detached : 1;
-	unsigned int kind,
-		lines;
-	int abbrev,
-		verbose;
+	unsigned int with_commit_tag_algo : 1, match_as_path : 1,
+		ignore_case : 1, detached : 1;
+	unsigned int kind, lines;
+	int abbrev, verbose;
 };
 
 struct ref_format {
@@ -85,13 +78,17 @@ struct ref_format {
 	int need_color_reset_at_eol;
 };
 
-#define REF_FORMAT_INIT { NULL, 0, -1 }
+#define REF_FORMAT_INIT     \
+	{                   \
+		NULL, 0, -1 \
+	}
 
 /*  Macros for checking --merged and --no-merged options */
-#define _OPT_MERGED_NO_MERGED(option, filter, h) \
-	{ OPTION_CALLBACK, 0, option, (filter), N_("commit"), (h), \
-	  PARSE_OPT_LASTARG_DEFAULT | PARSE_OPT_NONEG, \
-	  parse_opt_merge_filter, (intptr_t) "HEAD" \
+#define _OPT_MERGED_NO_MERGED(option, filter, h)                         \
+	{                                                                \
+		OPTION_CALLBACK, 0, option, (filter), N_("commit"), (h), \
+			PARSE_OPT_LASTARG_DEFAULT | PARSE_OPT_NONEG,     \
+			parse_opt_merge_filter, (intptr_t) "HEAD"        \
 	}
 #define OPT_MERGED(f, h) _OPT_MERGED_NO_MERGED("merged", f, h)
 #define OPT_NO_MERGED(f, h) _OPT_MERGED_NO_MERGED("no-merged", f, h)
@@ -102,10 +99,12 @@ struct ref_format {
  * as per the given ref_filter structure and finally store the
  * filtered refs in the ref_array structure.
  */
-int filter_refs(struct ref_array *array, struct ref_filter *filter, unsigned int type);
+int filter_refs(struct ref_array *array, struct ref_filter *filter,
+		unsigned int type);
 /*  Clear all memory allocated to ref_array */
 void ref_array_clear(struct ref_array *array);
-/*  Used to verify if the given format is correct and to parse out the used atoms */
+/*  Used to verify if the given format is correct and to parse out the used
+ * atoms */
 int verify_ref_format(struct ref_format *format);
 /*  Sort the given ref_array as per the ref_sorting provided */
 void ref_array_sort(struct ref_sorting *sort, struct ref_array *array);
@@ -114,7 +113,8 @@ void format_ref_array_item(struct ref_array_item *info,
 			   const struct ref_format *format,
 			   struct strbuf *final_buf);
 /*  Print the ref using the given format and quote_style */
-void show_ref_array_item(struct ref_array_item *info, const struct ref_format *format);
+void show_ref_array_item(struct ref_array_item *info,
+			 const struct ref_format *format);
 /*  Parse a single sort specifier and add it to the list */
 void parse_ref_sorting(struct ref_sorting **sorting_tail, const char *atom);
 /*  Callback function for parsing the sort option */

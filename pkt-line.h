@@ -20,11 +20,14 @@
  * side can't, we stay with pure read/write interfaces.
  */
 void packet_flush(int fd);
-void packet_write_fmt(int fd, const char *fmt, ...) __attribute__((format (printf, 2, 3)));
+void packet_write_fmt(int fd, const char *fmt, ...)
+	__attribute__((format(printf, 2, 3)));
 void packet_buf_flush(struct strbuf *buf);
-void packet_buf_write(struct strbuf *buf, const char *fmt, ...) __attribute__((format (printf, 2, 3)));
+void packet_buf_write(struct strbuf *buf, const char *fmt, ...)
+	__attribute__((format(printf, 2, 3)));
 int packet_flush_gently(int fd);
-int packet_write_fmt_gently(int fd, const char *fmt, ...) __attribute__((format (printf, 2, 3)));
+int packet_write_fmt_gently(int fd, const char *fmt, ...)
+	__attribute__((format(printf, 2, 3)));
 int write_packetized_from_fd(int fd_in, int fd_out);
 int write_packetized_from_buf(const char *src_in, size_t len, int fd_out);
 
@@ -59,10 +62,10 @@ int write_packetized_from_buf(const char *src_in, size_t len, int fd_out);
  * If options contains PACKET_READ_CHOMP_NEWLINE, a trailing newline (if
  * present) is removed from the buffer before returning.
  */
-#define PACKET_READ_GENTLE_ON_EOF (1u<<0)
-#define PACKET_READ_CHOMP_NEWLINE (1u<<1)
-int packet_read(int fd, char **src_buffer, size_t *src_len, char
-		*buffer, unsigned size, int options);
+#define PACKET_READ_GENTLE_ON_EOF (1u << 0)
+#define PACKET_READ_CHOMP_NEWLINE (1u << 1)
+int packet_read(int fd, char **src_buffer, size_t *src_len, char *buffer,
+		unsigned size, int options);
 
 /*
  * Convenience wrapper for packet_read that is not gentle, and sets the

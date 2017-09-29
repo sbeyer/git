@@ -76,7 +76,7 @@ static void setup_pager_env(struct argv_array *env)
 
 	if (n < 0)
 		die("malformed build-time PAGER_ENV: %s",
-			split_cmdline_strerror(n));
+		    split_cmdline_strerror(n));
 
 	for (i = 0; i < n; i++) {
 		char *cp = strchr(argv[i], '=');
@@ -112,7 +112,7 @@ void setup_pager(void)
 	 * force computing the width of the terminal before we redirect
 	 * the standard output to the pager.
 	 */
-	(void) term_columns();
+	(void)term_columns();
 
 	setenv("GIT_PAGER_IN_USE", "true", 1);
 

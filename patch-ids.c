@@ -35,10 +35,8 @@ int commit_patch_id(struct commit *commit, struct diff_options *options,
  * the side of safety.  The actual value being negative does not have
  * any significance; only that it is non-zero matters.
  */
-static int patch_id_cmp(const void *cmpfn_data,
-			const void *entry,
-			const void *entry_or_key,
-			const void *unused_keydata)
+static int patch_id_cmp(const void *cmpfn_data, const void *entry,
+			const void *entry_or_key, const void *unused_keydata)
 {
 	/* NEEDSWORK: const correctness? */
 	struct diff_options *opt = (void *)cmpfn_data;
@@ -48,11 +46,11 @@ static int patch_id_cmp(const void *cmpfn_data,
 	if (is_null_oid(&a->patch_id) &&
 	    commit_patch_id(a->commit, opt, &a->patch_id, 0))
 		return error("Could not get patch ID for %s",
-			oid_to_hex(&a->commit->object.oid));
+			     oid_to_hex(&a->commit->object.oid));
 	if (is_null_oid(&b->patch_id) &&
 	    commit_patch_id(b->commit, opt, &b->patch_id, 0))
 		return error("Could not get patch ID for %s",
-			oid_to_hex(&b->commit->object.oid));
+			     oid_to_hex(&b->commit->object.oid));
 	return oidcmp(&a->patch_id, &b->patch_id);
 }
 
@@ -73,8 +71,7 @@ int free_patch_ids(struct patch_ids *ids)
 	return 0;
 }
 
-static int init_patch_id_entry(struct patch_id *patch,
-			       struct commit *commit,
+static int init_patch_id_entry(struct patch_id *patch, struct commit *commit,
 			       struct patch_ids *ids)
 {
 	struct object_id header_only_patch_id;
@@ -87,8 +84,7 @@ static int init_patch_id_entry(struct patch_id *patch,
 	return 0;
 }
 
-struct patch_id *has_commit_patch_id(struct commit *commit,
-				     struct patch_ids *ids)
+struct patch_id *has_commit_patch_id(struct commit *commit, struct patch_ids *ids)
 {
 	struct patch_id patch;
 
@@ -102,8 +98,7 @@ struct patch_id *has_commit_patch_id(struct commit *commit,
 	return hashmap_get(&ids->patches, &patch, NULL);
 }
 
-struct patch_id *add_commit_patch_id(struct commit *commit,
-				     struct patch_ids *ids)
+struct patch_id *add_commit_patch_id(struct commit *commit, struct patch_ids *ids)
 {
 	struct patch_id *key;
 

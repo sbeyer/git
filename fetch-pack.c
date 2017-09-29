@@ -33,12 +33,12 @@ static struct lock_file shallow_lock;
 static const char *alternate_shallow_file;
 
 /* Remember to update object flag allocation in object.h */
-#define COMPLETE	(1U << 0)
-#define COMMON		(1U << 1)
-#define COMMON_REF	(1U << 2)
-#define SEEN		(1U << 3)
-#define POPPED		(1U << 4)
-#define ALTERNATE	(1U << 5)
+#define COMPLETE (1U << 0)
+#define COMMON (1U << 1)
+#define COMMON_REF (1U << 2)
+#define SEEN (1U << 3)
+#define POPPED (1U << 4)
+#define ALTERNATE (1U << 5)
 
 static int marked;
 
@@ -51,14 +51,14 @@ static int marked;
 static struct prio_queue rev_list = { compare_commits_by_commit_date };
 static int non_common_revs, multi_ack, use_sideband;
 /* Allow specifying sha1 if it is a ref tip. */
-#define ALLOW_TIP_SHA1	01
-/* Allow request of a sha1 if it is reachable from a ref (possibly hidden ref). */
-#define ALLOW_REACHABLE_SHA1	02
+#define ALLOW_TIP_SHA1 01
+/* Allow request of a sha1 if it is reachable from a ref (possibly hidden ref).
+ */
+#define ALLOW_REACHABLE_SHA1 02
 static unsigned int allow_unadvertised_object_request;
 
-__attribute__((format (printf, 2, 3)))
-static inline void print_verbose(const struct fetch_pack_args *args,
-				 const char *fmt, ...)
+__attribute__((format(printf, 2, 3))) static inline void
+print_verbose(const struct fetch_pack_args *args, const char *fmt, ...)
 {
 	va_list params;
 
@@ -77,8 +77,7 @@ struct alternate_object_cache {
 };
 
 static void cache_one_alternate(const char *refname,
-				const struct object_id *oid,
-				void *vcache)
+				const struct object_id *oid, void *vcache)
 {
 	struct alternate_object_cache *cache = vcache;
 	struct object *obj = parse_object(oid);
@@ -154,8 +153,7 @@ static int clear_marks(const char *refname, const struct object_id *oid,
    when only the server does not yet know that they are common).
 */
 
-static void mark_common(struct commit *commit,
-		int ancestors_only, int dont_parse)
+static void mark_common(struct commit *commit, int ancestors_only, int dont_parse)
 {
 	if (commit != NULL && !(commit->object.flags & COMMON)) {
 		struct object *o = (struct object *)commit;
@@ -174,9 +172,8 @@ static void mark_common(struct commit *commit,
 				if (parse_commit(commit))
 					return;
 
-			for (parents = commit->parents;
-					parents;
-					parents = parents->next)
+			for (parents = commit->parents; parents;
+			     parents = parents->next)
 				mark_common(parents->item, 0, dont_parse);
 		}
 	}
@@ -228,13 +225,7 @@ static const struct object_id *get_rev(void)
 	return &commit->object.oid;
 }
 
-enum ack_type {
-	NAK = 0,
-	ACK,
-	ACK_continue,
-	ACK_common,
-	ACK_ready
-};
+enum ack_type { NAK = 0, ACK, ACK_continue, ACK_common, ACK_ready };
 
 static void consume_shallow_list(struct fetch_pack_args *args, int fd)
 {
@@ -284,8 +275,7 @@ static enum ack_type get_ack(int fd, struct object_id *result_oid)
 	die(_("git fetch-pack: expected ACK/NAK, got '%s'"), line);
 }
 
-static void send_request(struct fetch_pack_args *args,
-			 int fd, struct strbuf *buf)
+static void send_request(struct fetch_pack_args *args, int fd, struct strbuf *buf)
 {
 	if (args->stateless_rpc) {
 		send_sideband(fd, -1, buf->buf, buf->len, LARGE_PACKET_MAX);
@@ -319,9 +309,8 @@ static int next_flush(struct fetch_pack_args *args, int count)
 	return count;
 }
 
-static int find_common(struct fetch_pack_args *args,
-		       int fd[2], struct object_id *result_oid,
-		       struct ref *refs)
+static int find_common(struct fetch_pack_args *args, int fd[2],
+		       struct object_id *result_oid, struct ref *refs)
 {
 	int fetching;
 	int count = 0, flushes = 0, flush_at = INITIAL_FLUSH, retval;
@@ -342,7 +331,7 @@ static int find_common(struct fetch_pack_args *args,
 	for_each_cached_alternate(insert_one_alternate_object);
 
 	fetching = 0;
-	for ( ; refs ; refs = refs->next) {
+	for (; refs; refs = refs->next) {
 		struct object_id *remote = &refs->old_oid;
 		const char *remote_hex;
 		struct object *o;
@@ -358,28 +347,42 @@ static int find_common(struct fetch_pack_args *args,
 		 * reachable and we have already scanned it.
 		 */
 		if (((o = lookup_object(remote->hash)) != NULL) &&
-				(o->flags & COMPLETE)) {
+		    (o->flags & COMPLETE)) {
 			continue;
 		}
 
 		remote_hex = oid_to_hex(remote);
 		if (!fetching) {
 			struct strbuf c = STRBUF_INIT;
-			if (multi_ack == 2)     strbuf_addstr(&c, " multi_ack_detailed");
-			if (multi_ack == 1)     strbuf_addstr(&c, " multi_ack");
-			if (no_done)            strbuf_addstr(&c, " no-done");
-			if (use_sideband == 2)  strbuf_addstr(&c, " side-band-64k");
-			if (use_sideband == 1)  strbuf_addstr(&c, " side-band");
-			if (args->deepen_relative) strbuf_addstr(&c, " deepen-relative");
-			if (args->use_thin_pack) strbuf_addstr(&c, " thin-pack");
-			if (args->no_progress)   strbuf_addstr(&c, " no-progress");
-			if (args->include_tag)   strbuf_addstr(&c, " include-tag");
-			if (prefer_ofs_delta)   strbuf_addstr(&c, " ofs-delta");
-			if (deepen_since_ok)    strbuf_addstr(&c, " deepen-since");
-			if (deepen_not_ok)      strbuf_addstr(&c, " deepen-not");
-			if (agent_supported)    strbuf_addf(&c, " agent=%s",
-							    git_user_agent_sanitized());
-			packet_buf_write(&req_buf, "want %s%s\n", remote_hex, c.buf);
+			if (multi_ack == 2)
+				strbuf_addstr(&c, " multi_ack_detailed");
+			if (multi_ack == 1)
+				strbuf_addstr(&c, " multi_ack");
+			if (no_done)
+				strbuf_addstr(&c, " no-done");
+			if (use_sideband == 2)
+				strbuf_addstr(&c, " side-band-64k");
+			if (use_sideband == 1)
+				strbuf_addstr(&c, " side-band");
+			if (args->deepen_relative)
+				strbuf_addstr(&c, " deepen-relative");
+			if (args->use_thin_pack)
+				strbuf_addstr(&c, " thin-pack");
+			if (args->no_progress)
+				strbuf_addstr(&c, " no-progress");
+			if (args->include_tag)
+				strbuf_addstr(&c, " include-tag");
+			if (prefer_ofs_delta)
+				strbuf_addstr(&c, " ofs-delta");
+			if (deepen_since_ok)
+				strbuf_addstr(&c, " deepen-since");
+			if (deepen_not_ok)
+				strbuf_addstr(&c, " deepen-not");
+			if (agent_supported)
+				strbuf_addf(&c, " agent=%s",
+					    git_user_agent_sanitized());
+			packet_buf_write(&req_buf, "want %s%s\n", remote_hex,
+					 c.buf);
 			strbuf_release(&c);
 		} else
 			packet_buf_write(&req_buf, "want %s\n", remote_hex);
@@ -398,7 +401,7 @@ static int find_common(struct fetch_pack_args *args,
 		packet_buf_write(&req_buf, "deepen %d", args->depth);
 	if (args->deepen_since) {
 		timestamp_t max_age = approxidate(args->deepen_since);
-		packet_buf_write(&req_buf, "deepen-since %"PRItime, max_age);
+		packet_buf_write(&req_buf, "deepen-since %" PRItime, max_age);
 	}
 	if (args->deepen_not) {
 		int i;
@@ -474,8 +477,9 @@ static int find_common(struct fetch_pack_args *args,
 			do {
 				ack = get_ack(fd[0], result_oid);
 				if (ack)
-					print_verbose(args, _("got %s %d %s"), "ack",
-						      ack, oid_to_hex(result_oid));
+					print_verbose(args, _("got %s %d %s"),
+						      "ack", ack,
+						      oid_to_hex(result_oid));
 				switch (ack) {
 				case ACK:
 					flushes = 0;
@@ -485,19 +489,23 @@ static int find_common(struct fetch_pack_args *args,
 				case ACK_common:
 				case ACK_ready:
 				case ACK_continue: {
-					struct commit *commit =
-						lookup_commit(result_oid);
+					struct commit *commit = lookup_commit(
+						result_oid);
 					if (!commit)
-						die(_("invalid commit %s"), oid_to_hex(result_oid));
-					if (args->stateless_rpc
-					 && ack == ACK_common
-					 && !(commit->object.flags & COMMON)) {
-						/* We need to replay the have for this object
-						 * on the next RPC request so the peer knows
+						die(_("invalid commit %s"),
+						    oid_to_hex(result_oid));
+					if (args->stateless_rpc &&
+					    ack == ACK_common &&
+					    !(commit->object.flags & COMMON)) {
+						/* We need to replay the have
+						 * for this object on the next
+						 * RPC request so the peer knows
 						 * it is in common with us.
 						 */
-						const char *hex = oid_to_hex(result_oid);
-						packet_buf_write(&req_buf, "have %s\n", hex);
+						const char *hex = oid_to_hex(
+							result_oid);
+						packet_buf_write(&req_buf,
+								 "have %s\n", hex);
 						state_len = req_buf.len;
 						/*
 						 * Reset in_vain because an ack
@@ -505,8 +513,8 @@ static int find_common(struct fetch_pack_args *args,
 						 * seen.
 						 */
 						in_vain = 0;
-					} else if (!args->stateless_rpc
-						   || ack != ACK_common)
+					} else if (!args->stateless_rpc ||
+						   ack != ACK_common)
 						in_vain = 0;
 					mark_common(commit, 0, 1);
 					retval = 0;
@@ -516,7 +524,7 @@ static int find_common(struct fetch_pack_args *args,
 						got_ready = 1;
 					}
 					break;
-					}
+				}
 				}
 			} while (ack);
 			flushes--;
@@ -543,8 +551,8 @@ done:
 	while (flushes || multi_ack) {
 		int ack = get_ack(fd[0], result_oid);
 		if (ack) {
-			print_verbose(args, _("got %s (%d) %s"), "ack",
-				      ack, oid_to_hex(result_oid));
+			print_verbose(args, _("got %s (%d) %s"), "ack", ack,
+				      oid_to_hex(result_oid));
 			if (ack == ACK)
 				return 0;
 			multi_ack = 1;
@@ -563,7 +571,7 @@ static int mark_complete(const struct object_id *oid)
 	struct object *o = parse_object(oid);
 
 	while (o && o->type == OBJ_TAG) {
-		struct tag *t = (struct tag *) o;
+		struct tag *t = (struct tag *)o;
 		if (!t->tagged)
 			break; /* broken repository */
 		o->flags |= COMPLETE;
@@ -585,8 +593,8 @@ static int mark_complete_oid(const char *refname, const struct object_id *oid,
 	return mark_complete(oid);
 }
 
-static void mark_recent_complete_commits(struct fetch_pack_args *args,
-					 timestamp_t cutoff)
+static void
+mark_recent_complete_commits(struct fetch_pack_args *args, timestamp_t cutoff)
 {
 	while (complete && cutoff <= complete->item->date) {
 		print_verbose(args, _("Marking %s as complete"),
@@ -601,9 +609,8 @@ static void add_refs_to_oidset(struct oidset *oids, struct ref *refs)
 		oidset_insert(oids, &refs->old_oid);
 }
 
-static int tip_oids_contain(struct oidset *tip_oids,
-			    struct ref *unmatched, struct ref *newlist,
-			    const struct object_id *id)
+static int tip_oids_contain(struct oidset *tip_oids, struct ref *unmatched,
+			    struct ref *newlist, const struct object_id *id)
 {
 	/*
 	 * Note that this only looks at the ref lists the first time it's
@@ -618,8 +625,7 @@ static int tip_oids_contain(struct oidset *tip_oids,
 	return oidset_contains(tip_oids, id);
 }
 
-static void filter_refs(struct fetch_pack_args *args,
-			struct ref **refs,
+static void filter_refs(struct fetch_pack_args *args, struct ref **refs,
 			struct ref **sought, int nr_sought)
 {
 	struct ref *newlist = NULL;
@@ -672,15 +678,13 @@ static void filter_refs(struct fetch_pack_args *args,
 		ref = sought[i];
 		if (ref->match_status != REF_NOT_MATCHED)
 			continue;
-		if (parse_oid_hex(ref->name, &oid, &p) ||
-		    *p != '\0' ||
+		if (parse_oid_hex(ref->name, &oid, &p) || *p != '\0' ||
 		    oidcmp(&oid, &ref->old_oid))
 			continue;
 
 		if ((allow_unadvertised_object_request &
 		     (ALLOW_TIP_SHA1 | ALLOW_REACHABLE_SHA1)) ||
-		    tip_oids_contain(&tip_oids, unmatched, newlist,
-				     &ref->old_oid)) {
+		    tip_oids_contain(&tip_oids, unmatched, newlist, &ref->old_oid)) {
 			ref->match_status = REF_MATCHED;
 			*newtail = copy_ref(ref);
 			newtail = &(*newtail)->next;
@@ -703,8 +707,7 @@ static void mark_alternate_complete(struct object *obj)
 	mark_complete(&obj->oid);
 }
 
-static int everything_local(struct fetch_pack_args *args,
-			    struct ref **refs,
+static int everything_local(struct fetch_pack_args *args, struct ref **refs,
 			    struct ref **sought, int nr_sought)
 {
 	struct ref *ref;
@@ -762,7 +765,7 @@ static int everything_local(struct fetch_pack_args *args,
 
 	filter_refs(args, refs, sought, nr_sought);
 
-	for (retval = 1, ref = *refs; ref ; ref = ref->next) {
+	for (retval = 1, ref = *refs; ref; ref = ref->next) {
 		const struct object_id *remote = &ref->old_oid;
 		struct object *o;
 
@@ -773,8 +776,8 @@ static int everything_local(struct fetch_pack_args *args,
 				      ref->name);
 			continue;
 		}
-		print_verbose(args, _("already have %s (%s)"), oid_to_hex(remote),
-			      ref->name);
+		print_verbose(args, _("already have %s (%s)"),
+			      oid_to_hex(remote), ref->name);
 	}
 	return retval;
 }
@@ -789,8 +792,7 @@ static int sideband_demux(int in, int out, void *data)
 	return ret;
 }
 
-static int get_pack(struct fetch_pack_args *args,
-		    int xd[2], char **pack_lockfile)
+static int get_pack(struct fetch_pack_args *args, int xd[2], char **pack_lockfile)
 {
 	struct async demux;
 	int do_keep = args->keep_pack;
@@ -812,12 +814,10 @@ static int get_pack(struct fetch_pack_args *args,
 		demux.isolate_sigpipe = 1;
 		if (start_async(&demux))
 			die(_("fetch-pack: unable to fork off sideband demultiplexer"));
-	}
-	else
+	} else
 		demux.out = xd[0];
 
 	if (!args->keep_pack && unpack_limit) {
-
 		if (read_pack_header(demux.out, &header))
 			die(_("protocol error: bad pack header"));
 		pass_header = 1;
@@ -847,13 +847,13 @@ static int get_pack(struct fetch_pack_args *args,
 			if (xgethostname(hostname, sizeof(hostname)))
 				xsnprintf(hostname, sizeof(hostname), "localhost");
 			argv_array_pushf(&cmd.args,
-					"--keep=fetch-pack %"PRIuMAX " on %s",
-					(uintmax_t)getpid(), hostname);
+					 "--keep=fetch-pack %" PRIuMAX " on %s",
+					 (uintmax_t)getpid(), hostname);
 		}
 		if (args->check_self_contained_and_connected)
-			argv_array_push(&cmd.args, "--check-self-contained-and-connected");
-	}
-	else {
+			argv_array_push(&cmd.args,
+					"--check-self-contained-and-connected");
+	} else {
 		cmd_name = "unpack-objects";
 		argv_array_push(&cmd.args, cmd_name);
 		if (args->quiet || args->no_progress)
@@ -862,14 +862,12 @@ static int get_pack(struct fetch_pack_args *args,
 	}
 
 	if (pass_header)
-		argv_array_pushf(&cmd.args, "--pack_header=%"PRIu32",%"PRIu32,
+		argv_array_pushf(&cmd.args, "--pack_header=%" PRIu32 ",%" PRIu32,
 				 ntohl(header.hdr_version),
 				 ntohl(header.hdr_entries));
-	if (fetch_fsck_objects >= 0
-	    ? fetch_fsck_objects
-	    : transfer_fsck_objects >= 0
-	    ? transfer_fsck_objects
-	    : 0)
+	if (fetch_fsck_objects >= 0 ?
+		    fetch_fsck_objects :
+		    transfer_fsck_objects >= 0 ? transfer_fsck_objects : 0)
 		argv_array_push(&cmd.args, "--strict");
 
 	cmd.in = demux.out;
@@ -888,8 +886,7 @@ static int get_pack(struct fetch_pack_args *args,
 	ret = finish_command(&cmd);
 	if (!ret || (args->check_self_contained_and_connected && ret == 1))
 		args->self_contained_and_connected =
-			args->check_self_contained_and_connected &&
-			ret == 0;
+			args->check_self_contained_and_connected && ret == 0;
 	else
 		die(_("%s failed"), cmd_name);
 	if (use_sideband && finish_async(&demux))
@@ -904,12 +901,10 @@ static int cmp_ref_by_name(const void *a_, const void *b_)
 	return strcmp(a->name, b->name);
 }
 
-static struct ref *do_fetch_pack(struct fetch_pack_args *args,
-				 int fd[2],
-				 const struct ref *orig_ref,
-				 struct ref **sought, int nr_sought,
-				 struct shallow_info *si,
-				 char **pack_lockfile)
+static struct ref *
+do_fetch_pack(struct fetch_pack_args *args, int fd[2],
+	      const struct ref *orig_ref, struct ref **sought, int nr_sought,
+	      struct shallow_info *si, char **pack_lockfile)
 {
 	struct ref *ref = copy_ref_list(orig_ref);
 	struct object_id oid;
@@ -919,7 +914,8 @@ static struct ref *do_fetch_pack(struct fetch_pack_args *args,
 	sort_ref_list(&ref, ref_compare_name);
 	QSORT(sought, nr_sought, cmp_ref_by_name);
 
-	if ((args->depth > 0 || is_repository_shallow()) && !server_supports("shallow"))
+	if ((args->depth > 0 || is_repository_shallow()) &&
+	    !server_supports("shallow"))
 		die(_("Server does not support shallow clients"));
 	if (args->depth > 0 || args->deepen_since || args->deepen_not)
 		args->deepen = 1;
@@ -931,16 +927,14 @@ static struct ref *do_fetch_pack(struct fetch_pack_args *args,
 			if (args->stateless_rpc)
 				no_done = 1;
 		}
-	}
-	else if (server_supports("multi_ack")) {
+	} else if (server_supports("multi_ack")) {
 		print_verbose(args, _("Server supports multi_ack"));
 		multi_ack = 1;
 	}
 	if (server_supports("side-band-64k")) {
 		print_verbose(args, _("Server supports side-band-64k"));
 		use_sideband = 2;
-	}
-	else if (server_supports("side-band")) {
+	} else if (server_supports("side-band")) {
 		print_verbose(args, _("Server supports side-band"));
 		use_sideband = 1;
 	}
@@ -949,7 +943,8 @@ static struct ref *do_fetch_pack(struct fetch_pack_args *args,
 		allow_unadvertised_object_request |= ALLOW_TIP_SHA1;
 	}
 	if (server_supports("allow-reachable-sha1-in-want")) {
-		print_verbose(args, _("Server supports allow-reachable-sha1-in-want"));
+		print_verbose(args,
+			      _("Server supports allow-reachable-sha1-in-want"));
 		allow_unadvertised_object_request |= ALLOW_REACHABLE_SHA1;
 	}
 	if (!server_supports("thin-pack"))
@@ -1003,7 +998,7 @@ static struct ref *do_fetch_pack(struct fetch_pack_args *args,
 	if (get_pack(args, fd, pack_lockfile))
 		die(_("git fetch-pack: fetch failed."));
 
- all_done:
+all_done:
 	return ref;
 }
 
@@ -1052,9 +1047,8 @@ static int remove_duplicates_in_refs(struct ref **ref, int nr)
 	return dst;
 }
 
-static void update_shallow(struct fetch_pack_args *args,
-			   struct ref **sought, int nr_sought,
-			   struct shallow_info *si)
+static void update_shallow(struct fetch_pack_args *args, struct ref **sought,
+			   int nr_sought, struct shallow_info *si)
 {
 	struct oid_array ref = OID_ARRAY_INIT;
 	int *status;
@@ -1086,8 +1080,7 @@ static void update_shallow(struct fetch_pack_args *args,
 				oid_array_append(&extra, &oid[i]);
 		if (extra.nr) {
 			setup_alternate_shallow(&shallow_lock,
-						&alternate_shallow_file,
-						&extra);
+						&alternate_shallow_file, &extra);
 			commit_lock_file(&shallow_lock);
 		}
 		oid_array_clear(&extra);
@@ -1122,8 +1115,7 @@ static void update_shallow(struct fetch_pack_args *args,
 			oid_array_append(&extra, &oid[si->ours[i]]);
 		for (i = 0; i < si->nr_theirs; i++)
 			oid_array_append(&extra, &oid[si->theirs[i]]);
-		setup_alternate_shallow(&shallow_lock,
-					&alternate_shallow_file,
+		setup_alternate_shallow(&shallow_lock, &alternate_shallow_file,
 					&extra);
 		commit_lock_file(&shallow_lock);
 		oid_array_clear(&extra);
@@ -1146,13 +1138,10 @@ static void update_shallow(struct fetch_pack_args *args,
 	oid_array_clear(&ref);
 }
 
-struct ref *fetch_pack(struct fetch_pack_args *args,
-		       int fd[], struct child_process *conn,
-		       const struct ref *ref,
-		       const char *dest,
-		       struct ref **sought, int nr_sought,
-		       struct oid_array *shallow,
-		       char **pack_lockfile)
+struct ref *
+fetch_pack(struct fetch_pack_args *args, int fd[], struct child_process *conn,
+	   const struct ref *ref, const char *dest, struct ref **sought,
+	   int nr_sought, struct oid_array *shallow, char **pack_lockfile)
 {
 	struct ref *ref_cpy;
 	struct shallow_info si;
@@ -1166,8 +1155,8 @@ struct ref *fetch_pack(struct fetch_pack_args *args,
 		die(_("no matching remote head"));
 	}
 	prepare_shallow_info(&si, shallow);
-	ref_cpy = do_fetch_pack(args, fd, ref, sought, nr_sought,
-				&si, pack_lockfile);
+	ref_cpy = do_fetch_pack(args, fd, ref, sought, nr_sought, &si,
+				pack_lockfile);
 	reprepare_packed_git();
 	update_shallow(args, sought, nr_sought, &si);
 	clear_shallow_info(&si);

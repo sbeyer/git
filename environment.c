@@ -104,24 +104,22 @@ static const char *super_prefix;
 /*
  * Repository-local GIT_* environment variables; see cache.h for details.
  */
-const char * const local_repo_env[] = {
-	ALTERNATE_DB_ENVIRONMENT,
-	CONFIG_ENVIRONMENT,
-	CONFIG_DATA_ENVIRONMENT,
-	DB_ENVIRONMENT,
-	GIT_DIR_ENVIRONMENT,
-	GIT_WORK_TREE_ENVIRONMENT,
-	GIT_IMPLICIT_WORK_TREE_ENVIRONMENT,
-	GRAFT_ENVIRONMENT,
-	INDEX_ENVIRONMENT,
-	NO_REPLACE_OBJECTS_ENVIRONMENT,
-	GIT_REPLACE_REF_BASE_ENVIRONMENT,
-	GIT_PREFIX_ENVIRONMENT,
-	GIT_SUPER_PREFIX_ENVIRONMENT,
-	GIT_SHALLOW_FILE_ENVIRONMENT,
-	GIT_COMMON_DIR_ENVIRONMENT,
-	NULL
-};
+const char *const local_repo_env[] = { ALTERNATE_DB_ENVIRONMENT,
+				       CONFIG_ENVIRONMENT,
+				       CONFIG_DATA_ENVIRONMENT,
+				       DB_ENVIRONMENT,
+				       GIT_DIR_ENVIRONMENT,
+				       GIT_WORK_TREE_ENVIRONMENT,
+				       GIT_IMPLICIT_WORK_TREE_ENVIRONMENT,
+				       GRAFT_ENVIRONMENT,
+				       INDEX_ENVIRONMENT,
+				       NO_REPLACE_OBJECTS_ENVIRONMENT,
+				       GIT_REPLACE_REF_BASE_ENVIRONMENT,
+				       GIT_PREFIX_ENVIRONMENT,
+				       GIT_SUPER_PREFIX_ENVIRONMENT,
+				       GIT_SHALLOW_FILE_ENVIRONMENT,
+				       GIT_COMMON_DIR_ENVIRONMENT,
+				       NULL };
 
 static char *expand_namespace(const char *raw_namespace)
 {
@@ -153,8 +151,8 @@ void setup_git_env(void)
 		check_replace_refs = 0;
 	replace_ref_base = getenv(GIT_REPLACE_REF_BASE_ENVIRONMENT);
 	free(git_replace_ref_base);
-	git_replace_ref_base = xstrdup(replace_ref_base ? replace_ref_base
-							  : "refs/replace/");
+	git_replace_ref_base = xstrdup(replace_ref_base ? replace_ref_base :
+							  "refs/replace/");
 	free(namespace);
 	namespace = expand_namespace(getenv(GIT_NAMESPACE_ENVIRONMENT));
 	shallow_file = getenv(GIT_SHALLOW_FILE_ENVIRONMENT);
@@ -170,8 +168,7 @@ int is_bare_repository(void)
 
 int have_git_dir(void)
 {
-	return startup_info->have_repository
-		|| the_repository->gitdir;
+	return startup_info->have_repository || the_repository->gitdir;
 }
 
 const char *get_git_dir(void)
@@ -270,13 +267,13 @@ int odb_pack_keep(const char *name)
 {
 	int fd;
 
-	fd = open(name, O_RDWR|O_CREAT|O_EXCL, 0600);
+	fd = open(name, O_RDWR | O_CREAT | O_EXCL, 0600);
 	if (0 <= fd)
 		return fd;
 
 	/* slow path */
 	safe_create_leading_directories_const(name);
-	return open(name, O_RDWR|O_CREAT|O_EXCL, 0600);
+	return open(name, O_RDWR | O_CREAT | O_EXCL, 0600);
 }
 
 char *get_index_file(void)
@@ -304,8 +301,8 @@ int set_git_dir(const char *path)
 
 const char *get_log_output_encoding(void)
 {
-	return git_log_output_encoding ? git_log_output_encoding
-		: get_commit_output_encoding();
+	return git_log_output_encoding ? git_log_output_encoding :
+					 get_commit_output_encoding();
 }
 
 const char *get_commit_output_encoding(void)

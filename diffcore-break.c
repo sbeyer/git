@@ -5,10 +5,8 @@
 #include "diff.h"
 #include "diffcore.h"
 
-static int should_break(struct diff_filespec *src,
-			struct diff_filespec *dst,
-			int break_score,
-			int *merge_score_p)
+static int should_break(struct diff_filespec *src, struct diff_filespec *dst,
+			int break_score, int *merge_score_p)
 {
 	/* dst is recorded as a modification of src.  Are they so
 	 * different that we are better off recording this as a pair
@@ -57,8 +55,7 @@ static int should_break(struct diff_filespec *src,
 		return 1; /* even their types are different */
 	}
 
-	if (src->oid_valid && dst->oid_valid &&
-	    !oidcmp(&src->oid, &dst->oid))
+	if (src->oid_valid && dst->oid_valid && !oidcmp(&src->oid, &dst->oid))
 		return 0; /* they are the same */
 
 	if (diff_populate_filespec(src, 0) || diff_populate_filespec(dst, 0))
@@ -71,8 +68,7 @@ static int should_break(struct diff_filespec *src,
 	if (!src->size)
 		return 0; /* we do not let empty files get renamed */
 
-	if (diffcore_count_changes(src, dst,
-				   &src->cnt_data, &dst->cnt_data,
+	if (diffcore_count_changes(src, dst, &src->cnt_data, &dst->cnt_data,
 				   &src_copied, &literal_added))
 		return 0;
 
@@ -107,8 +103,7 @@ static int should_break(struct diff_filespec *src,
 	 * not really a rewrite.
 	 */
 	if ((src->size * break_score < src_removed * MAX_SCORE) &&
-	    (literal_added * 20 < src_removed) &&
-	    (literal_added * 20 < src_copied))
+	    (literal_added * 20 < src_removed) && (literal_added * 20 < src_copied))
 		return 0;
 
 	return 1;
@@ -178,8 +173,7 @@ void diffcore_break(int break_score)
 		    object_type(p->one->mode) == OBJ_BLOB &&
 		    object_type(p->two->mode) == OBJ_BLOB &&
 		    !strcmp(p->one->path, p->two->path)) {
-			if (should_break(p->one, p->two,
-					 break_score, &score)) {
+			if (should_break(p->one, p->two, break_score, &score)) {
 				/* Split this into delete and create */
 				struct diff_filespec *null_one, *null_two;
 				struct diff_filepair *dp;
@@ -223,15 +217,15 @@ void diffcore_break(int break_score)
 	return;
 }
 
-static void merge_broken(struct diff_filepair *p,
-			 struct diff_filepair *pp,
+static void merge_broken(struct diff_filepair *p, struct diff_filepair *pp,
 			 struct diff_queue_struct *outq)
 {
 	/* p and pp are broken pairs we want to merge */
 	struct diff_filepair *c = p, *d = pp, *dp;
 	if (DIFF_FILE_VALID(p->one)) {
 		/* this must be a delete half */
-		d = p; c = pp;
+		d = p;
+		c = pp;
 	}
 	/* Sanity check */
 	if (!DIFF_FILE_VALID(d->one))
@@ -271,8 +265,7 @@ void diffcore_merge_broken(void)
 		if (!p)
 			/* we already merged this with its peer */
 			continue;
-		else if (p->broken_pair &&
-			 !strcmp(p->one->path, p->two->path)) {
+		else if (p->broken_pair && !strcmp(p->one->path, p->two->path)) {
 			/* If the peer also survived rename/copy, then
 			 * we merge them back together.
 			 */
@@ -292,8 +285,7 @@ void diffcore_merge_broken(void)
 				 * it in the output.
 				 */
 				diff_q(&outq, p);
-		}
-		else
+		} else
 			diff_q(&outq, p);
 	}
 	free(q->queue);

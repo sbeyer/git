@@ -66,15 +66,15 @@ static timestamp_t check_expirations(void)
 			entries_nr--;
 			credential_clear(&entries[i].item);
 			if (i != entries_nr)
-				memcpy(&entries[i], &entries[entries_nr], sizeof(*entries));
+				memcpy(&entries[i], &entries[entries_nr],
+				       sizeof(*entries));
 			/*
 			 * Stick around 30 seconds in case a new credential
 			 * shows up (e.g., because we just removed a failed
 			 * one, and we will soon get the correct one).
 			 */
 			wait_for_entry_until = now + 30;
-		}
-		else {
+		} else {
 			if (entries[i].expiration < next)
 				next = entries[i].expiration;
 			i++;
@@ -90,8 +90,9 @@ static timestamp_t check_expirations(void)
 	return next - now;
 }
 
-static int read_request(FILE *fh, struct credential *c,
-			struct strbuf *action, int *timeout) {
+static int
+read_request(FILE *fh, struct credential *c, struct strbuf *action, int *timeout)
+{
 	static struct strbuf item = STRBUF_INIT;
 	const char *p;
 
@@ -117,15 +118,14 @@ static void serve_one_client(FILE *in, FILE *out)
 	int timeout = -1;
 
 	if (read_request(in, &c, &action, &timeout) < 0)
-		/* ignore error */ ;
+		/* ignore error */;
 	else if (!strcmp(action.buf, "get")) {
 		struct credential_cache_entry *e = lookup_credential(&c);
 		if (e) {
 			fprintf(out, "username=%s\n", e->item.username);
 			fprintf(out, "password=%s\n", e->item.password);
 		}
-	}
-	else if (!strcmp(action.buf, "exit")) {
+	} else if (!strcmp(action.buf, "exit")) {
 		/*
 		 * It's important that we clean up our socket first, and then
 		 * signal the client only once we have finished the cleanup.
@@ -135,8 +135,7 @@ static void serve_one_client(FILE *in, FILE *out)
 		 * them EOF.
 		 */
 		exit(0);
-	}
-	else if (!strcmp(action.buf, "erase"))
+	} else if (!strcmp(action.buf, "erase"))
 		remove_credential(&c);
 	else if (!strcmp(action.buf, "store")) {
 		if (timeout < 0)
@@ -147,8 +146,7 @@ static void serve_one_client(FILE *in, FILE *out)
 			remove_credential(&c);
 			cache_credential(&c, timeout);
 		}
-	}
-	else
+	} else
 		warning("cache client sent unknown action: %s", action.buf);
 
 	credential_clear(&c);
@@ -219,10 +217,10 @@ static void serve_cache(const char *socket_path, int debug)
 }
 
 static const char permissions_advice[] = N_(
-"The permissions on your socket directory are too loose; other\n"
-"users may be able to read your cached credentials. Consider running:\n"
-"\n"
-"	chmod 0700 %s");
+	"The permissions on your socket directory are too loose; other\n"
+	"users may be able to read your cached credentials. Consider running:\n"
+	"\n"
+	"	chmod 0700 %s");
 static void init_socket_directory(const char *path)
 {
 	struct stat st;
@@ -234,10 +232,10 @@ static void init_socket_directory(const char *path)
 			die(_(permissions_advice), dir);
 	} else {
 		/*
-		 * We must be sure to create the directory with the correct mode,
-		 * not just chmod it after the fact; otherwise, there is a race
-		 * condition in which somebody can chdir to it, sleep, then try to open
-		 * our protected socket.
+		 * We must be sure to create the directory with the correct
+		 * mode, not just chmod it after the fact; otherwise, there is a
+		 * race condition in which somebody can chdir to it, sleep, then
+		 * try to open our protected socket.
 		 */
 		if (safe_create_leading_directories_const(dir) < 0)
 			die_errno("unable to create directories for '%s'", dir);
@@ -261,16 +259,13 @@ int cmd_main(int argc, const char **argv)
 	struct tempfile *socket_file;
 	const char *socket_path;
 	int ignore_sighup = 0;
-	static const char *usage[] = {
-		"git-credential-cache--daemon [opts] <socket_path>",
-		NULL
-	};
+	static const char *usage[] = { "git-credential-cache--daemon [opts] <socket_path>",
+				       NULL };
 	int debug = 0;
-	const struct option options[] = {
-		OPT_BOOL(0, "debug", &debug,
-			 N_("print debugging messages to stderr")),
-		OPT_END()
-	};
+	const struct option options[] =
+		{ OPT_BOOL(0, "debug", &debug,
+			   N_("print debugging messages to stderr")),
+		  OPT_END() };
 
 	git_config_get_bool("credentialcache.ignoresighup", &ignore_sighup);
 

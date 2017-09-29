@@ -15,9 +15,9 @@ static const char *merge_argument(struct commit *commit)
 		return EMPTY_TREE_SHA1_HEX;
 }
 
-int try_merge_command(const char *strategy, size_t xopts_nr,
-		      const char **xopts, struct commit_list *common,
-		      const char *head_arg, struct commit_list *remotes)
+int try_merge_command(const char *strategy, size_t xopts_nr, const char **xopts,
+		      struct commit_list *common, const char *head_arg,
+		      struct commit_list *remotes)
 {
 	struct argv_array args = ARGV_ARRAY_INIT;
 	int i, ret;
@@ -45,8 +45,7 @@ int try_merge_command(const char *strategy, size_t xopts_nr,
 }
 
 int checkout_fast_forward(const struct object_id *head,
-			  const struct object_id *remote,
-			  int overwrite_ignore)
+			  const struct object_id *remote, int overwrite_ignore)
 {
 	struct tree *trees[MAX_UNPACK_TREES];
 	struct unpack_trees_options opts;
@@ -87,7 +86,7 @@ int checkout_fast_forward(const struct object_id *head,
 		return -1;
 	for (i = 0; i < nr_trees; i++) {
 		parse_tree(trees[i]);
-		init_tree_desc(t+i, trees[i]->buffer, trees[i]->size);
+		init_tree_desc(t + i, trees[i]->buffer, trees[i]->size);
 	}
 	if (unpack_trees(nr_trees, t, &opts))
 		return -1;

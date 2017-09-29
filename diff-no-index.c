@@ -88,8 +88,7 @@ static struct diff_filespec *noindex_filespec(const char *name, int mode)
 	return s;
 }
 
-static int queue_diff(struct diff_options *o,
-		      const char *name1, const char *name2)
+static int queue_diff(struct diff_options *o, const char *name1, const char *name2)
 {
 	int mode1 = 0, mode2 = 0;
 
@@ -145,7 +144,7 @@ static int queue_diff(struct diff_options *o,
 			len2 = buffer2.len;
 		}
 
-		for (i1 = i2 = 0; !ret && (i1 < p1.nr || i2 < p2.nr); ) {
+		for (i1 = i2 = 0; !ret && (i1 < p1.nr || i2 < p2.nr);) {
 			const char *n1, *n2;
 			int comp;
 
@@ -157,7 +156,8 @@ static int queue_diff(struct diff_options *o,
 			else if (i2 == p2.nr)
 				comp = -1;
 			else
-				comp = strcmp(p1.items[i1].string, p2.items[i2].string);
+				comp = strcmp(p1.items[i1].string,
+					      p2.items[i2].string);
 
 			if (comp > 0)
 				n1 = NULL;
@@ -233,8 +233,7 @@ static void fixup_paths(const char **path, struct strbuf *replacement)
 	}
 }
 
-void diff_no_index(struct rev_info *revs,
-		   int argc, const char **argv)
+void diff_no_index(struct rev_info *revs, int argc, const char **argv)
 {
 	int i;
 	const char *paths[2];
@@ -242,7 +241,7 @@ void diff_no_index(struct rev_info *revs,
 	const char *prefix = revs->prefix;
 
 	diff_setup(&revs->diffopt);
-	for (i = 1; i < argc - 2; ) {
+	for (i = 1; i < argc - 2;) {
 		int j;
 		if (!strcmp(argv[i], "--no-index"))
 			i++;

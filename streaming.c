@@ -12,10 +12,8 @@ enum input_source {
 	pack_non_delta = 2
 };
 
-typedef int (*open_istream_fn)(struct git_istream *,
-			       struct object_info *,
-			       const unsigned char *,
-			       enum object_type *);
+typedef int (*open_istream_fn)(struct git_istream *, struct object_info *,
+			       const unsigned char *, enum object_type *);
 typedef int (*close_istream_fn)(struct git_istream *);
 typedef ssize_t (*read_istream_fn)(struct git_istream *, char *, size_t);
 
@@ -24,27 +22,21 @@ struct stream_vtbl {
 	read_istream_fn read;
 };
 
-#define open_method_decl(name) \
-	int open_istream_ ##name \
-	(struct git_istream *st, struct object_info *oi, \
-	 const unsigned char *sha1, \
-	 enum object_type *type)
+#define open_method_decl(name)                                                  \
+	int open_istream_##name(struct git_istream *st, struct object_info *oi, \
+				const unsigned char *sha1, enum object_type *type)
 
-#define close_method_decl(name) \
-	int close_istream_ ##name \
-	(struct git_istream *st)
+#define close_method_decl(name) int close_istream_##name(struct git_istream *st)
 
 #define read_method_decl(name) \
-	ssize_t read_istream_ ##name \
-	(struct git_istream *st, char *buf, size_t sz)
+	ssize_t read_istream_##name(struct git_istream *st, char *buf, size_t sz)
 
 /* forward declaration */
 static open_method_decl(incore);
 static open_method_decl(loose);
 static open_method_decl(pack_non_delta);
-static struct git_istream *attach_stream_filter(struct git_istream *st,
-						struct stream_filter *filter);
-
+static struct git_istream *
+attach_stream_filter(struct git_istream *st, struct stream_filter *filter);
 
 static open_istream_fn open_istream_tbl[] = {
 	open_istream_incore,
@@ -52,7 +44,7 @@ static open_istream_fn open_istream_tbl[] = {
 	open_istream_pack_non_delta,
 };
 
-#define FILTER_BUFFER (1024*16)
+#define FILTER_BUFFER (1024 * 16)
 
 struct filtered_istream {
 	struct git_istream *upstream;
@@ -105,9 +97,9 @@ ssize_t read_istream(struct git_istream *st, void *buf, size_t sz)
 	return st->vtbl->read(st, buf, sz);
 }
 
-static enum input_source istream_source(const unsigned char *sha1,
-					enum object_type *type,
-					struct object_info *oi)
+static enum input_source
+istream_source(const unsigned char *sha1, enum object_type *type,
+	       struct object_info *oi)
 {
 	unsigned long size;
 	int status;
@@ -130,10 +122,9 @@ static enum input_source istream_source(const unsigned char *sha1,
 	}
 }
 
-struct git_istream *open_istream(const unsigned char *sha1,
-				 enum object_type *type,
-				 unsigned long *size,
-				 struct stream_filter *filter)
+struct git_istream *
+open_istream(const unsigned char *sha1, enum object_type *type,
+	     unsigned long *size, struct stream_filter *filter)
 {
 	struct git_istream *st;
 	struct object_info oi = OBJECT_INFO_INIT;
@@ -164,7 +155,6 @@ struct git_istream *open_istream(const unsigned char *sha1,
 	return st;
 }
 
-
 /*****************************************************************
  *
  * Common helpers
@@ -176,7 +166,6 @@ static void close_deflated_stream(struct git_istream *st)
 	if (st->z_state == z_used)
 		git_inflate_end(&st->z);
 }
-
 
 /*****************************************************************
  *
@@ -213,9 +202,8 @@ static read_method_decl(filtered)
 		if (fs->i_ptr < fs->i_end) {
 			size_t to_feed = fs->i_end - fs->i_ptr;
 			size_t to_receive = FILTER_BUFFER;
-			if (stream_filter(fs->filter,
-					  fs->ibuf + fs->i_ptr, &to_feed,
-					  fs->obuf, &to_receive))
+			if (stream_filter(fs->filter, fs->ibuf + fs->i_ptr,
+					  &to_feed, fs->obuf, &to_receive))
 				return -1;
 			fs->i_ptr = fs->i_end - to_feed;
 			fs->o_end = FILTER_BUFFER - to_receive;
@@ -225,9 +213,8 @@ static read_method_decl(filtered)
 		/* tell the filter to drain upon no more input */
 		if (fs->input_finished) {
 			size_t to_receive = FILTER_BUFFER;
-			if (stream_filter(fs->filter,
-					  NULL, NULL,
-					  fs->obuf, &to_receive))
+			if (stream_filter(fs->filter, NULL, NULL, fs->obuf,
+					  &to_receive))
 				return -1;
 			fs->o_end = FILTER_BUFFER - to_receive;
 			if (!fs->o_end)
@@ -238,7 +225,8 @@ static read_method_decl(filtered)
 
 		/* refill the input from the upstream */
 		if (!fs->input_finished) {
-			fs->i_end = read_istream(fs->upstream, fs->ibuf, FILTER_BUFFER);
+			fs->i_end = read_istream(fs->upstream, fs->ibuf,
+						 FILTER_BUFFER);
 			if (fs->i_end < 0)
 				return -1;
 			if (fs->i_end)
@@ -254,8 +242,8 @@ static struct stream_vtbl filtered_vtbl = {
 	read_istream_filtered,
 };
 
-static struct git_istream *attach_stream_filter(struct git_istream *st,
-						struct stream_filter *filter)
+static struct git_istream *
+attach_stream_filter(struct git_istream *st, struct stream_filter *filter)
 {
 	struct git_istream *ifs = xmalloc(sizeof(*ifs));
 	struct filtered_istream *fs = &(ifs->u.filtered);
@@ -338,11 +326,8 @@ static open_method_decl(loose)
 	st->u.loose.mapped = map_sha1_file(sha1, &st->u.loose.mapsize);
 	if (!st->u.loose.mapped)
 		return -1;
-	if ((unpack_sha1_header(&st->z,
-				st->u.loose.mapped,
-				st->u.loose.mapsize,
-				st->u.loose.hdr,
-				sizeof(st->u.loose.hdr)) < 0) ||
+	if ((unpack_sha1_header(&st->z, st->u.loose.mapped, st->u.loose.mapsize,
+				st->u.loose.hdr, sizeof(st->u.loose.hdr)) < 0) ||
 	    (parse_sha1_header(st->u.loose.hdr, &st->size) < 0)) {
 		git_inflate_end(&st->z);
 		munmap(st->u.loose.mapped, st->u.loose.mapsize);
@@ -356,7 +341,6 @@ static open_method_decl(loose)
 	st->vtbl = &loose_vtbl;
 	return 0;
 }
-
 
 /*****************************************************************
  *
@@ -433,10 +417,8 @@ static open_method_decl(pack_non_delta)
 	st->u.in_pack.pos = oi->u.packed.offset;
 	window = NULL;
 
-	in_pack_type = unpack_object_header(st->u.in_pack.pack,
-					    &window,
-					    &st->u.in_pack.pos,
-					    &st->size);
+	in_pack_type = unpack_object_header(st->u.in_pack.pack, &window,
+					    &st->u.in_pack.pos, &st->size);
 	unuse_pack(&window);
 	switch (in_pack_type) {
 	default:
@@ -451,7 +433,6 @@ static open_method_decl(pack_non_delta)
 	st->vtbl = &pack_non_delta_vtbl;
 	return 0;
 }
-
 
 /*****************************************************************
  *
@@ -493,13 +474,12 @@ static open_method_decl(incore)
 	return st->u.incore.buf ? 0 : -1;
 }
 
-
 /****************************************************************
  * Users of streaming interface
  ****************************************************************/
 
-int stream_blob_to_fd(int fd, const struct object_id *oid, struct stream_filter *filter,
-		      int can_seek)
+int stream_blob_to_fd(int fd, const struct object_id *oid,
+		      struct stream_filter *filter, int can_seek)
 {
 	struct git_istream *st;
 	enum object_type type;
@@ -534,7 +514,7 @@ int stream_blob_to_fd(int fd, const struct object_id *oid, struct stream_filter 
 			}
 		}
 
-		if (kept && lseek(fd, kept, SEEK_CUR) == (off_t) -1)
+		if (kept && lseek(fd, kept, SEEK_CUR) == (off_t)-1)
 			goto close_and_exit;
 		else
 			kept = 0;
@@ -543,12 +523,12 @@ int stream_blob_to_fd(int fd, const struct object_id *oid, struct stream_filter 
 		if (wrote < 0)
 			goto close_and_exit;
 	}
-	if (kept && (lseek(fd, kept - 1, SEEK_CUR) == (off_t) -1 ||
+	if (kept && (lseek(fd, kept - 1, SEEK_CUR) == (off_t)-1 ||
 		     xwrite(fd, "", 1) != 1))
 		goto close_and_exit;
 	result = 0;
 
- close_and_exit:
+close_and_exit:
 	close_istream(st);
 	return result;
 }

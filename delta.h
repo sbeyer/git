@@ -40,10 +40,9 @@ extern unsigned long sizeof_delta_index(struct delta_index *index);
  * returned and *delta_size is updated with its size.  The returned buffer
  * must be freed by the caller.
  */
-extern void *
-create_delta(const struct delta_index *index,
-	     const void *buf, unsigned long bufsize,
-	     unsigned long *delta_size, unsigned long max_delta_size);
+extern void *create_delta(const struct delta_index *index, const void *buf,
+			  unsigned long bufsize, unsigned long *delta_size,
+			  unsigned long max_delta_size);
 
 /*
  * diff_delta: create a delta from source buffer to target buffer
@@ -54,9 +53,9 @@ create_delta(const struct delta_index *index,
  * updated with its size.  The returned buffer must be freed by the caller.
  */
 static inline void *
-diff_delta(const void *src_buf, unsigned long src_bufsize,
-	   const void *trg_buf, unsigned long trg_bufsize,
-	   unsigned long *delta_size, unsigned long max_delta_size)
+diff_delta(const void *src_buf, unsigned long src_bufsize, const void *trg_buf,
+	   unsigned long trg_bufsize, unsigned long *delta_size,
+	   unsigned long max_delta_size)
 {
 	struct delta_index *index = create_delta_index(src_buf, src_bufsize);
 	if (index) {
@@ -75,19 +74,19 @@ diff_delta(const void *src_buf, unsigned long src_bufsize,
  * *trg_bufsize is updated with its size.  On failure a NULL pointer is
  * returned.  The returned buffer must be freed by the caller.
  */
-extern void *patch_delta(const void *src_buf, unsigned long src_size,
-			 const void *delta_buf, unsigned long delta_size,
-			 unsigned long *dst_size);
+extern void *
+patch_delta(const void *src_buf, unsigned long src_size, const void *delta_buf,
+	    unsigned long delta_size, unsigned long *dst_size);
 
 /* the smallest possible delta size is 4 bytes */
-#define DELTA_SIZE_MIN	4
+#define DELTA_SIZE_MIN 4
 
 /*
  * This must be called twice on the delta data buffer, first to get the
  * expected source buffer size, and again to get the target buffer size.
  */
-static inline unsigned long get_delta_hdr_size(const unsigned char **datap,
-					       const unsigned char *top)
+static inline unsigned long
+get_delta_hdr_size(const unsigned char **datap, const unsigned char *top)
 {
 	const unsigned char *data = *datap;
 	unsigned long cmd, size = 0;

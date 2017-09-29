@@ -27,12 +27,13 @@ extern void sha1file_checkpoint(struct sha1file *, struct sha1file_checkpoint *)
 extern int sha1file_truncate(struct sha1file *, struct sha1file_checkpoint *);
 
 /* sha1close flags */
-#define CSUM_CLOSE	1
-#define CSUM_FSYNC	2
+#define CSUM_CLOSE 1
+#define CSUM_FSYNC 2
 
 extern struct sha1file *sha1fd(int fd, const char *name);
 extern struct sha1file *sha1fd_check(const char *name);
-extern struct sha1file *sha1fd_throughput(int fd, const char *name, struct progress *tp);
+extern struct sha1file *
+sha1fd_throughput(int fd, const char *name, struct progress *tp);
 extern int sha1close(struct sha1file *, unsigned char *, unsigned int);
 extern void sha1write(struct sha1file *, const void *, unsigned int);
 extern void sha1flush(struct sha1file *f);

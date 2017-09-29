@@ -11,8 +11,8 @@ struct split_index *init_split_index(struct index_state *istate)
 	return istate->split_index;
 }
 
-int read_link_extension(struct index_state *istate,
-			 const void *data_, unsigned long sz)
+int read_link_extension(struct index_state *istate, const void *data_,
+			unsigned long sz)
 {
 	const unsigned char *data = data_;
 	struct split_index *si;
@@ -41,8 +41,7 @@ int read_link_extension(struct index_state *istate,
 	return 0;
 }
 
-int write_link_extension(struct strbuf *sb,
-			 struct index_state *istate)
+int write_link_extension(struct strbuf *sb, struct index_state *istate)
 {
 	struct split_index *si = istate->split_index;
 	strbuf_add(sb, si->base_sha1, 20);
@@ -109,16 +108,16 @@ static void replace_entry(size_t pos, void *data)
 		die("position for replacement %d exceeds base index size %d",
 		    (int)pos, istate->cache_nr);
 	if (si->nr_replacements >= si->saved_cache_nr)
-		die("too many replacements (%d vs %d)",
-		    si->nr_replacements, si->saved_cache_nr);
+		die("too many replacements (%d vs %d)", si->nr_replacements,
+		    si->saved_cache_nr);
 	dst = istate->cache[pos];
 	if (dst->ce_flags & CE_REMOVE)
-		die("entry %d is marked as both replaced and deleted",
-		    (int)pos);
+		die("entry %d is marked as both replaced and deleted", (int)pos);
 	src = si->saved_cache[si->nr_replacements];
 	if (ce_namelen(src))
 		die("corrupt link extension, entry %d should have "
-		    "zero length name", (int)pos);
+		    "zero length name",
+		    (int)pos);
 	src->index = pos + 1;
 	src->ce_flags |= CE_UPDATE_IN_BASE;
 	src->ce_namelen = dst->ce_namelen;
@@ -134,10 +133,10 @@ void merge_base_index(struct index_state *istate)
 
 	mark_base_index_entries(si->base);
 
-	si->saved_cache	    = istate->cache;
-	si->saved_cache_nr  = istate->cache_nr;
-	istate->cache_nr    = si->base->cache_nr;
-	istate->cache	    = NULL;
+	si->saved_cache = istate->cache;
+	si->saved_cache_nr = istate->cache_nr;
+	istate->cache_nr = si->base->cache_nr;
+	istate->cache = NULL;
 	istate->cache_alloc = 0;
 	ALLOC_GROW(istate->cache, istate->cache_nr, istate->cache_alloc);
 	COPY_ARRAY(istate->cache, si->base->cache, istate->cache_nr);
@@ -152,23 +151,23 @@ void merge_base_index(struct index_state *istate)
 	for (i = si->nr_replacements; i < si->saved_cache_nr; i++) {
 		if (!ce_namelen(si->saved_cache[i]))
 			die("corrupt link extension, entry %d should "
-			    "have non-zero length name", i);
+			    "have non-zero length name",
+			    i);
 		add_index_entry(istate, si->saved_cache[i],
-				ADD_CACHE_OK_TO_ADD |
-				ADD_CACHE_KEEP_CACHE_TREE |
-				/*
-				 * we may have to replay what
-				 * merge-recursive.c:update_stages()
-				 * does, which has this flag on
-				 */
-				ADD_CACHE_SKIP_DFCHECK);
+				ADD_CACHE_OK_TO_ADD | ADD_CACHE_KEEP_CACHE_TREE |
+					/*
+					 * we may have to replay what
+					 * merge-recursive.c:update_stages()
+					 * does, which has this flag on
+					 */
+					ADD_CACHE_SKIP_DFCHECK);
 		si->saved_cache[i] = NULL;
 	}
 
 	ewah_free(si->delete_bitmap);
 	ewah_free(si->replace_bitmap);
 	FREE_AND_NULL(si->saved_cache);
-	si->delete_bitmap  = NULL;
+	si->delete_bitmap = NULL;
 	si->replace_bitmap = NULL;
 	si->saved_cache_nr = 0;
 }
@@ -193,8 +192,8 @@ void prepare_to_write_split_index(struct index_state *istate)
 		for (i = 0; i < istate->cache_nr; i++) {
 			struct cache_entry *base;
 			/* namelen is checked separately */
-			const unsigned int ondisk_flags =
-				CE_STAGEMASK | CE_VALID | CE_EXTENDED_FLAGS;
+			const unsigned int ondisk_flags = CE_STAGEMASK | CE_VALID |
+							  CE_EXTENDED_FLAGS;
 			unsigned int ce_flags, base_flags, ret;
 			ce = istate->cache[i];
 			if (!ce->index)
@@ -215,11 +214,12 @@ void prepare_to_write_split_index(struct index_state *istate)
 			ce_flags = ce->ce_flags;
 			base_flags = base->ce_flags;
 			/* only on-disk flags matter */
-			ce->ce_flags   &= ondisk_flags;
+			ce->ce_flags &= ondisk_flags;
 			base->ce_flags &= ondisk_flags;
 			ret = memcmp(&ce->ce_stat_data, &base->ce_stat_data,
 				     offsetof(struct cache_entry, name) -
-				     offsetof(struct cache_entry, ce_stat_data));
+					     offsetof(struct cache_entry,
+						      ce_stat_data));
 			ce->ce_flags = ce_flags;
 			base->ce_flags = base_flags;
 			if (ret)
@@ -235,7 +235,7 @@ void prepare_to_write_split_index(struct index_state *istate)
 			else if (ce->ce_flags & CE_UPDATE_IN_BASE) {
 				ewah_set(si->replace_bitmap, i);
 				ce->ce_flags |= CE_STRIP_NAME;
-				ALLOC_GROW(entries, nr_entries+1, nr_alloc);
+				ALLOC_GROW(entries, nr_entries + 1, nr_alloc);
 				entries[nr_entries++] = ce;
 			}
 		}
@@ -245,7 +245,7 @@ void prepare_to_write_split_index(struct index_state *istate)
 		ce = istate->cache[i];
 		if ((!si->base || !ce->index) && !(ce->ce_flags & CE_REMOVE)) {
 			assert(!(ce->ce_flags & CE_STRIP_NAME));
-			ALLOC_GROW(entries, nr_entries+1, nr_alloc);
+			ALLOC_GROW(entries, nr_entries + 1, nr_alloc);
 			entries[nr_entries++] = ce;
 		}
 		ce->ce_flags &= ~CE_MATCHED;
@@ -292,9 +292,7 @@ void discard_split_index(struct index_state *istate)
 
 void save_or_free_index_entry(struct index_state *istate, struct cache_entry *ce)
 {
-	if (ce->index &&
-	    istate->split_index &&
-	    istate->split_index->base &&
+	if (ce->index && istate->split_index && istate->split_index->base &&
 	    ce->index <= istate->split_index->base->cache_nr &&
 	    ce == istate->split_index->base->cache[ce->index - 1])
 		ce->ce_flags |= CE_REMOVE;
@@ -303,12 +301,9 @@ void save_or_free_index_entry(struct index_state *istate, struct cache_entry *ce
 }
 
 void replace_index_entry_in_base(struct index_state *istate,
-				 struct cache_entry *old,
-				 struct cache_entry *new)
+				 struct cache_entry *old, struct cache_entry *new)
 {
-	if (old->index &&
-	    istate->split_index &&
-	    istate->split_index->base &&
+	if (old->index && istate->split_index && istate->split_index->base &&
 	    old->index <= istate->split_index->base->cache_nr) {
 		new->index = old->index;
 		if (old != istate->split_index->base->cache[new->index - 1])

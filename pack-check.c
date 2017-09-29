@@ -5,7 +5,7 @@
 #include "packfile.h"
 
 struct idx_entry {
-	off_t                offset;
+	off_t offset;
 	union idx_entry_object {
 		const unsigned char *hash;
 		struct object_id *oid;
@@ -41,15 +41,14 @@ int check_pack_crc(struct packed_git *p, struct pack_window **w_curs,
 	} while (len);
 
 	index_crc = p->index_data;
-	index_crc += 2 + 256 + p->num_objects * (20/4) + nr;
+	index_crc += 2 + 256 + p->num_objects * (20 / 4) + nr;
 
 	return data_crc != ntohl(*index_crc);
 }
 
-static int verify_packfile(struct packed_git *p,
-			   struct pack_window **w_curs,
-			   verify_fn fn,
-			   struct progress *progress, uint32_t base_count)
+static int
+verify_packfile(struct packed_git *p, struct pack_window **w_curs, verify_fn fn,
+		struct progress *progress, uint32_t base_count)
 
 {
 	off_t index_size = p->index_size;
@@ -78,11 +77,9 @@ static int verify_packfile(struct packed_git *p,
 	git_SHA1_Final(hash, &ctx);
 	pack_sig = use_pack(p, w_curs, pack_sig_ofs, NULL);
 	if (hashcmp(hash, pack_sig))
-		err = error("%s SHA1 checksum mismatch",
-			    p->pack_name);
+		err = error("%s SHA1 checksum mismatch", p->pack_name);
 	if (hashcmp(index_base + index_size - 40, pack_sig))
-		err = error("%s SHA1 does not match its index",
-			    p->pack_name);
+		err = error("%s SHA1 does not match its index", p->pack_name);
 	unuse_pack(w_curs);
 
 	/* Make sure everything reachable from idx is valid.  Since we
@@ -92,7 +89,8 @@ static int verify_packfile(struct packed_git *p,
 	nr_objects = p->num_objects;
 	ALLOC_ARRAY(entries, nr_objects + 1);
 	entries[nr_objects].offset = pack_sig_ofs;
-	/* first sort entries by pack offset, since unpacking them is more efficient that way */
+	/* first sort entries by pack offset, since unpacking them is more
+	 * efficient that way */
 	for (i = 0; i < nr_objects; i++) {
 		entries[i].oid.hash = nth_packed_object_sha1(p, i);
 		if (!entries[i].oid.hash)
@@ -111,11 +109,11 @@ static int verify_packfile(struct packed_git *p,
 
 		if (p->index_version > 1) {
 			off_t offset = entries[i].offset;
-			off_t len = entries[i+1].offset - offset;
+			off_t len = entries[i + 1].offset - offset;
 			unsigned int nr = entries[i].nr;
 			if (check_pack_crc(p, w_curs, offset, len, nr))
 				err = error("index CRC mismatch for object %s "
-					    "from %s at offset %"PRIuMAX"",
+					    "from %s at offset %" PRIuMAX "",
 					    oid_to_hex(entries[i].oid.oid),
 					    p->pack_name, (uintmax_t)offset);
 		}
@@ -138,10 +136,12 @@ static int verify_packfile(struct packed_git *p,
 		}
 
 		if (data_valid && !data)
-			err = error("cannot unpack %s from %s at offset %"PRIuMAX"",
-				    oid_to_hex(entries[i].oid.oid), p->pack_name,
-				    (uintmax_t)entries[i].offset);
-		else if (check_sha1_signature(entries[i].oid.hash, data, size, typename(type)))
+			err = error("cannot unpack %s from %s at offset %" PRIuMAX
+				    "",
+				    oid_to_hex(entries[i].oid.oid),
+				    p->pack_name, (uintmax_t)entries[i].offset);
+		else if (check_sha1_signature(entries[i].oid.hash, data, size,
+					      typename(type)))
 			err = error("packed %s from %s is corrupt",
 				    oid_to_hex(entries[i].oid.oid), p->pack_name);
 		else if (fn) {
@@ -153,7 +153,6 @@ static int verify_packfile(struct packed_git *p,
 		if (((base_count + i) & 1023) == 0)
 			display_progress(progress, base_count + i);
 		free(data);
-
 	}
 	display_progress(progress, base_count + i);
 	free(entries);
@@ -179,13 +178,12 @@ int verify_pack_index(struct packed_git *p)
 	git_SHA1_Update(&ctx, index_base, (unsigned int)(index_size - 20));
 	git_SHA1_Final(sha1, &ctx);
 	if (hashcmp(sha1, index_base + index_size - 20))
-		err = error("Packfile index for %s SHA1 mismatch",
-			    p->pack_name);
+		err = error("Packfile index for %s SHA1 mismatch", p->pack_name);
 	return err;
 }
 
-int verify_pack(struct packed_git *p, verify_fn fn,
-		struct progress *progress, uint32_t base_count)
+int verify_pack(struct packed_git *p, verify_fn fn, struct progress *progress,
+		uint32_t base_count)
 {
 	int err = 0;
 	struct pack_window *w_curs = NULL;

@@ -72,12 +72,12 @@ static struct pathspec_magic {
 	char mnemonic; /* this cannot be ':'! */
 	const char *name;
 } pathspec_magic[] = {
-	{ PATHSPEC_FROMTOP,  '/', "top" },
+	{ PATHSPEC_FROMTOP, '/', "top" },
 	{ PATHSPEC_LITERAL, '\0', "literal" },
-	{ PATHSPEC_GLOB,    '\0', "glob" },
-	{ PATHSPEC_ICASE,   '\0', "icase" },
-	{ PATHSPEC_EXCLUDE,  '!', "exclude" },
-	{ PATHSPEC_ATTR,    '\0', "attr" },
+	{ PATHSPEC_GLOB, '\0', "glob" },
+	{ PATHSPEC_ICASE, '\0', "icase" },
+	{ PATHSPEC_EXCLUDE, '!', "exclude" },
+	{ PATHSPEC_ATTR, '\0', "attr" },
 };
 
 static void prefix_magic(struct strbuf *sb, int prefixlen, unsigned magic)
@@ -155,7 +155,7 @@ static void parse_pathspec_attr_match(struct pathspec_item *item, const char *va
 	item->attr_check = attr_check_alloc();
 	item->attr_match = xcalloc(list.nr, sizeof(struct attr_match));
 
-	for_each_string_list_item(si, &list) {
+	for_each_string_list_item (si, &list) {
 		size_t attr_len;
 		char *attr_name;
 		const struct git_attr *a;
@@ -260,8 +260,7 @@ static int get_global_magic(int element_magic)
 	if (get_icase_global())
 		global_magic |= PATHSPEC_ICASE;
 
-	if ((global_magic & PATHSPEC_LITERAL) &&
-	    (global_magic & ~PATHSPEC_LITERAL))
+	if ((global_magic & PATHSPEC_LITERAL) && (global_magic & ~PATHSPEC_LITERAL))
 		die(_("global 'literal' pathspec setting is incompatible "
 		      "with all other global pathspec settings"));
 
@@ -280,8 +279,7 @@ static int get_global_magic(int element_magic)
  * returns the position in 'elem' after all magic has been parsed
  */
 static const char *parse_long_magic(unsigned *magic, int *prefix_len,
-				    struct pathspec_item *item,
-				    const char *elem)
+				    struct pathspec_item *item, const char *elem)
 {
 	const char *pos;
 	const char *nextat;
@@ -324,12 +322,11 @@ static const char *parse_long_magic(unsigned *magic, int *prefix_len,
 
 		if (ARRAY_SIZE(pathspec_magic) <= i)
 			die(_("Invalid pathspec magic '%.*s' in '%s'"),
-			    (int) len, pos, elem);
+			    (int)len, pos, elem);
 	}
 
 	if (*pos != ')')
-		die(_("Missing ')' at the end of pathspec magic in '%s'"),
-		    elem);
+		die(_("Missing ')' at the end of pathspec magic in '%s'"), elem);
 	pos++;
 
 	return pos;
@@ -366,8 +363,8 @@ static const char *parse_short_magic(unsigned *magic, const char *elem)
 		}
 
 		if (ARRAY_SIZE(pathspec_magic) <= i)
-			die(_("Unimplemented pathspec magic '%c' in '%s'"),
-			    ch, elem);
+			die(_("Unimplemented pathspec magic '%c' in '%s'"), ch,
+			    elem);
 	}
 
 	if (*pos == ':')
@@ -377,8 +374,7 @@ static const char *parse_short_magic(unsigned *magic, const char *elem)
 }
 
 static const char *parse_element_magic(unsigned *magic, int *prefix_len,
-				       struct pathspec_item *item,
-				       const char *elem)
+				       struct pathspec_item *item, const char *elem)
 {
 	if (elem[0] != ':' || get_literal_global())
 		return elem; /* nothing to do */
@@ -394,8 +390,7 @@ static const char *parse_element_magic(unsigned *magic, int *prefix_len,
  * Perform the initialization of a pathspec_item based on a pathspec element.
  */
 static void init_pathspec_item(struct pathspec_item *item, unsigned flags,
-			       const char *prefix, int prefixlen,
-			       const char *elt)
+			       const char *prefix, int prefixlen, const char *elt)
 {
 	unsigned magic = 0, element_magic = 0;
 	const char *copyfrom = elt;
@@ -410,18 +405,15 @@ static void init_pathspec_item(struct pathspec_item *item, unsigned flags,
 	if (flags & PATHSPEC_LITERAL_PATH) {
 		magic = PATHSPEC_LITERAL;
 	} else {
-		copyfrom = parse_element_magic(&element_magic,
-					       &pathspec_prefix,
-					       item,
-					       elt);
+		copyfrom = parse_element_magic(&element_magic, &pathspec_prefix,
+					       item, elt);
 		magic |= element_magic;
 		magic |= get_global_magic(element_magic);
 	}
 
 	item->magic = magic;
 
-	if (pathspec_prefix >= 0 &&
-	    (prefixlen || (prefix && *prefix)))
+	if (pathspec_prefix >= 0 && (prefixlen || (prefix && *prefix)))
 		die("BUG: 'prefix' magic is supposed to be used at worktree's root");
 
 	if ((magic & PATHSPEC_LITERAL) && (magic & PATHSPEC_GLOB))
@@ -435,8 +427,7 @@ static void init_pathspec_item(struct pathspec_item *item, unsigned flags,
 		match = xstrdup(copyfrom);
 		prefixlen = 0;
 	} else {
-		match = prefix_path_gently(prefix, prefixlen,
-					   &prefixlen, copyfrom);
+		match = prefix_path_gently(prefix, prefixlen, &prefixlen, copyfrom);
 		if (!match)
 			die(_("%s: '%s' is outside repository"), elt, copyfrom);
 	}
@@ -449,8 +440,7 @@ static void init_pathspec_item(struct pathspec_item *item, unsigned flags,
 	 * Prefix the pathspec (keep all magic) and assign to
 	 * original. Useful for passing to another command.
 	 */
-	if ((flags & PATHSPEC_PREFIX_ORIGIN) &&
-	    !get_literal_global()) {
+	if ((flags & PATHSPEC_PREFIX_ORIGIN) && !get_literal_global()) {
 		struct strbuf sb = STRBUF_INIT;
 
 		/* Preserve the actual prefix length of each pattern */
@@ -484,9 +474,8 @@ static void init_pathspec_item(struct pathspec_item *item, unsigned flags,
 	}
 
 	/* sanity checks, pathspec matchers assume these are sane */
-	if (item->nowildcard_len > item->len ||
-	    item->prefix         > item->len) {
-		die ("BUG: error initializing pathspec_item");
+	if (item->nowildcard_len > item->len || item->prefix > item->len) {
+		die("BUG: error initializing pathspec_item");
 	}
 }
 
@@ -499,8 +488,7 @@ static int pathspec_item_cmp(const void *a_, const void *b_)
 	return strcmp(a->match, b->match);
 }
 
-static void NORETURN unsupported_magic(const char *pattern,
-				       unsigned magic)
+static void NORETURN unsupported_magic(const char *pattern, unsigned magic)
 {
 	struct strbuf sb = STRBUF_INIT;
 	int i;
@@ -512,8 +500,8 @@ static void NORETURN unsupported_magic(const char *pattern,
 			strbuf_addstr(&sb, ", ");
 
 		if (m->mnemonic)
-			strbuf_addf(&sb, _("'%s' (mnemonic: '%c')"),
-				    m->name, m->mnemonic);
+			strbuf_addf(&sb, _("'%s' (mnemonic: '%c')"), m->name,
+				    m->mnemonic);
 		else
 			strbuf_addf(&sb, "'%s'", m->name);
 	}
@@ -522,13 +510,12 @@ static void NORETURN unsupported_magic(const char *pattern,
 	 * name. E.g. when add--interactive dies when running
 	 * "checkout -p"
 	 */
-	die(_("%s: pathspec magic not supported by this command: %s"),
-	    pattern, sb.buf);
+	die(_("%s: pathspec magic not supported by this command: %s"), pattern,
+	    sb.buf);
 }
 
-void parse_pathspec(struct pathspec *pathspec,
-		    unsigned magic_mask, unsigned flags,
-		    const char *prefix, const char **argv)
+void parse_pathspec(struct pathspec *pathspec, unsigned magic_mask,
+		    unsigned flags, const char *prefix, const char **argv)
 {
 	struct pathspec_item *item;
 	const char *entry = argv ? *argv : NULL;
@@ -543,8 +530,7 @@ void parse_pathspec(struct pathspec *pathspec,
 	if (!entry && !prefix)
 		return;
 
-	if ((flags & PATHSPEC_PREFER_CWD) &&
-	    (flags & PATHSPEC_PREFER_FULL))
+	if ((flags & PATHSPEC_PREFER_CWD) && (flags & PATHSPEC_PREFER_FULL))
 		die("BUG: PATHSPEC_PREFER_CWD and PATHSPEC_PREFER_FULL are incompatible");
 
 	/* No arguments with prefix -> prefix pathspec */

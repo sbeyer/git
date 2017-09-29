@@ -9,11 +9,10 @@
 
 const char *tree_type = "tree";
 
-static int read_one_entry_opt(struct index_state *istate,
-			      const unsigned char *sha1,
-			      const char *base, int baselen,
-			      const char *pathname,
-			      unsigned mode, int stage, int opt)
+static int
+read_one_entry_opt(struct index_state *istate, const unsigned char *sha1,
+		   const char *base, int baselen, const char *pathname,
+		   unsigned mode, int stage, int opt)
 {
 	int len;
 	unsigned int size;
@@ -30,19 +29,19 @@ static int read_one_entry_opt(struct index_state *istate,
 	ce->ce_flags = create_ce_flags(stage);
 	ce->ce_namelen = baselen + len;
 	memcpy(ce->name, base, baselen);
-	memcpy(ce->name + baselen, pathname, len+1);
+	memcpy(ce->name + baselen, pathname, len + 1);
 	hashcpy(ce->oid.hash, sha1);
 	return add_index_entry(istate, ce, opt);
 }
 
-static int read_one_entry(const unsigned char *sha1, struct strbuf *base,
-			  const char *pathname, unsigned mode, int stage,
-			  void *context)
+static int
+read_one_entry(const unsigned char *sha1, struct strbuf *base,
+	       const char *pathname, unsigned mode, int stage, void *context)
 {
 	struct index_state *istate = context;
 	return read_one_entry_opt(istate, sha1, base->buf, base->len, pathname,
 				  mode, stage,
-				  ADD_CACHE_OK_TO_ADD|ADD_CACHE_SKIP_DFCHECK);
+				  ADD_CACHE_OK_TO_ADD | ADD_CACHE_SKIP_DFCHECK);
 }
 
 /*
@@ -55,13 +54,12 @@ static int read_one_entry_quick(const unsigned char *sha1, struct strbuf *base,
 {
 	struct index_state *istate = context;
 	return read_one_entry_opt(istate, sha1, base->buf, base->len, pathname,
-				  mode, stage,
-				  ADD_CACHE_JUST_APPEND);
+				  mode, stage, ADD_CACHE_JUST_APPEND);
 }
 
-static int read_tree_1(struct tree *tree, struct strbuf *base,
-		       int stage, const struct pathspec *pathspec,
-		       read_tree_fn_t fn, void *context)
+static int
+read_tree_1(struct tree *tree, struct strbuf *base, int stage,
+	    const struct pathspec *pathspec, read_tree_fn_t fn, void *context)
 {
 	struct tree_desc desc;
 	struct name_entry entry;
@@ -83,8 +81,8 @@ static int read_tree_1(struct tree *tree, struct strbuf *base,
 				continue;
 		}
 
-		switch (fn(entry.oid->hash, base,
-			   entry.path, entry.mode, stage, context)) {
+		switch (fn(entry.oid->hash, base, entry.path, entry.mode, stage,
+			   context)) {
 		case 0:
 			continue;
 		case READ_TREE_RECURSIVE:
@@ -101,24 +99,20 @@ static int read_tree_1(struct tree *tree, struct strbuf *base,
 			commit = lookup_commit(entry.oid);
 			if (!commit)
 				die("Commit %s in submodule path %s%s not found",
-				    oid_to_hex(entry.oid),
-				    base->buf, entry.path);
+				    oid_to_hex(entry.oid), base->buf, entry.path);
 
 			if (parse_commit(commit))
 				die("Invalid commit %s in submodule path %s%s",
-				    oid_to_hex(entry.oid),
-				    base->buf, entry.path);
+				    oid_to_hex(entry.oid), base->buf, entry.path);
 
 			oidcpy(&oid, &commit->tree->object.oid);
-		}
-		else
+		} else
 			continue;
 
 		len = tree_entry_len(&entry);
 		strbuf_add(base, entry.path, len);
 		strbuf_addch(base, '/');
-		retval = read_tree_1(lookup_tree(&oid),
-				     base, stage, pathspec,
+		retval = read_tree_1(lookup_tree(&oid), base, stage, pathspec,
 				     fn, context);
 		strbuf_setlen(base, oldlen);
 		if (retval)
@@ -127,8 +121,7 @@ static int read_tree_1(struct tree *tree, struct strbuf *base,
 	return 0;
 }
 
-int read_tree_recursive(struct tree *tree,
-			const char *base, int baselen,
+int read_tree_recursive(struct tree *tree, const char *base, int baselen,
 			int stage, const struct pathspec *pathspec,
 			read_tree_fn_t fn, void *context)
 {
@@ -147,8 +140,9 @@ static int cmp_cache_name_compare(const void *a_, const void *b_)
 
 	ce1 = *((const struct cache_entry **)a_);
 	ce2 = *((const struct cache_entry **)b_);
-	return cache_name_stage_compare(ce1->name, ce1->ce_namelen, ce_stage(ce1),
-				  ce2->name, ce2->ce_namelen, ce_stage(ce2));
+	return cache_name_stage_compare(ce1->name, ce1->ce_namelen,
+					ce_stage(ce1), ce2->name,
+					ce2->ce_namelen, ce_stage(ce2));
 }
 
 int read_tree(struct tree *tree, int stage, struct pathspec *match,
@@ -213,21 +207,20 @@ int parse_tree_buffer(struct tree *item, void *buffer, unsigned long size)
 
 int parse_tree_gently(struct tree *item, int quiet_on_missing)
 {
-	 enum object_type type;
-	 void *buffer;
-	 unsigned long size;
+	enum object_type type;
+	void *buffer;
+	unsigned long size;
 
 	if (item->object.parsed)
 		return 0;
 	buffer = read_sha1_file(item->object.oid.hash, &type, &size);
 	if (!buffer)
 		return quiet_on_missing ? -1 :
-			error("Could not read %s",
-			     oid_to_hex(&item->object.oid));
+					  error("Could not read %s",
+						oid_to_hex(&item->object.oid));
 	if (type != OBJ_TREE) {
 		free(buffer);
-		return error("Object %s not a tree",
-			     oid_to_hex(&item->object.oid));
+		return error("Object %s not a tree", oid_to_hex(&item->object.oid));
 	}
 	return parse_tree_buffer(item, buffer, size);
 }
@@ -246,11 +239,11 @@ struct tree *parse_tree_indirect(const struct object_id *oid)
 		if (!obj)
 			return NULL;
 		if (obj->type == OBJ_TREE)
-			return (struct tree *) obj;
+			return (struct tree *)obj;
 		else if (obj->type == OBJ_COMMIT)
-			obj = &(((struct commit *) obj)->tree->object);
+			obj = &(((struct commit *)obj)->tree->object);
 		else if (obj->type == OBJ_TAG)
-			obj = ((struct tag *) obj)->tagged;
+			obj = ((struct tag *)obj)->tagged;
 		else
 			return NULL;
 		if (!obj->parsed)

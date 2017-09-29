@@ -14,7 +14,7 @@
 #include "strbuf.h"
 #include "trace.h"
 
-#define TP_IDX_MAX      8
+#define TP_IDX_MAX 8
 
 struct throughput {
 	off_t curr_total;
@@ -67,7 +67,11 @@ static void set_progress_signal(void)
 
 static void clear_progress_signal(void)
 {
-	struct itimerval v = {{0,},};
+	struct itimerval v = {
+		{
+			0,
+		},
+	};
 	setitimer(ITIMER_REAL, &v, NULL);
 	signal(SIGALRM, SIG_IGN);
 	progress_update = 0;
@@ -116,8 +120,7 @@ static int display(struct progress *progress, unsigned n, const char *done)
 		}
 	} else if (progress_update) {
 		if (is_foreground_fd(fileno(stderr)) || done) {
-			fprintf(stderr, "%s: %u%s%s",
-				progress->title, n, tp, eol);
+			fprintf(stderr, "%s: %u%s%s", progress->title, n, tp, eol);
 			fflush(stderr);
 		}
 		progress_update = 0;
@@ -127,8 +130,7 @@ static int display(struct progress *progress, unsigned n, const char *done)
 	return 0;
 }
 
-static void throughput_string(struct strbuf *buf, off_t total,
-			      unsigned int rate)
+static void throughput_string(struct strbuf *buf, off_t total, unsigned int rate)
 {
 	strbuf_reset(buf);
 	strbuf_addstr(buf, ", ");
@@ -205,8 +207,9 @@ int display_progress(struct progress *progress, unsigned n)
 	return progress ? display(progress, n, NULL) : 0;
 }
 
-static struct progress *start_progress_delay(const char *title, unsigned total,
-					     unsigned percent_threshold, unsigned delay)
+static struct progress *
+start_progress_delay(const char *title, unsigned total,
+		     unsigned percent_threshold, unsigned delay)
 {
 	struct progress *progress = malloc(sizeof(*progress));
 	if (!progress) {

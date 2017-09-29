@@ -1,8 +1,7 @@
 #include "cache.h"
 #include "pack.h"
 
-static const char show_index_usage[] =
-"git show-index";
+static const char show_index_usage[] = "git show-index";
 
 int cmd_main(int argc, const char **argv)
 {
@@ -40,7 +39,7 @@ int cmd_main(int argc, const char **argv)
 			if (fread(entry, 4 + 20, 1, stdin) != 1)
 				die("unable to read entry %u/%u", i, nr);
 			offset = ntohl(entry[0]);
-			printf("%u %s\n", offset, sha1_to_hex((void *)(entry+1)));
+			printf("%u %s\n", offset, sha1_to_hex((void *)(entry + 1)));
 		}
 	} else {
 		unsigned off64_nr = 0;
@@ -48,7 +47,7 @@ int cmd_main(int argc, const char **argv)
 			unsigned char sha1[20];
 			uint32_t crc;
 			uint32_t off;
-		} *entries;
+		} * entries;
 		ALLOC_ARRAY(entries, nr);
 		for (i = 0; i < nr; i++)
 			if (fread(entries[i].sha1, 20, 1, stdin) != 1)
@@ -69,14 +68,14 @@ int cmd_main(int argc, const char **argv)
 				if ((off & 0x7fffffff) != off64_nr)
 					die("inconsistent 64b offset index");
 				if (fread(off64, 8, 1, stdin) != 1)
-					die("unable to read 64b offset %u", off64_nr);
+					die("unable to read 64b offset %u",
+					    off64_nr);
 				offset = (((uint64_t)ntohl(off64[0])) << 32) |
-						     ntohl(off64[1]);
+					 ntohl(off64[1]);
 				off64_nr++;
 			}
-			printf("%" PRIuMAX " %s (%08"PRIx32")\n",
-			       (uintmax_t) offset,
-			       sha1_to_hex(entries[i].sha1),
+			printf("%" PRIuMAX " %s (%08" PRIx32 ")\n",
+			       (uintmax_t)offset, sha1_to_hex(entries[i].sha1),
 			       ntohl(entries[i].crc));
 		}
 		free(entries);

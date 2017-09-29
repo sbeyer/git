@@ -5,11 +5,7 @@ const char *git_path_seq_dir(void);
 
 #define APPEND_SIGNOFF_DEDUP (1u << 0)
 
-enum replay_action {
-	REPLAY_REVERT,
-	REPLAY_PICK,
-	REPLAY_INTERACTIVE_REBASE
-};
+enum replay_action { REPLAY_REVERT, REPLAY_PICK, REPLAY_INTERACTIVE_REBASE };
 
 struct replay_opts {
 	enum replay_action action;
@@ -38,7 +34,10 @@ struct replay_opts {
 	/* Only used by REPLAY_NONE */
 	struct rev_info *revs;
 };
-#define REPLAY_OPTS_INIT { -1 }
+#define REPLAY_OPTS_INIT \
+	{                \
+		-1       \
+	}
 
 int sequencer_pick_revisions(struct replay_opts *opts);
 int sequencer_continue(struct replay_opts *opts);

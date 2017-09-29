@@ -18,7 +18,7 @@ static int ident_use_config_only;
 
 #define IDENT_NAME_GIVEN 01
 #define IDENT_MAIL_GIVEN 02
-#define IDENT_ALL_GIVEN (IDENT_NAME_GIVEN|IDENT_MAIL_GIVEN)
+#define IDENT_ALL_GIVEN (IDENT_NAME_GIVEN | IDENT_MAIL_GIVEN)
 static int committer_ident_explicitly_given;
 static int author_ident_explicitly_given;
 static int ident_config_given;
@@ -97,7 +97,7 @@ static int canonical_name(const char *host, struct strbuf *out)
 
 #ifndef NO_IPV6
 	struct addrinfo hints, *ai;
-	memset (&hints, '\0', sizeof (hints));
+	memset(&hints, '\0', sizeof(hints));
 	hints.ai_flags = AI_CANONNAME;
 	if (!getaddrinfo(host, NULL, &hints, &ai)) {
 		if (ai && ai->ai_canonname && strchr(ai->ai_canonname, '.')) {
@@ -135,8 +135,7 @@ static void add_domainname(struct strbuf *out, int *is_bogus)
 	}
 }
 
-static void copy_email(const struct passwd *pw, struct strbuf *email,
-		       int *is_bogus)
+static void copy_email(const struct passwd *pw, struct strbuf *email, int *is_bogus)
 {
 	/*
 	 * Make up a fake email address
@@ -146,14 +145,15 @@ static void copy_email(const struct passwd *pw, struct strbuf *email,
 	strbuf_addch(email, '@');
 
 	if (!add_mailname_host(email))
-		return;	/* read from "/etc/mailname" (Debian) */
+		return; /* read from "/etc/mailname" (Debian) */
 	add_domainname(email, is_bogus);
 }
 
 const char *ident_default_name(void)
 {
 	if (!(ident_config_given & IDENT_NAME_GIVEN) && !git_default_name.len) {
-		copy_gecos(xgetpwuid_self(&default_name_is_bogus), &git_default_name);
+		copy_gecos(xgetpwuid_self(&default_name_is_bogus),
+			   &git_default_name);
 		strbuf_trim(&git_default_name);
 	}
 	return git_default_name.buf;
@@ -190,16 +190,8 @@ void reset_ident_date(void)
 
 static int crud(unsigned char c)
 {
-	return  c <= 32  ||
-		c == '.' ||
-		c == ',' ||
-		c == ':' ||
-		c == ';' ||
-		c == '<' ||
-		c == '>' ||
-		c == '"' ||
-		c == '\\' ||
-		c == '\'';
+	return c <= 32 || c == '.' || c == ',' || c == ':' || c == ';' ||
+	       c == '<' || c == '>' || c == '"' || c == '\\' || c == '\'';
 }
 
 static int has_non_crud(const char *str)
@@ -230,7 +222,7 @@ static void strbuf_addstr_without_crud(struct strbuf *sb, const char *src)
 	/* Remove crud from the end.. */
 	len = strlen(src);
 	while (len > 0) {
-		c = src[len-1];
+		c = src[len - 1];
 		if (!crud(c))
 			break;
 		--len;
@@ -246,7 +238,9 @@ static void strbuf_addstr_without_crud(struct strbuf *sb, const char *src)
 	for (i = 0; i < len; i++) {
 		c = *src++;
 		switch (c) {
-		case '\n': case '<': case '>':
+		case '\n':
+		case '<':
+		case '>':
 			continue;
 		}
 		sb->buf[sb->len++] = c;
@@ -338,21 +332,21 @@ person_only:
 	return 0;
 }
 
-static const char *env_hint =
-N_("\n"
-   "*** Please tell me who you are.\n"
-   "\n"
-   "Run\n"
-   "\n"
-   "  git config --global user.email \"you@example.com\"\n"
-   "  git config --global user.name \"Your Name\"\n"
-   "\n"
-   "to set your account\'s default identity.\n"
-   "Omit --global to set the identity only in this repository.\n"
-   "\n");
+static const char *env_hint = N_(
+	"\n"
+	"*** Please tell me who you are.\n"
+	"\n"
+	"Run\n"
+	"\n"
+	"  git config --global user.email \"you@example.com\"\n"
+	"  git config --global user.name \"Your Name\"\n"
+	"\n"
+	"to set your account\'s default identity.\n"
+	"Omit --global to set the identity only in this repository.\n"
+	"\n");
 
-const char *fmt_ident(const char *name, const char *email,
-		      const char *date_str, int flag)
+const char *
+fmt_ident(const char *name, const char *email, const char *date_str, int flag)
 {
 	static struct strbuf ident = STRBUF_INIT;
 	int strict = (flag & IDENT_STRICT);
@@ -360,23 +354,24 @@ const char *fmt_ident(const char *name, const char *email,
 	int want_name = !(flag & IDENT_NO_NAME);
 
 	if (!email) {
-		if (strict && ident_use_config_only
-		    && !(ident_config_given & IDENT_MAIL_GIVEN)) {
+		if (strict && ident_use_config_only &&
+		    !(ident_config_given & IDENT_MAIL_GIVEN)) {
 			fputs(_(env_hint), stderr);
 			die(_("no email was given and auto-detection is disabled"));
 		}
 		email = ident_default_email();
 		if (strict && default_email_is_bogus) {
 			fputs(_(env_hint), stderr);
-			die(_("unable to auto-detect email address (got '%s')"), email);
+			die(_("unable to auto-detect email address (got '%s')"),
+			    email);
 		}
 	}
 
 	if (want_name) {
 		int using_default = 0;
 		if (!name) {
-			if (strict && ident_use_config_only
-			    && !(ident_config_given & IDENT_NAME_GIVEN)) {
+			if (strict && ident_use_config_only &&
+			    !(ident_config_given & IDENT_NAME_GIVEN)) {
 				fputs(_(env_hint), stderr);
 				die(_("no name was given and auto-detection is disabled"));
 			}
@@ -384,7 +379,8 @@ const char *fmt_ident(const char *name, const char *email,
 			using_default = 1;
 			if (strict && default_name_is_bogus) {
 				fputs(_(env_hint), stderr);
-				die(_("unable to auto-detect name (got '%s')"), name);
+				die(_("unable to auto-detect name (got '%s')"),
+				    name);
 			}
 		}
 		if (!*name) {
@@ -392,13 +388,15 @@ const char *fmt_ident(const char *name, const char *email,
 			if (strict) {
 				if (using_default)
 					fputs(_(env_hint), stderr);
-				die(_("empty ident name (for <%s>) not allowed"), email);
+				die(_("empty ident name (for <%s>) not allowed"),
+				    email);
 			}
 			pw = xgetpwuid_self(NULL);
 			name = pw->pw_name;
 		}
 		if (strict && !has_non_crud(name))
-			die(_("name consists only of disallowed characters: %s"), name);
+			die(_("name consists only of disallowed characters: %s"),
+			    name);
 	}
 
 	strbuf_reset(&ident);
@@ -408,14 +406,13 @@ const char *fmt_ident(const char *name, const char *email,
 	}
 	strbuf_addstr_without_crud(&ident, email);
 	if (want_name)
-			strbuf_addch(&ident, '>');
+		strbuf_addch(&ident, '>');
 	if (want_date) {
 		strbuf_addch(&ident, ' ');
 		if (date_str && date_str[0]) {
 			if (parse_date(date_str, &ident) < 0)
 				die(_("invalid date format: %s"), date_str);
-		}
-		else
+		} else
 			strbuf_addstr(&ident, ident_default_date());
 	}
 
@@ -433,10 +430,8 @@ const char *git_author_info(int flag)
 		author_ident_explicitly_given |= IDENT_NAME_GIVEN;
 	if (getenv("GIT_AUTHOR_EMAIL"))
 		author_ident_explicitly_given |= IDENT_MAIL_GIVEN;
-	return fmt_ident(getenv("GIT_AUTHOR_NAME"),
-			 getenv("GIT_AUTHOR_EMAIL"),
-			 getenv("GIT_AUTHOR_DATE"),
-			 flag);
+	return fmt_ident(getenv("GIT_AUTHOR_NAME"), getenv("GIT_AUTHOR_EMAIL"),
+			 getenv("GIT_AUTHOR_DATE"), flag);
 }
 
 const char *git_committer_info(int flag)
@@ -447,8 +442,7 @@ const char *git_committer_info(int flag)
 		committer_ident_explicitly_given |= IDENT_MAIL_GIVEN;
 	return fmt_ident(getenv("GIT_COMMITTER_NAME"),
 			 getenv("GIT_COMMITTER_EMAIL"),
-			 getenv("GIT_COMMITTER_DATE"),
-			 flag);
+			 getenv("GIT_COMMITTER_DATE"), flag);
 }
 
 static int ident_is_sufficient(int user_ident_explicitly_given)
@@ -502,8 +496,8 @@ int git_ident_config(const char *var, const char *value, void *data)
 	return 0;
 }
 
-static int buf_cmp(const char *a_begin, const char *a_end,
-		   const char *b_begin, const char *b_end)
+static int buf_cmp(const char *a_begin, const char *a_end, const char *b_begin,
+		   const char *b_end)
 {
 	int a_len = a_end - a_begin;
 	int b_len = b_end - b_begin;
@@ -517,16 +511,13 @@ static int buf_cmp(const char *a_begin, const char *a_end,
 	return a_len - b_len;
 }
 
-int ident_cmp(const struct ident_split *a,
-	      const struct ident_split *b)
+int ident_cmp(const struct ident_split *a, const struct ident_split *b)
 {
 	int cmp;
 
-	cmp = buf_cmp(a->mail_begin, a->mail_end,
-		      b->mail_begin, b->mail_end);
+	cmp = buf_cmp(a->mail_begin, a->mail_end, b->mail_begin, b->mail_end);
 	if (cmp)
 		return cmp;
 
-	return buf_cmp(a->name_begin, a->name_end,
-		       b->name_begin, b->name_end);
+	return buf_cmp(a->name_begin, a->name_end, b->name_begin, b->name_end);
 }

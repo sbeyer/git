@@ -13,7 +13,8 @@ struct tree_desc {
 	unsigned int size;
 };
 
-static inline const struct object_id *tree_entry_extract(struct tree_desc *desc, const char **pathp, unsigned int *modep)
+static inline const struct object_id *
+tree_entry_extract(struct tree_desc *desc, const char **pathp, unsigned int *modep)
 {
 	*pathp = desc->entry.path;
 	*modep = desc->entry.mode;
@@ -33,7 +34,8 @@ static inline int tree_entry_len(const struct name_entry *ne)
 void update_tree_entry(struct tree_desc *);
 int update_tree_entry_gently(struct tree_desc *);
 void init_tree_desc(struct tree_desc *desc, const void *buf, unsigned long size);
-int init_tree_desc_gently(struct tree_desc *desc, const void *buf, unsigned long size);
+int init_tree_desc_gently(struct tree_desc *desc, const void *buf,
+			  unsigned long size);
 
 /*
  * Helper function that does both tree_entry_extract() and update_tree_entry()
@@ -45,7 +47,9 @@ int tree_entry_gently(struct tree_desc *, struct name_entry *);
 void *fill_tree_descriptor(struct tree_desc *desc, const struct object_id *oid);
 
 struct traverse_info;
-typedef int (*traverse_callback_t)(int n, unsigned long mask, unsigned long dirmask, struct name_entry *entry, struct traverse_info *);
+typedef int (*traverse_callback_t)(int n, unsigned long mask,
+				   unsigned long dirmask, struct name_entry *entry,
+				   struct traverse_info *);
 int traverse_trees(int n, struct tree_desc *t, struct traverse_info *info);
 
 enum follow_symlinks_result {
@@ -64,7 +68,10 @@ enum follow_symlinks_result {
 		       */
 };
 
-enum follow_symlinks_result get_tree_entry_follow_symlinks(unsigned char *tree_sha1, const char *name, unsigned char *result, struct strbuf *result_path, unsigned *mode);
+enum follow_symlinks_result
+get_tree_entry_follow_symlinks(unsigned char *tree_sha1, const char *name,
+			       unsigned char *result,
+			       struct strbuf *result_path, unsigned *mode);
 
 struct traverse_info {
 	const char *traverse_path;
@@ -79,25 +86,30 @@ struct traverse_info {
 	int show_all_errors;
 };
 
-int get_tree_entry(const unsigned char *, const char *, unsigned char *, unsigned *);
-extern char *make_traverse_path(char *path, const struct traverse_info *info, const struct name_entry *n);
+int get_tree_entry(const unsigned char *, const char *, unsigned char *,
+		   unsigned *);
+extern char *make_traverse_path(char *path, const struct traverse_info *info,
+				const struct name_entry *n);
 extern void setup_traverse_info(struct traverse_info *info, const char *base);
 
-static inline int traverse_path_len(const struct traverse_info *info, const struct name_entry *n)
+static inline int
+traverse_path_len(const struct traverse_info *info, const struct name_entry *n)
 {
 	return info->pathlen + tree_entry_len(n);
 }
 
 /* in general, positive means "kind of interesting" */
 enum interesting {
-	all_entries_not_interesting = -1, /* no, and no subsequent entries will be either */
+	all_entries_not_interesting = -1, /* no, and no subsequent entries will
+					     be either */
 	entry_not_interesting = 0,
 	entry_interesting = 1,
-	all_entries_interesting = 2 /* yes, and all subsequent entries will be */
+	all_entries_interesting = 2 /* yes, and all subsequent entries will be
+				     */
 };
 
-extern enum interesting tree_entry_interesting(const struct name_entry *,
-					       struct strbuf *, int,
-					       const struct pathspec *ps);
+extern enum interesting
+tree_entry_interesting(const struct name_entry *, struct strbuf *, int,
+		       const struct pathspec *ps);
 
 #endif

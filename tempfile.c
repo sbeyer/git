@@ -61,7 +61,8 @@ static void remove_tempfiles(int in_signal_handler)
 	pid_t me = getpid();
 	volatile struct volatile_list_head *pos;
 
-	list_for_each(pos, &tempfile_list) {
+	list_for_each(pos, &tempfile_list)
+	{
 		struct tempfile *p = list_entry(pos, struct tempfile, list);
 
 		if (!is_tempfile_active(p) || p->owner != me)

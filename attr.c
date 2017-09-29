@@ -76,10 +76,8 @@ struct attr_hash_entry {
 };
 
 /* attr_hashmap comparison function */
-static int attr_hash_entry_cmp(const void *unused_cmp_data,
-			       const void *entry,
-			       const void *entry_or_key,
-			       const void *unused_keydata)
+static int attr_hash_entry_cmp(const void *unused_cmp_data, const void *entry,
+			       const void *entry_or_key, const void *unused_keydata)
 {
 	const struct attr_hash_entry *a = entry;
 	const struct attr_hash_entry *b = entry_or_key;
@@ -96,8 +94,8 @@ static void attr_hashmap_init(struct attr_hashmap *map)
  * Retrieve the 'value' stored in a hashmap given the provided 'key'.
  * If there is no matching entry, return NULL.
  */
-static void *attr_hashmap_get(struct attr_hashmap *map,
-			      const char *key, size_t keylen)
+static void *
+attr_hashmap_get(struct attr_hashmap *map, const char *key, size_t keylen)
 {
 	struct attr_hash_entry k;
 	struct attr_hash_entry *e;
@@ -114,9 +112,8 @@ static void *attr_hashmap_get(struct attr_hashmap *map,
 }
 
 /* Add 'value' to a hashmap based on the provided 'key'. */
-static void attr_hashmap_add(struct attr_hashmap *map,
-			     const char *key, size_t keylen,
-			     void *value)
+static void attr_hashmap_add(struct attr_hashmap *map, const char *key,
+			     size_t keylen, void *value)
 {
 	struct attr_hash_entry *e;
 
@@ -202,21 +199,19 @@ static int attr_name_valid(const char *name, size_t namelen)
 		return 0;
 	while (namelen--) {
 		char ch = *name++;
-		if (! (ch == '-' || ch == '.' || ch == '_' ||
-		       ('0' <= ch && ch <= '9') ||
-		       ('a' <= ch && ch <= 'z') ||
-		       ('A' <= ch && ch <= 'Z')) )
+		if (!(ch == '-' || ch == '.' || ch == '_' ||
+		      ('0' <= ch && ch <= '9') || ('a' <= ch && ch <= 'z') ||
+		      ('A' <= ch && ch <= 'Z')))
 			return 0;
 	}
 	return 1;
 }
 
-static void report_invalid_attr(const char *name, size_t len,
-				const char *src, int lineno)
+static void
+report_invalid_attr(const char *name, size_t len, const char *src, int lineno)
 {
 	struct strbuf err = STRBUF_INIT;
-	strbuf_addf(&err, _("%.*s is not a valid attribute name"),
-		    (int) len, name);
+	strbuf_addf(&err, _("%.*s is not a valid attribute name"), (int)len, name);
 	fprintf(stderr, "%s: %s:%d\n", err.buf, src, lineno);
 	strbuf_release(&err);
 }
@@ -242,8 +237,7 @@ static const struct git_attr *git_attr_internal(const char *name, int namelen)
 		a->attr_nr = hashmap_get_size(&g_attr_hashmap.map);
 
 		attr_hashmap_add(&g_attr_hashmap, a->name, namelen, a);
-		assert(a->attr_nr ==
-		       (hashmap_get_size(&g_attr_hashmap.map) - 1));
+		assert(a->attr_nr == (hashmap_get_size(&g_attr_hashmap.map) - 1));
 	}
 
 	hashmap_unlock(&g_attr_hashmap);
@@ -266,7 +260,7 @@ struct pattern {
 	const char *pattern;
 	int patternlen;
 	int nowildcardlen;
-	unsigned flags;		/* EXC_FLAG_* */
+	unsigned flags; /* EXC_FLAG_* */
 };
 
 /*
@@ -301,8 +295,8 @@ static const char blank[] = " \t\r\n";
  * remainder of the string (with leading whitespace removed), or NULL
  * if there was an error.
  */
-static const char *parse_attr(const char *src, int lineno, const char *cp,
-			      struct attr_state *e)
+static const char *
+parse_attr(const char *src, int lineno, const char *cp, struct attr_state *e)
 {
 	const char *ep, *equals;
 	int len;
@@ -335,8 +329,7 @@ static const char *parse_attr(const char *src, int lineno, const char *cp,
 			e->setto = (*cp == '-') ? ATTR__FALSE : ATTR__UNSET;
 			cp++;
 			len--;
-		}
-		else if (!equals)
+		} else if (!equals)
 			e->setto = ATTR__TRUE;
 		else {
 			e->setto = xmemdupz(equals + 1, ep - equals - 1);
@@ -346,8 +339,8 @@ static const char *parse_attr(const char *src, int lineno, const char *cp,
 	return ep + strspn(ep, blank);
 }
 
-static struct match_attr *parse_attr_line(const char *line, const char *src,
-					  int lineno, int macro_ok)
+static struct match_attr *
+parse_attr_line(const char *line, const char *src, int lineno, int macro_ok)
 {
 	int namelen;
 	int num_attr, i;
@@ -372,8 +365,8 @@ static struct match_attr *parse_attr_line(const char *line, const char *src,
 	if (strlen(ATTRIBUTE_MACRO_PREFIX) < namelen &&
 	    starts_with(name, ATTRIBUTE_MACRO_PREFIX)) {
 		if (!macro_ok) {
-			fprintf(stderr, "%s not allowed: %s:%d\n",
-				name, src, lineno);
+			fprintf(stderr, "%s not allowed: %s:%d\n", name, src,
+				lineno);
 			goto fail_return;
 		}
 		is_macro = 1;
@@ -384,8 +377,7 @@ static struct match_attr *parse_attr_line(const char *line, const char *src,
 			report_invalid_attr(name, namelen, src, lineno);
 			goto fail_return;
 		}
-	}
-	else
+	} else
 		is_macro = 0;
 
 	states += strspn(states, blank);
@@ -397,10 +389,8 @@ static struct match_attr *parse_attr_line(const char *line, const char *src,
 			goto fail_return;
 	}
 
-	res = xcalloc(1,
-		      sizeof(*res) +
-		      sizeof(struct attr_state) * num_attr +
-		      (is_macro ? 0 : namelen + 1));
+	res = xcalloc(1, sizeof(*res) + sizeof(struct attr_state) * num_attr +
+				 (is_macro ? 0 : namelen + 1));
 	if (is_macro) {
 		res->u.attr = git_attr_internal(name, namelen);
 	} else {
@@ -408,8 +398,7 @@ static struct match_attr *parse_attr_line(const char *line, const char *src,
 		memcpy(p, name, namelen);
 		res->u.pat.pattern = p;
 		parse_exclude_pattern(&res->u.pat.pattern,
-				      &res->u.pat.patternlen,
-				      &res->u.pat.flags,
+				      &res->u.pat.patternlen, &res->u.pat.flags,
 				      &res->u.pat.nowildcardlen);
 		if (res->u.pat.flags & EXC_FLAG_NEGATIVE) {
 			warning(_("Negative patterns are ignored in git attributes\n"
@@ -470,13 +459,11 @@ static void attr_stack_free(struct attr_stack *e)
 		int j;
 		for (j = 0; j < a->num_attr; j++) {
 			const char *setto = a->state[j].setto;
-			if (setto == ATTR__TRUE ||
-			    setto == ATTR__FALSE ||
-			    setto == ATTR__UNSET ||
-			    setto == ATTR__UNKNOWN)
+			if (setto == ATTR__TRUE || setto == ATTR__FALSE ||
+			    setto == ATTR__UNSET || setto == ATTR__UNKNOWN)
 				;
 			else
-				free((char *) setto);
+				free((char *)setto);
 		}
 		free(a);
 	}
@@ -521,9 +508,7 @@ static void check_vector_add(struct attr_check *c)
 {
 	vector_lock();
 
-	ALLOC_GROW(check_vector.checks,
-		   check_vector.nr + 1,
-		   check_vector.alloc);
+	ALLOC_GROW(check_vector.checks, check_vector.nr + 1, check_vector.alloc);
 	check_vector.checks[check_vector.nr++] = c;
 
 	vector_unlock();
@@ -599,8 +584,7 @@ struct attr_check *attr_check_initl(const char *one, ...)
 		const struct git_attr *attr;
 		param = va_arg(params, const char *);
 		if (!param)
-			die("BUG: counted %d != ended at %d",
-			    check->nr, cnt);
+			die("BUG: counted %d != ended at %d", check->nr, cnt);
 		attr = git_attr(param);
 		if (!attr)
 			die("BUG: %s: not a valid attribute name", param);
@@ -627,8 +611,8 @@ struct attr_check *attr_check_dup(const struct attr_check *check)
 	return ret;
 }
 
-struct attr_check_item *attr_check_append(struct attr_check *check,
-					  const struct git_attr *attr)
+struct attr_check_item *
+attr_check_append(struct attr_check *check, const struct git_attr *attr)
 {
 	struct attr_check_item *item;
 
@@ -671,11 +655,8 @@ static const char *builtin_attr[] = {
 	NULL,
 };
 
-static void handle_attr_line(struct attr_stack *res,
-			     const char *line,
-			     const char *src,
-			     int lineno,
-			     int macro_ok)
+static void handle_attr_line(struct attr_stack *res, const char *line,
+			     const char *src, int lineno, int macro_ok)
 {
 	struct match_attr *a;
 
@@ -749,12 +730,13 @@ static struct attr_stack *read_attr_from_index(const char *path, int macro_ok)
 	char *buf, *sp;
 	int lineno = 0;
 
-	buf = read_blob_data_from_index(use_index ? use_index : &the_index, path, NULL);
+	buf = read_blob_data_from_index(use_index ? use_index : &the_index,
+					path, NULL);
 	if (!buf)
 		return NULL;
 
 	res = xcalloc(1, sizeof(*res));
-	for (sp = buf; *sp; ) {
+	for (sp = buf; *sp;) {
 		char *ep;
 		int more;
 
@@ -802,7 +784,8 @@ static void debug_info(const char *what, struct attr_stack *elem)
 {
 	fprintf(stderr, "%s: %s\n", what, elem->origin ? elem->origin : "()");
 }
-static void debug_set(const char *what, const char *match, struct git_attr *attr, const void *v)
+static void debug_set(const char *what, const char *match,
+		      struct git_attr *attr, const void *v)
 {
 	const char *value = v;
 
@@ -813,15 +796,24 @@ static void debug_set(const char *what, const char *match, struct git_attr *attr
 	else if (ATTR_UNSET(value))
 		value = "unspecified";
 
-	fprintf(stderr, "%s: %s => %s (%s)\n",
-		what, attr->name, (char *) value, match);
+	fprintf(stderr, "%s: %s => %s (%s)\n", what, attr->name, (char *)value,
+		match);
 }
 #define debug_push(a) debug_info("push", (a))
 #define debug_pop(a) debug_info("pop", (a))
 #else
-#define debug_push(a) do { ; } while (0)
-#define debug_pop(a) do { ; } while (0)
-#define debug_set(a,b,c,d) do { ; } while (0)
+#define debug_push(a) \
+	do {          \
+		;     \
+	} while (0)
+#define debug_pop(a) \
+	do {         \
+		;    \
+	} while (0)
+#define debug_set(a, b, c, d) \
+	do {                  \
+		;             \
+	} while (0)
 #endif /* DEBUG_ATTR */
 
 static const char *git_etc_gitattributes(void)
@@ -847,8 +839,9 @@ static int git_attr_system(void)
 
 static GIT_PATH_FUNC(git_path_info_attributes, INFOATTRIBUTES_FILE)
 
-static void push_stack(struct attr_stack **attr_stack_p,
-		       struct attr_stack *elem, char *origin, size_t originlen)
+	static void push_stack(struct attr_stack **attr_stack_p,
+			       struct attr_stack *elem, char *origin,
+			       size_t originlen)
 {
 	if (elem) {
 		elem->origin = origin;
@@ -896,8 +889,8 @@ static void bootstrap_attr_stack(struct attr_stack **stack)
 	push_stack(stack, e, NULL, 0);
 }
 
-static void prepare_attr_stack(const char *path, int dirlen,
-			       struct attr_stack **stack)
+static void
+prepare_attr_stack(const char *path, int dirlen, struct attr_stack **stack)
 {
 	struct attr_stack *info;
 	struct strbuf pathbuf = STRBUF_INIT;
@@ -936,8 +929,7 @@ static void prepare_attr_stack(const char *path, int dirlen,
 		struct attr_stack *elem;
 
 		elem = *stack;
-		if (namelen <= dirlen &&
-		    !strncmp(elem->origin, path, namelen) &&
+		if (namelen <= dirlen && !strncmp(elem->origin, path, namelen) &&
 		    (!namelen || path[namelen] == '/'))
 			break;
 
@@ -990,10 +982,8 @@ static void prepare_attr_stack(const char *path, int dirlen,
 	strbuf_release(&pathbuf);
 }
 
-static int path_matches(const char *pathname, int pathlen,
-			int basename_offset,
-			const struct pattern *pat,
-			const char *base, int baselen)
+static int path_matches(const char *pathname, int pathlen, int basename_offset,
+			const struct pattern *pat, const char *base, int baselen)
 {
 	const char *pattern = pat->pattern;
 	int prefix = pat->nowildcardlen;
@@ -1004,13 +994,11 @@ static int path_matches(const char *pathname, int pathlen,
 
 	if (pat->flags & EXC_FLAG_NODIR) {
 		return match_basename(pathname + basename_offset,
-				      pathlen - basename_offset - isdir,
-				      pattern, prefix,
-				      pat->patternlen, pat->flags);
+				      pathlen - basename_offset - isdir, pattern,
+				      prefix, pat->patternlen, pat->flags);
 	}
-	return match_pathname(pathname, pathlen - isdir,
-			      base, baselen,
-			      pattern, prefix, pat->patternlen, pat->flags);
+	return match_pathname(pathname, pathlen - isdir, base, baselen, pattern,
+			      prefix, pat->patternlen, pat->flags);
 }
 
 static int macroexpand_one(struct all_attrs_item *all_attrs, int nr, int rem);
@@ -1037,9 +1025,9 @@ static int fill_one(const char *what, struct all_attrs_item *all_attrs,
 	return rem;
 }
 
-static int fill(const char *path, int pathlen, int basename_offset,
-		const struct attr_stack *stack,
-		struct all_attrs_item *all_attrs, int rem)
+static int
+fill(const char *path, int pathlen, int basename_offset,
+     const struct attr_stack *stack, struct all_attrs_item *all_attrs, int rem)
 {
 	for (; rem > 0 && stack; stack = stack->prev) {
 		int i;
@@ -1073,8 +1061,8 @@ static int macroexpand_one(struct all_attrs_item *all_attrs, int nr, int rem)
  * This prevents having to search through the attribute stack each time
  * a macro needs to be expanded during the fill stage.
  */
-static void determine_macros(struct all_attrs_item *all_attrs,
-			     const struct attr_stack *stack)
+static void
+determine_macros(struct all_attrs_item *all_attrs, const struct attr_stack *stack)
 {
 	for (; stack; stack = stack->prev) {
 		int i;

@@ -13,7 +13,7 @@
 
 static void flush(struct sha1file *f, const void *buf, unsigned int count)
 {
-	if (0 <= f->check_fd && count)  {
+	if (0 <= f->check_fd && count) {
 		unsigned char check_buffer[8192];
 		ssize_t ret = read_in_full(f->check_fd, check_buffer, count);
 
@@ -30,14 +30,15 @@ static void flush(struct sha1file *f, const void *buf, unsigned int count)
 		if (ret > 0) {
 			f->total += ret;
 			display_throughput(f->tp, f->total);
-			buf = (char *) buf + ret;
+			buf = (char *)buf + ret;
 			count -= ret;
 			if (count)
 				continue;
 			return;
 		}
 		if (!ret)
-			die("sha1 file '%s' write error. Out of diskspace", f->name);
+			die("sha1 file '%s' write error. Out of diskspace",
+			    f->name);
 		die_errno("sha1 file '%s' write error", f->name);
 	}
 }
@@ -107,7 +108,7 @@ void sha1write(struct sha1file *f, const void *buf, unsigned int count)
 
 		count -= nr;
 		offset += nr;
-		buf = (char *) buf + nr;
+		buf = (char *)buf + nr;
 		left -= nr;
 		if (!left) {
 			git_SHA1_Update(&f->ctx, data, offset);
@@ -164,8 +165,7 @@ int sha1file_truncate(struct sha1file *f, struct sha1file_checkpoint *checkpoint
 {
 	off_t offset = checkpoint->offset;
 
-	if (ftruncate(f->fd, offset) ||
-	    lseek(f->fd, offset, SEEK_SET) != offset)
+	if (ftruncate(f->fd, offset) || lseek(f->fd, offset, SEEK_SET) != offset)
 		return -1;
 	f->total = offset;
 	f->ctx = checkpoint->ctx;

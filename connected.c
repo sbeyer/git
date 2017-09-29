@@ -53,7 +53,7 @@ int check_connected(sha1_iterate_fn fn, void *cb_data,
 		argv_array_push(&rev_list.args, "--shallow-file");
 		argv_array_push(&rev_list.args, opt->shallow_file);
 	}
-	argv_array_push(&rev_list.args,"rev-list");
+	argv_array_push(&rev_list.args, "rev-list");
 	argv_array_push(&rev_list.args, "--objects");
 	argv_array_push(&rev_list.args, "--stdin");
 	argv_array_push(&rev_list.args, "--not");

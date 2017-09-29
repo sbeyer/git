@@ -78,8 +78,7 @@ static void get_root_part(struct strbuf *resolved, struct strbuf *remaining)
  * informative error message if there is a problem.  Otherwise, return
  * NULL on errors (without generating any output).
  */
-char *strbuf_realpath(struct strbuf *resolved, const char *path,
-		      int die_on_error)
+char *strbuf_realpath(struct strbuf *resolved, const char *path, int die_on_error)
 {
 	struct strbuf remaining = STRBUF_INIT;
 	struct strbuf next = STRBUF_INIT;
@@ -145,13 +144,13 @@ char *strbuf_realpath(struct strbuf *resolved, const char *path,
 
 				if (die_on_error)
 					die("More than %d nested symlinks "
-					    "on path '%s'", MAXSYMLINKS, path);
+					    "on path '%s'",
+					    MAXSYMLINKS, path);
 				else
 					goto error_out;
 			}
 
-			len = strbuf_readlink(&symlink, resolved->buf,
-					      st.st_size);
+			len = strbuf_readlink(&symlink, resolved->buf, st.st_size);
 			if (len < 0) {
 				if (die_on_error)
 					die_errno("Invalid symlink '%s'",

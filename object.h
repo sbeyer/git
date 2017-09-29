@@ -20,12 +20,15 @@ struct object_array {
 		char *name;
 		char *path;
 		unsigned mode;
-	} *objects;
+	} * objects;
 };
 
-#define OBJECT_ARRAY_INIT { 0, 0, NULL }
+#define OBJECT_ARRAY_INIT  \
+	{                  \
+		0, 0, NULL \
+	}
 
-#define TYPE_BITS   3
+#define TYPE_BITS 3
 /*
  * object flag allocation:
  * revision.h:      0---------10                                26
@@ -40,7 +43,7 @@ struct object_array {
  * sha1_name.c:                                     20
  * builtin/fsck.c:  0--3
  */
-#define FLAG_BITS  27
+#define FLAG_BITS 27
 
 /*
  * The object type is stored in 3 bits.
@@ -102,19 +105,24 @@ struct object *parse_object_or_die(const struct object_id *oid, const char *name
  * parsing it.  eaten_p indicates if the object has a borrowed copy
  * of buffer and the caller should not free() it.
  */
-struct object *parse_object_buffer(const struct object_id *oid, enum object_type type, unsigned long size, void *buffer, int *eaten_p);
+struct object *
+parse_object_buffer(const struct object_id *oid, enum object_type type,
+		    unsigned long size, void *buffer, int *eaten_p);
 
 /** Returns the object, with potentially excess memory allocated. **/
-struct object *lookup_unknown_object(const unsigned  char *sha1);
+struct object *lookup_unknown_object(const unsigned char *sha1);
 
-struct object_list *object_list_insert(struct object *item,
-				       struct object_list **list_p);
+struct object_list *
+object_list_insert(struct object *item, struct object_list **list_p);
 
 int object_list_contains(struct object_list *list, struct object *obj);
 
 /* Object array handling .. */
-void add_object_array(struct object *obj, const char *name, struct object_array *array);
-void add_object_array_with_path(struct object *obj, const char *name, struct object_array *array, unsigned mode, const char *path);
+void add_object_array(struct object *obj, const char *name,
+		      struct object_array *array);
+void add_object_array_with_path(struct object *obj, const char *name,
+				struct object_array *array, unsigned mode,
+				const char *path);
 
 /*
  * Returns NULL if the array is empty. Otherwise, returns the last object

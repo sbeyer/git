@@ -23,11 +23,8 @@ static struct ref_msg {
 	const char *behind;
 	const char *ahead_behind;
 } msgs = {
-	 /* Untranslated plumbing messages: */
-	"gone",
-	"ahead %d",
-	"behind %d",
-	"ahead %d, behind %d"
+	/* Untranslated plumbing messages: */
+	"gone", "ahead %d", "behind %d", "ahead %d, behind %d"
 };
 
 void setup_ref_filter_porcelain_msg(void)
@@ -49,8 +46,7 @@ struct align {
 struct if_then_else {
 	cmp_status cmp_status;
 	const char *str;
-	unsigned int then_atom_seen : 1,
-		else_atom_seen : 1,
+	unsigned int then_atom_seen : 1, else_atom_seen : 1,
 		condition_satisfied : 1;
 };
 
@@ -81,7 +77,13 @@ static struct used_atom {
 			unsigned int nobracket : 1;
 		} remote_ref;
 		struct {
-			enum { C_BARE, C_BODY, C_BODY_DEP, C_LINES, C_SIG, C_SUB, C_TRAILERS } option;
+			enum { C_BARE,
+			       C_BODY,
+			       C_BODY_DEP,
+			       C_LINES,
+			       C_SIG,
+			       C_SUB,
+			       C_TRAILERS } option;
 			unsigned int nlines;
 		} contents;
 		struct {
@@ -95,10 +97,11 @@ static struct used_atom {
 		struct refname_atom refname;
 		char *head;
 	} u;
-} *used_atom;
+} * used_atom;
 static int used_atom_cnt, need_tagged, need_symref;
 
-static void color_atom_parser(const struct ref_format *format, struct used_atom *atom, const char *color_value)
+static void color_atom_parser(const struct ref_format *format,
+			      struct used_atom *atom, const char *color_value)
 {
 	if (!color_value)
 		die(_("expected format: %%(color:<color>)"));
@@ -132,15 +135,16 @@ static void refname_atom_parser_internal(struct refname_atom *atom,
 		die(_("unrecognized %%(%s) argument: %s"), name, arg);
 }
 
-static void remote_ref_atom_parser(const struct ref_format *format, struct used_atom *atom, const char *arg)
+static void remote_ref_atom_parser(const struct ref_format *format,
+				   struct used_atom *atom, const char *arg)
 {
 	struct string_list params = STRING_LIST_INIT_DUP;
 	int i;
 
 	if (!arg) {
 		atom->u.remote_ref.option = RR_REF;
-		refname_atom_parser_internal(&atom->u.remote_ref.refname,
-					     arg, atom->name);
+		refname_atom_parser_internal(&atom->u.remote_ref.refname, arg,
+					     atom->name);
 		return;
 	}
 
@@ -166,28 +170,32 @@ static void remote_ref_atom_parser(const struct ref_format *format, struct used_
 	string_list_clear(&params, 0);
 }
 
-static void body_atom_parser(const struct ref_format *format, struct used_atom *atom, const char *arg)
+static void body_atom_parser(const struct ref_format *format,
+			     struct used_atom *atom, const char *arg)
 {
 	if (arg)
 		die(_("%%(body) does not take arguments"));
 	atom->u.contents.option = C_BODY_DEP;
 }
 
-static void subject_atom_parser(const struct ref_format *format, struct used_atom *atom, const char *arg)
+static void subject_atom_parser(const struct ref_format *format,
+				struct used_atom *atom, const char *arg)
 {
 	if (arg)
 		die(_("%%(subject) does not take arguments"));
 	atom->u.contents.option = C_SUB;
 }
 
-static void trailers_atom_parser(const struct ref_format *format, struct used_atom *atom, const char *arg)
+static void trailers_atom_parser(const struct ref_format *format,
+				 struct used_atom *atom, const char *arg)
 {
 	if (arg)
 		die(_("%%(trailers) does not take arguments"));
 	atom->u.contents.option = C_TRAILERS;
 }
 
-static void contents_atom_parser(const struct ref_format *format, struct used_atom *atom, const char *arg)
+static void contents_atom_parser(const struct ref_format *format,
+				 struct used_atom *atom, const char *arg)
 {
 	if (!arg)
 		atom->u.contents.option = C_BARE;
@@ -207,7 +215,8 @@ static void contents_atom_parser(const struct ref_format *format, struct used_at
 		die(_("unrecognized %%(contents) argument: %s"), arg);
 }
 
-static void objectname_atom_parser(const struct ref_format *format, struct used_atom *atom, const char *arg)
+static void objectname_atom_parser(const struct ref_format *format,
+				   struct used_atom *atom, const char *arg)
 {
 	if (!arg)
 		atom->u.objectname.option = O_FULL;
@@ -224,7 +233,8 @@ static void objectname_atom_parser(const struct ref_format *format, struct used_
 		die(_("unrecognized %%(objectname) argument: %s"), arg);
 }
 
-static void refname_atom_parser(const struct ref_format *format, struct used_atom *atom, const char *arg)
+static void refname_atom_parser(const struct ref_format *format,
+				struct used_atom *atom, const char *arg)
 {
 	refname_atom_parser_internal(&atom->u.refname, arg, atom->name);
 }
@@ -240,7 +250,8 @@ static align_type parse_align_position(const char *s)
 	return -1;
 }
 
-static void align_atom_parser(const struct ref_format *format, struct used_atom *atom, const char *arg)
+static void align_atom_parser(const struct ref_format *format,
+			      struct used_atom *atom, const char *arg)
 {
 	struct align *align = &atom->u.align;
 	struct string_list params = STRING_LIST_INIT_DUP;
@@ -279,7 +290,8 @@ static void align_atom_parser(const struct ref_format *format, struct used_atom 
 	string_list_clear(&params, 0);
 }
 
-static void if_atom_parser(const struct ref_format *format, struct used_atom *atom, const char *arg)
+static void if_atom_parser(const struct ref_format *format,
+			   struct used_atom *atom, const char *arg)
 {
 	if (!arg) {
 		atom->u.if_then_else.cmp_status = COMPARE_NONE;
@@ -293,19 +305,22 @@ static void if_atom_parser(const struct ref_format *format, struct used_atom *at
 	}
 }
 
-static void head_atom_parser(const struct ref_format *format, struct used_atom *atom, const char *arg)
+static void head_atom_parser(const struct ref_format *format,
+			     struct used_atom *atom, const char *arg)
 {
 	struct object_id unused;
 
-	atom->u.head = resolve_refdup("HEAD", RESOLVE_REF_READING, unused.hash, NULL);
+	atom->u.head = resolve_refdup("HEAD", RESOLVE_REF_READING, unused.hash,
+				      NULL);
 }
 
 static struct {
 	const char *name;
 	cmp_type cmp_type;
-	void (*parser)(const struct ref_format *format, struct used_atom *atom, const char *arg);
+	void (*parser)(const struct ref_format *format, struct used_atom *atom,
+		       const char *arg);
 } valid_atom[] = {
-	{ "refname" , FIELD_STR, refname_atom_parser },
+	{ "refname", FIELD_STR, refname_atom_parser },
 	{ "objecttype" },
 	{ "objectsize", FIELD_ULONG },
 	{ "objectname", FIELD_STR, objectname_atom_parser },
@@ -346,7 +361,10 @@ static struct {
 	{ "else" },
 };
 
-#define REF_FORMATTING_STATE_INIT  { 0, NULL }
+#define REF_FORMATTING_STATE_INIT \
+	{                         \
+		0, NULL           \
+	}
 
 struct ref_formatting_stack {
 	struct ref_formatting_stack *prev;
@@ -362,7 +380,8 @@ struct ref_formatting_state {
 
 struct atom_value {
 	const char *s;
-	void (*handler)(struct atom_value *atomv, struct ref_formatting_state *state);
+	void (*handler)(struct atom_value *atomv,
+			struct ref_formatting_state *state);
 	uintmax_t value; /* used for sorting when not FIELD_STR */
 	struct used_atom *atom;
 };
@@ -381,7 +400,7 @@ static int parse_ref_filter_atom(const struct ref_format *format,
 	if (*sp == '*' && sp < ep)
 		sp++; /* deref */
 	if (ep <= sp)
-		die(_("malformed field name: %.*s"), (int)(ep-atom), atom);
+		die(_("malformed field name: %.*s"), (int)(ep - atom), atom);
 
 	/* Do we have the atom already used elsewhere? */
 	for (i = 0; i < used_atom_cnt; i++) {
@@ -407,7 +426,7 @@ static int parse_ref_filter_atom(const struct ref_format *format,
 	}
 
 	if (ARRAY_SIZE(valid_atom) <= i)
-		die(_("unknown field name: %.*s"), (int)(ep-atom), atom);
+		die(_("unknown field name: %.*s"), (int)(ep - atom), atom);
 
 	/* Add it in, including the deref prefix */
 	at = used_atom_cnt;
@@ -464,7 +483,8 @@ static void append_atom(struct atom_value *v, struct ref_formatting_state *state
 
 static void push_stack_element(struct ref_formatting_stack **stack)
 {
-	struct ref_formatting_stack *s = xcalloc(1, sizeof(struct ref_formatting_stack));
+	struct ref_formatting_stack *s =
+		xcalloc(1, sizeof(struct ref_formatting_stack));
 
 	strbuf_init(&s->output, 0);
 	s->prev = *stack;
@@ -494,7 +514,8 @@ static void end_align_handler(struct ref_formatting_stack **stack)
 	strbuf_release(&s);
 }
 
-static void align_atom_handler(struct atom_value *atomv, struct ref_formatting_state *state)
+static void
+align_atom_handler(struct atom_value *atomv, struct ref_formatting_state *state)
 {
 	struct ref_formatting_stack *new;
 
@@ -516,8 +537,8 @@ static void if_then_else_handler(struct ref_formatting_stack **stack)
 	if (if_then_else->else_atom_seen) {
 		/*
 		 * There is an %(else) atom: we need to drop one state from the
-		 * stack, either the %(else) branch if the condition is satisfied, or
-		 * the %(then) branch if it isn't.
+		 * stack, either the %(else) branch if the condition is
+		 * satisfied, or the %(then) branch if it isn't.
 		 */
 		if (if_then_else->condition_satisfied) {
 			strbuf_reset(&cur->output);
@@ -539,7 +560,8 @@ static void if_then_else_handler(struct ref_formatting_stack **stack)
 	free(if_then_else);
 }
 
-static void if_atom_handler(struct atom_value *atomv, struct ref_formatting_state *state)
+static void
+if_atom_handler(struct atom_value *atomv, struct ref_formatting_state *state)
 {
 	struct ref_formatting_stack *new;
 	struct if_then_else *if_then_else = xcalloc(sizeof(struct if_then_else), 1);
@@ -563,7 +585,8 @@ static int is_empty(const char *s)
 	return 1;
 }
 
-static void then_atom_handler(struct atom_value *atomv, struct ref_formatting_state *state)
+static void
+then_atom_handler(struct atom_value *atomv, struct ref_formatting_state *state)
 {
 	struct ref_formatting_stack *cur = state->stack;
 	struct if_then_else *if_then_else = NULL;
@@ -593,7 +616,8 @@ static void then_atom_handler(struct atom_value *atomv, struct ref_formatting_st
 	strbuf_reset(&cur->output);
 }
 
-static void else_atom_handler(struct atom_value *atomv, struct ref_formatting_state *state)
+static void
+else_atom_handler(struct atom_value *atomv, struct ref_formatting_state *state)
 {
 	struct ref_formatting_stack *prev = state->stack;
 	struct if_then_else *if_then_else = NULL;
@@ -612,7 +636,8 @@ static void else_atom_handler(struct atom_value *atomv, struct ref_formatting_st
 	state->stack->at_end = prev->at_end;
 }
 
-static void end_atom_handler(struct atom_value *atomv, struct ref_formatting_state *state)
+static void
+end_atom_handler(struct atom_value *atomv, struct ref_formatting_state *state)
 {
 	struct ref_formatting_stack *current = state->stack;
 	struct strbuf s = STRBUF_INIT;
@@ -621,7 +646,8 @@ static void end_atom_handler(struct atom_value *atomv, struct ref_formatting_sta
 		die(_("format: %%(end) atom used without corresponding atom"));
 	current->at_end(&state->stack);
 
-	/*  Stack may have been popped within at_end(), hence reset the current pointer */
+	/*  Stack may have been popped within at_end(), hence reset the current
+	 * pointer */
 	current = state->stack;
 
 	/*
@@ -668,7 +694,7 @@ int verify_ref_format(struct ref_format *format)
 	const char *cp, *sp;
 
 	format->need_color_reset_at_eol = 0;
-	for (cp = format->format; *cp && (sp = find_next(cp)); ) {
+	for (cp = format->format; *cp && (sp = find_next(cp));) {
 		const char *color, *ep = strchr(sp, ')');
 		int at;
 
@@ -692,7 +718,8 @@ int verify_ref_format(struct ref_format *format)
  * by the "struct object" representation, set *eaten as well---it is a
  * signal from parse_object_buffer to us not to free the buffer.
  */
-static void *get_obj(const struct object_id *oid, struct object **obj, unsigned long *sz, int *eaten)
+static void *get_obj(const struct object_id *oid, struct object **obj,
+		     unsigned long *sz, int *eaten)
 {
 	enum object_type type;
 	void *buf = read_sha1_file(oid->hash, &type, sz);
@@ -715,7 +742,8 @@ static int grab_objectname(const char *name, const unsigned char *sha1,
 			v->s = xstrdup(sha1_to_hex(sha1));
 			return 1;
 		} else if (atom->u.objectname.option == O_LENGTH) {
-			v->s = xstrdup(find_unique_abbrev(sha1, atom->u.objectname.length));
+			v->s = xstrdup(
+				find_unique_abbrev(sha1, atom->u.objectname.length));
 			return 1;
 		} else
 			die("BUG: unknown %%(objectname) option");
@@ -724,7 +752,8 @@ static int grab_objectname(const char *name, const unsigned char *sha1,
 }
 
 /* See grab_values */
-static void grab_common_values(struct atom_value *val, int deref, struct object *obj, void *buf, unsigned long sz)
+static void grab_common_values(struct atom_value *val, int deref,
+			       struct object *obj, void *buf, unsigned long sz)
 {
 	int i;
 
@@ -740,17 +769,17 @@ static void grab_common_values(struct atom_value *val, int deref, struct object 
 		else if (!strcmp(name, "objectsize")) {
 			v->value = sz;
 			v->s = xstrfmt("%lu", sz);
-		}
-		else if (deref)
+		} else if (deref)
 			grab_objectname(name, obj->oid.hash, v, &used_atom[i]);
 	}
 }
 
 /* See grab_values */
-static void grab_tag_values(struct atom_value *val, int deref, struct object *obj, void *buf, unsigned long sz)
+static void grab_tag_values(struct atom_value *val, int deref,
+			    struct object *obj, void *buf, unsigned long sz)
 {
 	int i;
-	struct tag *tag = (struct tag *) obj;
+	struct tag *tag = (struct tag *)obj;
 
 	for (i = 0; i < used_atom_cnt; i++) {
 		const char *name = used_atom[i].name;
@@ -769,10 +798,11 @@ static void grab_tag_values(struct atom_value *val, int deref, struct object *ob
 }
 
 /* See grab_values */
-static void grab_commit_values(struct atom_value *val, int deref, struct object *obj, void *buf, unsigned long sz)
+static void grab_commit_values(struct atom_value *val, int deref,
+			       struct object *obj, void *buf, unsigned long sz)
 {
 	int i;
-	struct commit *commit = (struct commit *) obj;
+	struct commit *commit = (struct commit *)obj;
 
 	for (i = 0; i < used_atom_cnt; i++) {
 		const char *name = used_atom[i].name;
@@ -783,15 +813,14 @@ static void grab_commit_values(struct atom_value *val, int deref, struct object 
 			name++;
 		if (!strcmp(name, "tree")) {
 			v->s = xstrdup(oid_to_hex(&commit->tree->object.oid));
-		}
-		else if (!strcmp(name, "numparent")) {
+		} else if (!strcmp(name, "numparent")) {
 			v->value = commit_list_count(commit->parents);
 			v->s = xstrfmt("%lu", (unsigned long)v->value);
-		}
-		else if (!strcmp(name, "parent")) {
+		} else if (!strcmp(name, "parent")) {
 			struct commit_list *parents;
 			struct strbuf s = STRBUF_INIT;
-			for (parents = commit->parents; parents; parents = parents->next) {
+			for (parents = commit->parents; parents;
+			     parents = parents->next) {
 				struct commit *parent = parents->item;
 				if (parents != commit->parents)
 					strbuf_addch(&s, ' ');
@@ -802,12 +831,12 @@ static void grab_commit_values(struct atom_value *val, int deref, struct object 
 	}
 }
 
-static const char *find_wholine(const char *who, int wholen, const char *buf, unsigned long sz)
+static const char *
+find_wholine(const char *who, int wholen, const char *buf, unsigned long sz)
 {
 	const char *eol;
 	while (*buf) {
-		if (!strncmp(buf, who, wholen) &&
-		    buf[wholen] == ' ')
+		if (!strncmp(buf, who, wholen) && buf[wholen] == ' ')
 			return buf + wholen + 1;
 		eol = strchr(buf, '\n');
 		if (!eol)
@@ -872,7 +901,8 @@ static void grab_date(const char *buf, struct atom_value *v, const char *atomnam
 	/*
 	 * We got here because atomname ends in "date" or "date<something>";
 	 * it's not possible that <something> is not ":<format>" because
-	 * parse_ref_filter_atom() wouldn't have allowed it, so we can assume that no
+	 * parse_ref_filter_atom() wouldn't have allowed it, so we can assume
+	 * that no
 	 * ":" means no format is specified, and use the default.
 	 */
 	formatp = strchr(atomname, ':');
@@ -892,13 +922,14 @@ static void grab_date(const char *buf, struct atom_value *v, const char *atomnam
 	v->s = xstrdup(show_date(timestamp, tz, &date_mode));
 	v->value = timestamp;
 	return;
- bad:
+bad:
 	v->s = "";
 	v->value = 0;
 }
 
 /* See grab_values */
-static void grab_person(const char *who, struct atom_value *val, int deref, struct object *obj, void *buf, unsigned long sz)
+static void grab_person(const char *who, struct atom_value *val, int deref,
+			struct object *obj, void *buf, unsigned long sz)
 {
 	int i;
 	int wholen = strlen(who);
@@ -913,8 +944,7 @@ static void grab_person(const char *who, struct atom_value *val, int deref, stru
 			name++;
 		if (strncmp(who, name, wholen))
 			continue;
-		if (name[wholen] != 0 &&
-		    strcmp(name + wholen, "name") &&
+		if (name[wholen] != 0 && strcmp(name + wholen, "name") &&
 		    strcmp(name + wholen, "email") &&
 		    !starts_with(name + wholen, "date"))
 			continue;
@@ -957,11 +987,10 @@ static void grab_person(const char *who, struct atom_value *val, int deref, stru
 	}
 }
 
-static void find_subpos(const char *buf, unsigned long sz,
-			const char **sub, unsigned long *sublen,
-			const char **body, unsigned long *bodylen,
-			unsigned long *nonsiglen,
-			const char **sig, unsigned long *siglen)
+static void
+find_subpos(const char *buf, unsigned long sz, const char **sub,
+	    unsigned long *sublen, const char **body, unsigned long *bodylen,
+	    unsigned long *nonsiglen, const char **sig, unsigned long *siglen)
 {
 	const char *eol;
 	/* skip past header until we hit empty line */
@@ -1005,7 +1034,8 @@ static void find_subpos(const char *buf, unsigned long sz,
  * If 'lines' is greater than 0, append that many lines from the given
  * 'buf' of length 'size' to the given strbuf.
  */
-static void append_lines(struct strbuf *out, const char *buf, unsigned long size, int lines)
+static void
+append_lines(struct strbuf *out, const char *buf, unsigned long size, int lines)
 {
 	int i;
 	const char *sp, *eol;
@@ -1026,7 +1056,8 @@ static void append_lines(struct strbuf *out, const char *buf, unsigned long size
 }
 
 /* See grab_values */
-static void grab_sub_body_contents(struct atom_value *val, int deref, struct object *obj, void *buf, unsigned long sz)
+static void grab_sub_body_contents(struct atom_value *val, int deref,
+				   struct object *obj, void *buf, unsigned long sz)
 {
 	int i;
 	const char *subpos = NULL, *bodypos = NULL, *sigpos = NULL;
@@ -1040,16 +1071,12 @@ static void grab_sub_body_contents(struct atom_value *val, int deref, struct obj
 			continue;
 		if (deref)
 			name++;
-		if (strcmp(name, "subject") &&
-		    strcmp(name, "body") &&
-		    strcmp(name, "trailers") &&
-		    !starts_with(name, "contents"))
+		if (strcmp(name, "subject") && strcmp(name, "body") &&
+		    strcmp(name, "trailers") && !starts_with(name, "contents"))
 			continue;
 		if (!subpos)
-			find_subpos(buf, sz,
-				    &subpos, &sublen,
-				    &bodypos, &bodylen, &nonsiglen,
-				    &sigpos, &siglen);
+			find_subpos(buf, sz, &subpos, &sublen, &bodypos,
+				    &bodylen, &nonsiglen, &sigpos, &siglen);
 
 		if (atom->u.contents.option == C_SUB)
 			v->s = copy_subject(subpos, sublen);
@@ -1063,8 +1090,10 @@ static void grab_sub_body_contents(struct atom_value *val, int deref, struct obj
 			struct strbuf s = STRBUF_INIT;
 			const char *contents_end = bodylen + bodypos - siglen;
 
-			/*  Size is the length of the message after removing the signature */
-			append_lines(&s, subpos, contents_end - subpos, atom->u.contents.nlines);
+			/*  Size is the length of the message after removing the
+			 * signature */
+			append_lines(&s, subpos, contents_end - subpos,
+				     atom->u.contents.nlines);
 			v->s = strbuf_detach(&s, NULL);
 		} else if (atom->u.contents.option == C_TRAILERS) {
 			struct trailer_info info;
@@ -1100,7 +1129,8 @@ static void fill_missing_values(struct atom_value *val)
  * pointed at by the ref itself; otherwise it is the object the
  * ref (which is a tag) refers to.
  */
-static void grab_values(struct atom_value *val, int deref, struct object *obj, void *buf, unsigned long sz)
+static void grab_values(struct atom_value *val, int deref, struct object *obj,
+			void *buf, unsigned long sz)
 {
 	grab_common_values(val, deref, obj, buf, sz);
 	switch (obj->type) {
@@ -1217,8 +1247,7 @@ static void fill_remote_ref_details(struct used_atom *atom, const char *refname,
 	if (atom->u.remote_ref.option == RR_REF)
 		*s = show_ref(&atom->u.remote_ref.refname, refname);
 	else if (atom->u.remote_ref.option == RR_TRACK) {
-		if (stat_tracking_info(branch, &num_ours,
-				       &num_theirs, NULL)) {
+		if (stat_tracking_info(branch, &num_ours, &num_theirs, NULL)) {
 			*s = xstrdup(msgs.gone);
 		} else if (!num_ours && !num_theirs)
 			*s = "";
@@ -1227,16 +1256,14 @@ static void fill_remote_ref_details(struct used_atom *atom, const char *refname,
 		else if (!num_theirs)
 			*s = xstrfmt(msgs.ahead, num_ours);
 		else
-			*s = xstrfmt(msgs.ahead_behind,
-				     num_ours, num_theirs);
+			*s = xstrfmt(msgs.ahead_behind, num_ours, num_theirs);
 		if (!atom->u.remote_ref.nobracket && *s[0]) {
 			const char *to_free = *s;
 			*s = xstrfmt("[%s]", *s);
 			free((void *)to_free);
 		}
 	} else if (atom->u.remote_ref.option == RR_TRACKSHORT) {
-		if (stat_tracking_info(branch, &num_ours,
-				       &num_theirs, NULL))
+		if (stat_tracking_info(branch, &num_ours, &num_theirs, NULL))
 			return;
 
 		if (!num_ours && !num_theirs)
@@ -1257,10 +1284,8 @@ char *get_head_description(void)
 	struct wt_status_state state;
 	memset(&state, 0, sizeof(state));
 	wt_status_get_state(&state, 1);
-	if (state.rebase_in_progress ||
-	    state.rebase_interactive_in_progress)
-		strbuf_addf(&desc, _("(no branch, rebasing %s)"),
-			    state.branch);
+	if (state.rebase_in_progress || state.rebase_interactive_in_progress)
+		strbuf_addf(&desc, _("(no branch, rebasing %s)"), state.branch);
 	else if (state.bisect_in_progress)
 		strbuf_addf(&desc, _("(no branch, bisect started on %s)"),
 			    state.branch);
@@ -1271,16 +1296,15 @@ char *get_head_description(void)
 			 * detached at " in wt-status.c
 			 */
 			strbuf_addf(&desc, _("(HEAD detached at %s)"),
-				state.detached_from);
+				    state.detached_from);
 		else
 			/*
 			 * TRANSLATORS: make sure this matches "HEAD
 			 * detached from " in wt-status.c
 			 */
 			strbuf_addf(&desc, _("(HEAD detached from %s)"),
-				state.detached_from);
-	}
-	else
+				    state.detached_from);
+	} else
 		strbuf_addstr(&desc, _("(no branch)"));
 	free(state.branch);
 	free(state.onto);
@@ -1348,19 +1372,18 @@ static void populate_value(struct ref_array_item *ref)
 		else if (starts_with(name, "upstream")) {
 			const char *branch_name;
 			/* only local branches may have an upstream */
-			if (!skip_prefix(ref->refname, "refs/heads/",
-					 &branch_name))
+			if (!skip_prefix(ref->refname, "refs/heads/", &branch_name))
 				continue;
 			branch = branch_get(branch_name);
 
 			refname = branch_get_upstream(branch, NULL);
 			if (refname)
-				fill_remote_ref_details(atom, refname, branch, &v->s);
+				fill_remote_ref_details(atom, refname, branch,
+							&v->s);
 			continue;
 		} else if (starts_with(name, "push")) {
 			const char *branch_name;
-			if (!skip_prefix(ref->refname, "refs/heads/",
-					 &branch_name))
+			if (!skip_prefix(ref->refname, "refs/heads/", &branch_name))
 				continue;
 			branch = branch_get(branch_name);
 
@@ -1385,7 +1408,8 @@ static void populate_value(struct ref_array_item *ref)
 				v->s = xstrdup(buf + 1);
 			}
 			continue;
-		} else if (!deref && grab_objectname(name, ref->objectname.hash, v, atom)) {
+		} else if (!deref &&
+			   grab_objectname(name, ref->objectname.hash, v, atom)) {
 			continue;
 		} else if (!strcmp(name, "HEAD")) {
 			if (atom->u.head && !strcmp(ref->refname, atom->u.head))
@@ -1428,11 +1452,11 @@ static void populate_value(struct ref_array_item *ref)
 	}
 	return;
 
- need_obj:
+need_obj:
 	buf = get_obj(&ref->objectname, &obj, &size, &eaten);
 	if (!buf)
-		die(_("missing object %s for %s"),
-		    oid_to_hex(&ref->objectname), ref->refname);
+		die(_("missing object %s for %s"), oid_to_hex(&ref->objectname),
+		    ref->refname);
 	if (!obj)
 		die(_("parse_object_buffer failed on %s for %s"),
 		    oid_to_hex(&ref->objectname), ref->refname);
@@ -1462,8 +1486,8 @@ static void populate_value(struct ref_array_item *ref)
 	 */
 	buf = get_obj(tagged, &obj, &size, &eaten);
 	if (!buf)
-		die(_("missing object %s for %s"),
-		    oid_to_hex(tagged), ref->refname);
+		die(_("missing object %s for %s"), oid_to_hex(tagged),
+		    ref->refname);
 	if (!obj)
 		die(_("parse_object_buffer failed on %s for %s"),
 		    oid_to_hex(tagged), ref->refname);
@@ -1476,7 +1500,8 @@ static void populate_value(struct ref_array_item *ref)
  * Given a ref, return the value for the atom.  This lazily gets value
  * out of the object by calling populate value.
  */
-static void get_ref_atom_value(struct ref_array_item *ref, int atom, struct atom_value **v)
+static void
+get_ref_atom_value(struct ref_array_item *ref, int atom, struct atom_value **v)
 {
 	if (!ref->value) {
 		populate_value(ref);
@@ -1489,11 +1514,7 @@ static void get_ref_atom_value(struct ref_array_item *ref, int atom, struct atom
  * Unknown has to be "0" here, because that's the default value for
  * contains_cache slab entries that have not yet been assigned.
  */
-enum contains_result {
-	CONTAINS_UNKNOWN = 0,
-	CONTAINS_NO,
-	CONTAINS_YES
-};
+enum contains_result { CONTAINS_UNKNOWN = 0, CONTAINS_NO, CONTAINS_YES };
 
 define_commit_slab(contains_cache, enum contains_result);
 
@@ -1516,7 +1537,7 @@ struct contains_stack {
 	struct contains_stack_entry {
 		struct commit *commit;
 		struct commit_list *parents;
-	} *contains_stack;
+	} * contains_stack;
 };
 
 static int in_commit_list(const struct commit_list *want, struct commit *c)
@@ -1531,9 +1552,9 @@ static int in_commit_list(const struct commit_list *want, struct commit *c)
  * Test whether the candidate or one of its parents is contained in the list.
  * Do not recurse to find out, though, but return -1 if inconclusive.
  */
-static enum contains_result contains_test(struct commit *candidate,
-					  const struct commit_list *want,
-					  struct contains_cache *cache)
+static enum contains_result
+contains_test(struct commit *candidate, const struct commit_list *want,
+	      struct contains_cache *cache)
 {
 	enum contains_result *cached = contains_cache_at(cache, candidate);
 
@@ -1552,16 +1573,18 @@ static enum contains_result contains_test(struct commit *candidate,
 	return CONTAINS_UNKNOWN;
 }
 
-static void push_to_contains_stack(struct commit *candidate, struct contains_stack *contains_stack)
+static void push_to_contains_stack(struct commit *candidate,
+				   struct contains_stack *contains_stack)
 {
-	ALLOC_GROW(contains_stack->contains_stack, contains_stack->nr + 1, contains_stack->alloc);
+	ALLOC_GROW(contains_stack->contains_stack, contains_stack->nr + 1,
+		   contains_stack->alloc);
 	contains_stack->contains_stack[contains_stack->nr].commit = candidate;
 	contains_stack->contains_stack[contains_stack->nr++].parents = candidate->parents;
 }
 
-static enum contains_result contains_tag_algo(struct commit *candidate,
-					      const struct commit_list *want,
-					      struct contains_cache *cache)
+static enum contains_result
+contains_tag_algo(struct commit *candidate, const struct commit_list *want,
+		  struct contains_cache *cache)
 {
 	struct contains_stack contains_stack = { 0, 0, NULL };
 	enum contains_result result = contains_test(candidate, want, cache);
@@ -1571,7 +1594,8 @@ static enum contains_result contains_tag_algo(struct commit *candidate,
 
 	push_to_contains_stack(candidate, &contains_stack);
 	while (contains_stack.nr) {
-		struct contains_stack_entry *entry = &contains_stack.contains_stack[contains_stack.nr - 1];
+		struct contains_stack_entry *entry =
+			&contains_stack.contains_stack[contains_stack.nr - 1];
 		struct commit *commit = entry->commit;
 		struct commit_list *parents = entry->parents;
 
@@ -1583,18 +1607,20 @@ static enum contains_result contains_tag_algo(struct commit *candidate,
 		 * If we just popped the stack, parents->item has been marked,
 		 * therefore contains_test will return a meaningful yes/no.
 		 */
-		else switch (contains_test(parents->item, want, cache)) {
-		case CONTAINS_YES:
-			*contains_cache_at(cache, commit) = CONTAINS_YES;
-			contains_stack.nr--;
-			break;
-		case CONTAINS_NO:
-			entry->parents = parents->next;
-			break;
-		case CONTAINS_UNKNOWN:
-			push_to_contains_stack(parents->item, &contains_stack);
-			break;
-		}
+		else
+			switch (contains_test(parents->item, want, cache)) {
+			case CONTAINS_YES:
+				*contains_cache_at(cache, commit) = CONTAINS_YES;
+				contains_stack.nr--;
+				break;
+			case CONTAINS_NO:
+				entry->parents = parents->next;
+				break;
+			case CONTAINS_UNKNOWN:
+				push_to_contains_stack(parents->item,
+						       &contains_stack);
+				break;
+			}
 	}
 	free(contains_stack.contains_stack);
 	return contains_test(candidate, want, cache);
@@ -1657,11 +1683,9 @@ static int match_name_as_path(const struct ref_filter *filter, const char *refna
 		const char *p = *pattern;
 		int plen = strlen(p);
 
-		if ((plen <= namelen) &&
-		    !strncmp(refname, p, plen) &&
-		    (refname[plen] == '\0' ||
-		     refname[plen] == '/' ||
-		     p[plen-1] == '/'))
+		if ((plen <= namelen) && !strncmp(refname, p, plen) &&
+		    (refname[plen] == '\0' || refname[plen] == '/' ||
+		     p[plen - 1] == '/'))
 			return 1;
 		if (!wildmatch(p, refname, WM_PATHNAME))
 			return 1;
@@ -1702,9 +1726,7 @@ static void find_longest_prefix(struct strbuf *out, const char *pattern)
  * pattern match, so the callback still has to match each ref individually.
  */
 static int for_each_fullref_in_pattern(struct ref_filter *filter,
-				       each_ref_fn cb,
-				       void *cb_data,
-				       int broken)
+				       each_ref_fn cb, void *cb_data, int broken)
 {
 	struct strbuf prefix = STRBUF_INIT;
 	int ret;
@@ -1754,9 +1776,9 @@ static int for_each_fullref_in_pattern(struct ref_filter *filter,
  * the need to parse the object via parse_object(). peel_ref() might be a
  * more efficient alternative to obtain the pointee.
  */
-static const struct object_id *match_points_at(struct oid_array *points_at,
-					       const struct object_id *oid,
-					       const char *refname)
+static const struct object_id *
+match_points_at(struct oid_array *points_at, const struct object_id *oid,
+		const char *refname)
 {
 	const struct object_id *tagged_oid = NULL;
 	struct object *obj;
@@ -1773,10 +1795,10 @@ static const struct object_id *match_points_at(struct oid_array *points_at,
 	return NULL;
 }
 
-/* Allocate space for a new ref_array_item and copy the objectname and flag to it */
-static struct ref_array_item *new_ref_array_item(const char *refname,
-						 const unsigned char *objectname,
-						 int flag)
+/* Allocate space for a new ref_array_item and copy the objectname and flag to
+ * it */
+static struct ref_array_item *
+new_ref_array_item(const char *refname, const unsigned char *objectname, int flag)
 {
 	struct ref_array_item *ref;
 	FLEX_ALLOC_STR(ref, refname, refname);
@@ -1793,11 +1815,9 @@ static int ref_kind_from_refname(const char *refname)
 	static struct {
 		const char *prefix;
 		unsigned int kind;
-	} ref_kind[] = {
-		{ "refs/heads/" , FILTER_REFS_BRANCHES },
-		{ "refs/remotes/" , FILTER_REFS_REMOTES },
-		{ "refs/tags/", FILTER_REFS_TAGS}
-	};
+	} ref_kind[] = { { "refs/heads/", FILTER_REFS_BRANCHES },
+			 { "refs/remotes/", FILTER_REFS_REMOTES },
+			 { "refs/tags/", FILTER_REFS_TAGS } };
 
 	if (!strcmp(refname, "HEAD"))
 		return FILTER_REFS_DETACHED_HEAD;
@@ -1813,8 +1833,7 @@ static int ref_kind_from_refname(const char *refname)
 static int filter_ref_kind(struct ref_filter *filter, const char *refname)
 {
 	if (filter->kind == FILTER_REFS_BRANCHES ||
-	    filter->kind == FILTER_REFS_REMOTES ||
-	    filter->kind == FILTER_REFS_TAGS)
+	    filter->kind == FILTER_REFS_REMOTES || filter->kind == FILTER_REFS_TAGS)
 		return filter->kind;
 	return ref_kind_from_refname(refname);
 }
@@ -1823,7 +1842,8 @@ static int filter_ref_kind(struct ref_filter *filter, const char *refname)
  * A call-back given to for_each_ref().  Filter refs and keep them for
  * later object processing.
  */
-static int ref_filter_handler(const char *refname, const struct object_id *oid, int flag, void *cb_data)
+static int ref_filter_handler(const char *refname, const struct object_id *oid,
+			      int flag, void *cb_data)
 {
 	struct ref_filter_cbdata *ref_cbdata = cb_data;
 	struct ref_filter *filter = ref_cbdata->filter;
@@ -1841,7 +1861,8 @@ static int ref_filter_handler(const char *refname, const struct object_id *oid, 
 		return 0;
 	}
 
-	/* Obtain the current ref kind from filter_ref_kind() and ignore unwanted refs. */
+	/* Obtain the current ref kind from filter_ref_kind() and ignore
+	 * unwanted refs. */
 	kind = filter_ref_kind(filter, refname);
 	if (!(kind & filter->kind))
 		return 0;
@@ -1849,7 +1870,8 @@ static int ref_filter_handler(const char *refname, const struct object_id *oid, 
 	if (!filter_pattern_match(filter, refname))
 		return 0;
 
-	if (filter->points_at.nr && !match_points_at(&filter->points_at, oid, refname))
+	if (filter->points_at.nr &&
+	    !match_points_at(&filter->points_at, oid, refname))
 		return 0;
 
 	/*
@@ -1857,17 +1879,20 @@ static int ref_filter_handler(const char *refname, const struct object_id *oid, 
 	 * obtain the commit using the 'oid' available and discard all
 	 * non-commits early. The actual filtering is done later.
 	 */
-	if (filter->merge_commit || filter->with_commit || filter->no_commit || filter->verbose) {
+	if (filter->merge_commit || filter->with_commit || filter->no_commit ||
+	    filter->verbose) {
 		commit = lookup_commit_reference_gently(oid, 1);
 		if (!commit)
 			return 0;
 		/* We perform the filtering for the '--contains' option... */
 		if (filter->with_commit &&
-		    !commit_contains(filter, commit, filter->with_commit, &ref_cbdata->contains_cache))
+		    !commit_contains(filter, commit, filter->with_commit,
+				     &ref_cbdata->contains_cache))
 			return 0;
 		/* ...or for the `--no-contains' option */
 		if (filter->no_commit &&
-		    commit_contains(filter, commit, filter->no_commit, &ref_cbdata->no_contains_cache))
+		    commit_contains(filter, commit, filter->no_commit,
+				    &ref_cbdata->no_contains_cache))
 			return 0;
 	}
 
@@ -1974,19 +1999,25 @@ int filter_refs(struct ref_array *array, struct ref_filter *filter, unsigned int
 		die("filter_refs: invalid type");
 	else {
 		/*
-		 * For common cases where we need only branches or remotes or tags,
-		 * we only iterate through those refs. If a mix of refs is needed,
-		 * we iterate over all refs and filter out required refs with the help
-		 * of filter_ref_kind().
+		 * For common cases where we need only branches or remotes or
+		 * tags, we only iterate through those refs. If a mix of refs is
+		 * needed, we iterate over all refs and filter out required refs
+		 * with the help of filter_ref_kind().
 		 */
 		if (filter->kind == FILTER_REFS_BRANCHES)
-			ret = for_each_fullref_in("refs/heads/", ref_filter_handler, &ref_cbdata, broken);
+			ret = for_each_fullref_in("refs/heads/", ref_filter_handler,
+						  &ref_cbdata, broken);
 		else if (filter->kind == FILTER_REFS_REMOTES)
-			ret = for_each_fullref_in("refs/remotes/", ref_filter_handler, &ref_cbdata, broken);
+			ret = for_each_fullref_in("refs/remotes/",
+						  ref_filter_handler,
+						  &ref_cbdata, broken);
 		else if (filter->kind == FILTER_REFS_TAGS)
-			ret = for_each_fullref_in("refs/tags/", ref_filter_handler, &ref_cbdata, broken);
+			ret = for_each_fullref_in("refs/tags/", ref_filter_handler,
+						  &ref_cbdata, broken);
 		else if (filter->kind & FILTER_REFS_ALL)
-			ret = for_each_fullref_in_pattern(filter, ref_filter_handler, &ref_cbdata, broken);
+			ret = for_each_fullref_in_pattern(filter,
+							  ref_filter_handler,
+							  &ref_cbdata, broken);
 		if (!ret && (filter->kind & FILTER_REFS_DETACHED_HEAD))
 			head_ref(ref_filter_handler, &ref_cbdata);
 	}
@@ -2001,7 +2032,8 @@ int filter_refs(struct ref_array *array, struct ref_filter *filter, unsigned int
 	return ret;
 }
 
-static int cmp_ref_sorting(struct ref_sorting *s, struct ref_array_item *a, struct ref_array_item *b)
+static int cmp_ref_sorting(struct ref_sorting *s, struct ref_array_item *a,
+			   struct ref_array_item *b)
 {
 	struct atom_value *va, *vb;
 	int cmp;
@@ -2046,7 +2078,8 @@ void ref_array_sort(struct ref_sorting *sorting, struct ref_array *array)
 	QSORT_S(array->items, array->nr, compare_refs, sorting);
 }
 
-static void append_literal(const char *cp, const char *ep, struct ref_formatting_state *state)
+static void
+append_literal(const char *cp, const char *ep, struct ref_formatting_state *state)
 {
 	struct strbuf *s = &state->stack->output;
 
@@ -2084,8 +2117,7 @@ void format_ref_array_item(struct ref_array_item *info,
 		ep = strchr(sp, ')');
 		if (cp < sp)
 			append_literal(cp, sp, &state);
-		get_ref_atom_value(info,
-				   parse_ref_filter_atom(format, sp + 2, ep),
+		get_ref_atom_value(info, parse_ref_filter_atom(format, sp + 2, ep),
 				   &atomv);
 		atomv->handler(atomv, &state);
 	}
@@ -2104,8 +2136,7 @@ void format_ref_array_item(struct ref_array_item *info,
 	pop_stack_element(&state.stack);
 }
 
-void show_ref_array_item(struct ref_array_item *info,
-			 const struct ref_format *format)
+void show_ref_array_item(struct ref_array_item *info, const struct ref_format *format)
 {
 	struct strbuf final_buf = STRBUF_INIT;
 
@@ -2160,8 +2191,7 @@ void parse_ref_sorting(struct ref_sorting **sorting_tail, const char *arg)
 		s->reverse = 1;
 		arg++;
 	}
-	if (skip_prefix(arg, "version:", &arg) ||
-	    skip_prefix(arg, "v:", &arg))
+	if (skip_prefix(arg, "version:", &arg) || skip_prefix(arg, "v:", &arg))
 		s->version = 1;
 	s->atom = parse_sorting_atom(arg);
 }
@@ -2188,9 +2218,7 @@ int parse_opt_merge_filter(const struct option *opt, const char *arg, int unset)
 		}
 	}
 
-	rf->merge = no_merged
-		? REF_FILTER_MERGED_OMIT
-		: REF_FILTER_MERGED_INCLUDE;
+	rf->merge = no_merged ? REF_FILTER_MERGED_OMIT : REF_FILTER_MERGED_INCLUDE;
 
 	if (get_oid(arg, &oid))
 		die(_("malformed object name %s"), arg);

@@ -5,8 +5,8 @@
 #include "submodule.h"
 #include "progress.h"
 
-static void create_directories(const char *path, int path_len,
-			       const struct checkout *state)
+static void
+create_directories(const char *path, int path_len, const struct checkout *state)
 {
 	char *buf = xmallocz(path_len);
 	int len = 0;
@@ -109,18 +109,17 @@ static int open_output_fd(char *path, const struct cache_entry *ce, int to_tempf
 static int fstat_output(int fd, const struct checkout *state, struct stat *st)
 {
 	/* use fstat() only when path == ce->name */
-	if (fstat_is_reliable() &&
-	    state->refresh_cache && !state->base_dir_len) {
+	if (fstat_is_reliable() && state->refresh_cache && !state->base_dir_len) {
 		fstat(fd, st);
 		return 1;
 	}
 	return 0;
 }
 
-static int streaming_write_entry(const struct cache_entry *ce, char *path,
-				 struct stream_filter *filter,
-				 const struct checkout *state, int to_tempfile,
-				 int *fstat_done, struct stat *statbuf)
+static int
+streaming_write_entry(const struct cache_entry *ce, char *path,
+		      struct stream_filter *filter, const struct checkout *state,
+		      int to_tempfile, int *fstat_done, struct stat *statbuf)
 {
 	int result = 0;
 	int fd;
@@ -173,13 +172,16 @@ int finish_delayed_checkout(struct checkout *state)
 
 	dco->state = CE_RETRY;
 	delayed_object_count = dco->paths.nr;
-	progress = start_delayed_progress(_("Filtering content"), delayed_object_count);
+	progress = start_delayed_progress(_("Filtering content"),
+					  delayed_object_count);
 	while (dco->filters.nr > 0) {
-		for_each_string_list_item(filter, &dco->filters) {
+		for_each_string_list_item (filter, &dco->filters) {
 			struct string_list available_paths = STRING_LIST_INIT_NODUP;
-			display_progress(progress, delayed_object_count - dco->paths.nr);
+			display_progress(progress,
+					 delayed_object_count - dco->paths.nr);
 
-			if (!async_query_available_blobs(filter->string, &available_paths)) {
+			if (!async_query_available_blobs(filter->string,
+							 &available_paths)) {
 				/* Filter reported an error */
 				errs = 1;
 				filter->string = "";
@@ -201,11 +203,11 @@ int finish_delayed_checkout(struct checkout *state)
 			 * The filter just send us a list of available paths.
 			 * Remove them from the list.
 			 */
-			filter_string_list(&dco->paths, 0,
-				&remove_available_paths, &available_paths);
+			filter_string_list(&dco->paths, 0, &remove_available_paths,
+					   &available_paths);
 
-			for_each_string_list_item(path, &available_paths) {
-				struct cache_entry* ce;
+			for_each_string_list_item (path, &available_paths) {
+				struct cache_entry *ce;
 
 				if (!path->util) {
 					error("external filter '%s' signaled that '%s' "
@@ -215,8 +217,9 @@ int finish_delayed_checkout(struct checkout *state)
 					errs |= 1;
 
 					/*
-					 * Do not ask the filter for available blobs,
-					 * again, as the filter is likely buggy.
+					 * Do not ask the filter for available
+					 * blobs, again, as the filter is likely
+					 * buggy.
 					 */
 					filter->string = "";
 					continue;
@@ -226,7 +229,8 @@ int finish_delayed_checkout(struct checkout *state)
 				if (ce) {
 					errs |= checkout_entry(ce, state, NULL);
 					filtered_bytes += ce->ce_stat_data.sd_size;
-					display_throughput(progress, filtered_bytes);
+					display_throughput(progress,
+							   filtered_bytes);
 				} else
 					errs = 1;
 			}
@@ -238,7 +242,7 @@ int finish_delayed_checkout(struct checkout *state)
 
 	/* At this point we should not have any delayed paths anymore. */
 	errs |= dco->paths.nr;
-	for_each_string_list_item(path, &dco->paths) {
+	for_each_string_list_item (path, &dco->paths) {
 		error("'%s' was not filtered properly", path->string);
 	}
 	string_list_clear(&dco->paths, 0);
@@ -249,8 +253,8 @@ int finish_delayed_checkout(struct checkout *state)
 	return errs;
 }
 
-static int write_entry(struct cache_entry *ce,
-		       char *path, const struct checkout *state, int to_tempfile)
+static int write_entry(struct cache_entry *ce, char *path,
+		       const struct checkout *state, int to_tempfile)
 {
 	unsigned int ce_mode_s_ifmt = ce->ce_mode & S_IFMT;
 	int fd, ret, fstat_done = 0;
@@ -265,10 +269,8 @@ static int write_entry(struct cache_entry *ce,
 	if (ce_mode_s_ifmt == S_IFREG) {
 		struct stream_filter *filter = get_stream_filter(ce->name,
 								 ce->oid.hash);
-		if (filter &&
-		    !streaming_write_entry(ce, path, filter,
-					   state, to_tempfile,
-					   &fstat_done, &st))
+		if (filter && !streaming_write_entry(ce, path, filter, state,
+						     to_tempfile, &fstat_done, &st))
 			goto finish;
 	}
 
@@ -278,7 +280,7 @@ static int write_entry(struct cache_entry *ce,
 		new = read_blob_entry(ce, &size);
 		if (!new)
 			return error("unable to read sha1 file of %s (%s)",
-				path, oid_to_hex(&ce->oid));
+				     path, oid_to_hex(&ce->oid));
 
 		if (ce_mode_s_ifmt == S_IFLNK && has_symlinks && !to_tempfile) {
 			ret = symlink(new, path);
@@ -300,15 +302,17 @@ static int write_entry(struct cache_entry *ce,
 					new = NULL;
 					size = 0;
 				}
-				ret = async_convert_to_working_tree(
-					ce->name, new, size, &buf, dco);
-				if (ret && string_list_has_string(&dco->paths, ce->name)) {
+				ret = async_convert_to_working_tree(ce->name,
+								    new, size,
+								    &buf, dco);
+				if (ret && string_list_has_string(&dco->paths,
+								  ce->name)) {
 					free(new);
 					goto finish;
 				}
 			} else
-				ret = convert_to_working_tree(
-					ce->name, new, size, &buf);
+				ret = convert_to_working_tree(ce->name, new,
+							      size, &buf);
 
 			if (ret) {
 				free(new);
@@ -343,8 +347,8 @@ static int write_entry(struct cache_entry *ce,
 			return error("cannot create submodule directory %s", path);
 		sub = submodule_from_ce(ce);
 		if (sub)
-			return submodule_move_head(ce->name,
-				NULL, oid_to_hex(&ce->oid),
+			return submodule_move_head(
+				ce->name, NULL, oid_to_hex(&ce->oid),
 				state->force ? SUBMODULE_MOVE_HEAD_FORCE : 0);
 		break;
 	default:
@@ -388,8 +392,7 @@ static int check_path(const char *path, int len, struct stat *st, int skiplen)
  * its name is returned in topath[], which must be able to hold at
  * least TEMPORARY_FILENAME_LENGTH bytes long.
  */
-int checkout_entry(struct cache_entry *ce,
-		   const struct checkout *state, char *topath)
+int checkout_entry(struct cache_entry *ce, const struct checkout *state, char *topath)
 {
 	static struct strbuf path = STRBUF_INIT;
 	struct stat st;
@@ -403,7 +406,9 @@ int checkout_entry(struct cache_entry *ce,
 
 	if (!check_path(path.buf, path.len, &st, state->base_dir_len)) {
 		const struct submodule *sub;
-		unsigned changed = ce_match_stat(ce, &st, CE_MATCH_IGNORE_VALID|CE_MATCH_IGNORE_SKIP_WORKTREE);
+		unsigned changed = ce_match_stat(
+			ce, &st,
+			CE_MATCH_IGNORE_VALID | CE_MATCH_IGNORE_SKIP_WORKTREE);
 		/*
 		 * Needs to be checked before !changed returns early,
 		 * as the possibly empty directory was not changed
@@ -414,24 +419,26 @@ int checkout_entry(struct cache_entry *ce,
 			if (!is_submodule_populated_gently(ce->name, &err)) {
 				struct stat sb;
 				if (lstat(ce->name, &sb))
-					die(_("could not stat file '%s'"), ce->name);
+					die(_("could not stat file '%s'"),
+					    ce->name);
 				if (!(st.st_mode & S_IFDIR))
 					unlink_or_warn(ce->name);
 
-				return submodule_move_head(ce->name,
-					NULL, oid_to_hex(&ce->oid), 0);
+				return submodule_move_head(ce->name, NULL,
+							   oid_to_hex(&ce->oid),
+							   0);
 			} else
-				return submodule_move_head(ce->name,
-					"HEAD", oid_to_hex(&ce->oid),
-					state->force ? SUBMODULE_MOVE_HEAD_FORCE : 0);
+				return submodule_move_head(
+					ce->name, "HEAD", oid_to_hex(&ce->oid),
+					state->force ? SUBMODULE_MOVE_HEAD_FORCE :
+						       0);
 		}
 
 		if (!changed)
 			return 0;
 		if (!state->force) {
 			if (!state->quiet)
-				fprintf(stderr,
-					"%s already exists, no checkout\n",
+				fprintf(stderr, "%s already exists, no checkout\n",
 					path.buf);
 			return -1;
 		}

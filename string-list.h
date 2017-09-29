@@ -11,12 +11,18 @@ typedef int (*compare_strings_fn)(const char *, const char *);
 struct string_list {
 	struct string_list_item *items;
 	unsigned int nr, alloc;
-	unsigned int strdup_strings:1;
+	unsigned int strdup_strings : 1;
 	compare_strings_fn cmp; /* NULL uses strcmp() */
 };
 
-#define STRING_LIST_INIT_NODUP { NULL, 0, 0, 0, NULL }
-#define STRING_LIST_INIT_DUP   { NULL, 0, 0, 1, NULL }
+#define STRING_LIST_INIT_NODUP      \
+	{                           \
+		NULL, 0, 0, 0, NULL \
+	}
+#define STRING_LIST_INIT_DUP        \
+	{                           \
+		NULL, 0, 0, 1, NULL \
+	}
 
 void string_list_init(struct string_list *list, int strdup_strings);
 
@@ -24,17 +30,18 @@ void print_string_list(const struct string_list *p, const char *text);
 void string_list_clear(struct string_list *list, int free_util);
 
 /* Use this function to call a custom clear function on each util pointer */
-/* The string associated with the util pointer is passed as the second argument */
+/* The string associated with the util pointer is passed as the second argument
+ */
 typedef void (*string_list_clear_func_t)(void *p, const char *str);
-void string_list_clear_func(struct string_list *list, string_list_clear_func_t clearfunc);
+void string_list_clear_func(struct string_list *list,
+			    string_list_clear_func_t clearfunc);
 
 /* Use this function or the macro below to iterate over each item */
 typedef int (*string_list_each_func_t)(struct string_list_item *, void *);
-int for_each_string_list(struct string_list *list,
-			 string_list_each_func_t, void *cb_data);
-#define for_each_string_list_item(item,list)            \
-	for (item = (list)->items;                      \
-	     item && item < (list)->items + (list)->nr; \
+int for_each_string_list(struct string_list *list, string_list_each_func_t,
+			 void *cb_data);
+#define for_each_string_list_item(item, list)                                 \
+	for (item = (list)->items; item && item < (list)->items + (list)->nr; \
 	     ++item)
 
 /*
@@ -55,27 +62,29 @@ void string_list_remove_empty_items(struct string_list *list, int free_util);
 
 /* Use these functions only on sorted lists: */
 int string_list_has_string(const struct string_list *list, const char *string);
-int string_list_find_insert_index(const struct string_list *list, const char *string,
-				  int negative_existing_index);
+int string_list_find_insert_index(const struct string_list *list,
+				  const char *string, int negative_existing_index);
 /*
  * Inserts the given string into the sorted list.
  * If the string already exists, the list is not altered.
  * Returns the string_list_item, the string is part of.
  */
-struct string_list_item *string_list_insert(struct string_list *list, const char *string);
+struct string_list_item *
+string_list_insert(struct string_list *list, const char *string);
 
 /*
  * Removes the given string from the sorted list.
  * If the string doesn't exist, the list is not altered.
  */
-extern void string_list_remove(struct string_list *list, const char *string,
-			       int free_util);
+extern void
+string_list_remove(struct string_list *list, const char *string, int free_util);
 
 /*
- * Checks if the given string is part of a sorted list. If it is part of the list,
- * return the coresponding string_list_item, NULL otherwise.
+ * Checks if the given string is part of a sorted list. If it is part of the
+ * list, return the coresponding string_list_item, NULL otherwise.
  */
-struct string_list_item *string_list_lookup(struct string_list *list, const char *string);
+struct string_list_item *
+string_list_lookup(struct string_list *list, const char *string);
 
 /*
  * Remove all but the first of consecutive entries with the same
@@ -84,7 +93,6 @@ struct string_list_item *string_list_lookup(struct string_list *list, const char
  */
 void string_list_remove_duplicates(struct string_list *sorted_list, int free_util);
 
-
 /* Use these functions only on unsorted lists: */
 
 /*
@@ -92,7 +100,8 @@ void string_list_remove_duplicates(struct string_list *sorted_list, int free_uti
  * string is copied; otherwise the new string_list_entry refers to the
  * input string.
  */
-struct string_list_item *string_list_append(struct string_list *list, const char *string);
+struct string_list_item *
+string_list_append(struct string_list *list, const char *string);
 
 /*
  * Like string_list_append(), except string is never copied.  When
@@ -100,14 +109,16 @@ struct string_list_item *string_list_append(struct string_list *list, const char
  * ownership of a malloc()ed string to list without making an extra
  * copy.
  */
-struct string_list_item *string_list_append_nodup(struct string_list *list, char *string);
+struct string_list_item *
+string_list_append_nodup(struct string_list *list, char *string);
 
 void string_list_sort(struct string_list *list);
 int unsorted_string_list_has_string(struct string_list *list, const char *string);
-struct string_list_item *unsorted_string_list_lookup(struct string_list *list,
-						     const char *string);
+struct string_list_item *
+unsorted_string_list_lookup(struct string_list *list, const char *string);
 
-void unsorted_string_list_delete_item(struct string_list *list, int i, int free_util);
+void unsorted_string_list_delete_item(struct string_list *list, int i,
+				      int free_util);
 
 /*
  * Split string into substrings on character delim and append the
@@ -125,8 +136,8 @@ void unsorted_string_list_delete_item(struct string_list *list, int i, int free_
  *   string_list_split(l, "", ':', -1) -> [""]
  *   string_list_split(l, ":", ':', -1) -> ["", ""]
  */
-int string_list_split(struct string_list *list, const char *string,
-		      int delim, int maxsplit);
+int string_list_split(struct string_list *list, const char *string, int delim,
+		      int maxsplit);
 
 /*
  * Like string_list_split(), except that string is split in-place: the

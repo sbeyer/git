@@ -24,7 +24,7 @@ static int run_gpg_verify(const char *buf, unsigned long size, unsigned flags)
 	}
 
 	ret = check_signature(buf, payload_size, buf + payload_size,
-				size - payload_size, &sigc);
+			      size - payload_size, &sigc);
 
 	if (!(flags & GPG_VERIFY_OMIT_STATUS))
 		print_signature_buffer(&sigc, flags);
@@ -34,7 +34,7 @@ static int run_gpg_verify(const char *buf, unsigned long size, unsigned flags)
 }
 
 int gpg_verify_tag(const struct object_id *oid, const char *name_to_report,
-		unsigned flags)
+		   unsigned flags)
 {
 	enum object_type type;
 	char *buf;
@@ -44,17 +44,17 @@ int gpg_verify_tag(const struct object_id *oid, const char *name_to_report,
 	type = sha1_object_info(oid->hash, NULL);
 	if (type != OBJ_TAG)
 		return error("%s: cannot verify a non-tag object of type %s.",
-				name_to_report ?
-				name_to_report :
-				find_unique_abbrev(oid->hash, DEFAULT_ABBREV),
-				typename(type));
+			     name_to_report ?
+				     name_to_report :
+				     find_unique_abbrev(oid->hash, DEFAULT_ABBREV),
+			     typename(type));
 
 	buf = read_sha1_file(oid->hash, &type, &size);
 	if (!buf)
 		return error("%s: unable to read file.",
-				name_to_report ?
-				name_to_report :
-				find_unique_abbrev(oid->hash, DEFAULT_ABBREV));
+			     name_to_report ? name_to_report :
+					      find_unique_abbrev(oid->hash,
+								 DEFAULT_ABBREV));
 
 	ret = run_gpg_verify(buf, size, flags);
 
@@ -128,7 +128,8 @@ int parse_tag_buffer(struct tag *item, const void *data, unsigned long size)
 
 	if (size < GIT_SHA1_HEXSZ + 24)
 		return -1;
-	if (memcmp("object ", bufptr, 7) || parse_oid_hex(bufptr + 7, &oid, &bufptr) || *bufptr++ != '\n')
+	if (memcmp("object ", bufptr, 7) ||
+	    parse_oid_hex(bufptr + 7, &oid, &bufptr) || *bufptr++ != '\n')
 		return -1;
 
 	if (!starts_with(bufptr, "type "))
@@ -155,7 +156,7 @@ int parse_tag_buffer(struct tag *item, const void *data, unsigned long size)
 	}
 
 	if (bufptr + 4 < tail && starts_with(bufptr, "tag "))
-		; 		/* good */
+		; /* good */
 	else
 		return -1;
 	bufptr += 4;
@@ -184,12 +185,10 @@ int parse_tag(struct tag *item)
 		return 0;
 	data = read_sha1_file(item->object.oid.hash, &type, &size);
 	if (!data)
-		return error("Could not read %s",
-			     oid_to_hex(&item->object.oid));
+		return error("Could not read %s", oid_to_hex(&item->object.oid));
 	if (type != OBJ_TAG) {
 		free(data);
-		return error("Object %s not a tag",
-			     oid_to_hex(&item->object.oid));
+		return error("Object %s not a tag", oid_to_hex(&item->object.oid));
 	}
 	ret = parse_tag_buffer(item, data, size);
 	free(data);

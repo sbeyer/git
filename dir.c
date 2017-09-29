@@ -46,10 +46,11 @@ struct cached_dir {
 	struct untracked_cache_dir *ucd;
 };
 
-static enum path_treatment read_directory_recursive(struct dir_struct *dir,
-	struct index_state *istate, const char *path, int len,
-	struct untracked_cache_dir *untracked,
-	int check_only, int stop_at_first_file, const struct pathspec *pathspec);
+static enum path_treatment
+read_directory_recursive(struct dir_struct *dir, struct index_state *istate,
+			 const char *path, int len,
+			 struct untracked_cache_dir *untracked, int check_only,
+			 int stop_at_first_file, const struct pathspec *pathspec);
 static int get_dtype(struct dirent *de, struct index_state *istate,
 		     const char *path, int len);
 
@@ -72,9 +73,8 @@ int fspathncmp(const char *a, const char *b, size_t count)
 	return ignore_case ? strncasecmp(a, b, count) : strncmp(a, b, count);
 }
 
-int git_fnmatch(const struct pathspec_item *item,
-		const char *pattern, const char *string,
-		int prefix)
+int git_fnmatch(const struct pathspec_item *item, const char *pattern,
+		const char *string, int prefix)
 {
 	if (prefix > 0) {
 		if (ps_strncmp(item, pattern, string, prefix))
@@ -86,13 +86,13 @@ int git_fnmatch(const struct pathspec_item *item,
 		int pattern_len = strlen(++pattern);
 		int string_len = strlen(string);
 		return string_len < pattern_len ||
-			ps_strcmp(item, pattern,
-				  string + string_len - pattern_len);
+		       ps_strcmp(item, pattern, string + string_len - pattern_len);
 	}
 	if (item->magic & PATHSPEC_GLOB)
 		return wildmatch(pattern, string,
-				 WM_PATHNAME |
-				 (item->magic & PATHSPEC_ICASE ? WM_CASEFOLD : 0));
+				 WM_PATHNAME | (item->magic & PATHSPEC_ICASE ?
+							WM_CASEFOLD :
+							0));
 	else
 		/* wildmatch has not learned no FNM_PATHNAME mode yet */
 		return wildmatch(pattern, string,
@@ -100,8 +100,7 @@ int git_fnmatch(const struct pathspec_item *item,
 }
 
 static int fnmatch_icase_mem(const char *pattern, int patternlen,
-			     const char *string, int stringlen,
-			     int flags)
+			     const char *string, int stringlen, int flags)
 {
 	int match_status;
 	struct strbuf pat_buf = STRBUF_INIT;
@@ -140,14 +139,10 @@ static size_t common_prefix_len(const struct pathspec *pathspec)
 	 * subdir xyz, the common prefix is still xyz, not xuz/abc as
 	 * in non-:(icase).
 	 */
-	GUARD_PATHSPEC(pathspec,
-		       PATHSPEC_FROMTOP |
-		       PATHSPEC_MAXDEPTH |
-		       PATHSPEC_LITERAL |
-		       PATHSPEC_GLOB |
-		       PATHSPEC_ICASE |
-		       PATHSPEC_EXCLUDE |
-		       PATHSPEC_ATTR);
+	GUARD_PATHSPEC(pathspec, PATHSPEC_FROMTOP | PATHSPEC_MAXDEPTH |
+					 PATHSPEC_LITERAL | PATHSPEC_GLOB |
+					 PATHSPEC_ICASE | PATHSPEC_EXCLUDE |
+					 PATHSPEC_ATTR);
 
 	for (n = 0; n < pathspec->nr; n++) {
 		size_t i = 0, len = 0, item_len;
@@ -185,8 +180,7 @@ char *common_prefix(const struct pathspec *pathspec)
 	return len ? xmemdupz(pathspec->items[0].match, len) : NULL;
 }
 
-int fill_directory(struct dir_struct *dir,
-		   struct index_state *istate,
+int fill_directory(struct dir_struct *dir, struct index_state *istate,
 		   const struct pathspec *pathspec)
 {
 	const char *prefix;
@@ -205,8 +199,7 @@ int fill_directory(struct dir_struct *dir,
 	return prefix_len;
 }
 
-int within_depth(const char *name, int namelen,
-			int depth, int max_depth)
+int within_depth(const char *name, int namelen, int depth, int max_depth)
 {
 	const char *cp = name, *cpe = name + namelen;
 
@@ -220,12 +213,12 @@ int within_depth(const char *name, int namelen,
 	return 1;
 }
 
-#define DO_MATCH_EXCLUDE   (1<<0)
-#define DO_MATCH_DIRECTORY (1<<1)
-#define DO_MATCH_SUBMODULE (1<<2)
+#define DO_MATCH_EXCLUDE (1 << 0)
+#define DO_MATCH_DIRECTORY (1 << 1)
+#define DO_MATCH_SUBMODULE (1 << 2)
 
-static int match_attrs(const char *name, int namelen,
-		       const struct pathspec_item *item)
+static int
+match_attrs(const char *name, int namelen, const struct pathspec_item *item)
 {
 	int i;
 
@@ -317,31 +310,27 @@ static int match_pathspec_item(const struct pathspec_item *item, int prefix,
 		if (matchlen == namelen)
 			return MATCHED_EXACTLY;
 
-		if (match[matchlen-1] == '/' || name[matchlen] == '/')
+		if (match[matchlen - 1] == '/' || name[matchlen] == '/')
 			return MATCHED_RECURSIVELY;
-	} else if ((flags & DO_MATCH_DIRECTORY) &&
-		   match[matchlen - 1] == '/' &&
+	} else if ((flags & DO_MATCH_DIRECTORY) && match[matchlen - 1] == '/' &&
 		   namelen == matchlen - 1 &&
 		   !ps_strncmp(item, match, name, namelen))
 		return MATCHED_EXACTLY;
 
 	if (item->nowildcard_len < item->len &&
-	    !git_fnmatch(item, match, name,
-			 item->nowildcard_len - prefix))
+	    !git_fnmatch(item, match, name, item->nowildcard_len - prefix))
 		return MATCHED_FNMATCH;
 
 	/* Perform checks to see if "name" is a super set of the pathspec */
 	if (flags & DO_MATCH_SUBMODULE) {
 		/* name is a literal prefix of the pathspec */
-		if ((namelen < matchlen) &&
-		    (match[namelen] == '/') &&
+		if ((namelen < matchlen) && (match[namelen] == '/') &&
 		    !ps_strncmp(item, match, name, namelen))
 			return MATCHED_RECURSIVELY;
 
 		/* name" doesn't match up to the first wild character */
 		if (item->nowildcard_len < item->len &&
-		    ps_strncmp(item, match, name,
-			       item->nowildcard_len - prefix))
+		    ps_strncmp(item, match, name, item->nowildcard_len - prefix))
 			return 0;
 
 		/*
@@ -374,25 +363,17 @@ static int match_pathspec_item(const struct pathspec_item *item, int prefix,
  * pathspec did not match any names, which could indicate that the
  * user mistyped the nth pathspec.
  */
-static int do_match_pathspec(const struct pathspec *ps,
-			     const char *name, int namelen,
-			     int prefix, char *seen,
-			     unsigned flags)
+static int do_match_pathspec(const struct pathspec *ps, const char *name,
+			     int namelen, int prefix, char *seen, unsigned flags)
 {
 	int i, retval = 0, exclude = flags & DO_MATCH_EXCLUDE;
 
-	GUARD_PATHSPEC(ps,
-		       PATHSPEC_FROMTOP |
-		       PATHSPEC_MAXDEPTH |
-		       PATHSPEC_LITERAL |
-		       PATHSPEC_GLOB |
-		       PATHSPEC_ICASE |
-		       PATHSPEC_EXCLUDE |
-		       PATHSPEC_ATTR);
+	GUARD_PATHSPEC(ps, PATHSPEC_FROMTOP | PATHSPEC_MAXDEPTH | PATHSPEC_LITERAL |
+				   PATHSPEC_GLOB | PATHSPEC_ICASE |
+				   PATHSPEC_EXCLUDE | PATHSPEC_ATTR);
 
 	if (!ps->nr) {
-		if (!ps->recursive ||
-		    !(ps->magic & PATHSPEC_MAXDEPTH) ||
+		if (!ps->recursive || !(ps->magic & PATHSPEC_MAXDEPTH) ||
 		    ps->max_depth == -1)
 			return MATCHED_RECURSIVELY;
 
@@ -408,8 +389,8 @@ static int do_match_pathspec(const struct pathspec *ps,
 	for (i = ps->nr - 1; i >= 0; i--) {
 		int how;
 
-		if ((!exclude &&   ps->items[i].magic & PATHSPEC_EXCLUDE) ||
-		    ( exclude && !(ps->items[i].magic & PATHSPEC_EXCLUDE)))
+		if ((!exclude && ps->items[i].magic & PATHSPEC_EXCLUDE) ||
+		    (exclude && !(ps->items[i].magic & PATHSPEC_EXCLUDE)))
 			continue;
 
 		if (seen && seen[i] == MATCHED_EXACTLY)
@@ -420,16 +401,14 @@ static int do_match_pathspec(const struct pathspec *ps,
 		 */
 		if (seen && ps->items[i].magic & PATHSPEC_EXCLUDE)
 			seen[i] = MATCHED_FNMATCH;
-		how = match_pathspec_item(ps->items+i, prefix, name,
-					  namelen, flags);
-		if (ps->recursive &&
-		    (ps->magic & PATHSPEC_MAXDEPTH) &&
-		    ps->max_depth != -1 &&
-		    how && how != MATCHED_FNMATCH) {
+		how = match_pathspec_item(ps->items + i, prefix, name, namelen,
+					  flags);
+		if (ps->recursive && (ps->magic & PATHSPEC_MAXDEPTH) &&
+		    ps->max_depth != -1 && how && how != MATCHED_FNMATCH) {
 			int len = ps->items[i].len;
 			if (name[len] == '/')
 				len++;
-			if (within_depth(name+len, namelen-len, 0, ps->max_depth))
+			if (within_depth(name + len, namelen - len, 0, ps->max_depth))
 				how = MATCHED_EXACTLY;
 			else
 				how = 0;
@@ -444,18 +423,15 @@ static int do_match_pathspec(const struct pathspec *ps,
 	return retval;
 }
 
-int match_pathspec(const struct pathspec *ps,
-		   const char *name, int namelen,
+int match_pathspec(const struct pathspec *ps, const char *name, int namelen,
 		   int prefix, char *seen, int is_dir)
 {
 	int positive, negative;
 	unsigned flags = is_dir ? DO_MATCH_DIRECTORY : 0;
-	positive = do_match_pathspec(ps, name, namelen,
-				     prefix, seen, flags);
+	positive = do_match_pathspec(ps, name, namelen, prefix, seen, flags);
 	if (!(ps->magic & PATHSPEC_EXCLUDE) || !positive)
 		return positive;
-	negative = do_match_pathspec(ps, name, namelen,
-				     prefix, seen,
+	negative = do_match_pathspec(ps, name, namelen, prefix, seen,
 				     flags | DO_MATCH_EXCLUDE);
 	return negative ? 0 : positive;
 }
@@ -463,20 +439,16 @@ int match_pathspec(const struct pathspec *ps,
 /**
  * Check if a submodule is a superset of the pathspec
  */
-int submodule_path_match(const struct pathspec *ps,
-			 const char *submodule_name,
+int submodule_path_match(const struct pathspec *ps, const char *submodule_name,
 			 char *seen)
 {
 	int matched = do_match_pathspec(ps, submodule_name,
-					strlen(submodule_name),
-					0, seen,
-					DO_MATCH_DIRECTORY |
-					DO_MATCH_SUBMODULE);
+					strlen(submodule_name), 0, seen,
+					DO_MATCH_DIRECTORY | DO_MATCH_SUBMODULE);
 	return matched;
 }
 
-int report_path_error(const char *ps_matched,
-		      const struct pathspec *pathspec,
+int report_path_error(const char *ps_matched, const struct pathspec *pathspec,
 		      const char *prefix)
 {
 	/*
@@ -494,8 +466,7 @@ int report_path_error(const char *ps_matched,
 		 * FIXME: parse_pathspec should have eliminated
 		 * duplicate pathspec.
 		 */
-		for (found_dup = other = 0;
-		     !found_dup && other < pathspec->nr;
+		for (found_dup = other = 0; !found_dup && other < pathspec->nr;
 		     other++) {
 			if (other == num || !ps_matched[other])
 				continue;
@@ -536,10 +507,8 @@ int no_wildcard(const char *string)
 	return string[simple_length(string)] == '\0';
 }
 
-void parse_exclude_pattern(const char **pattern,
-			   int *patternlen,
-			   unsigned *flags,
-			   int *nowildcardlen)
+void parse_exclude_pattern(const char **pattern, int *patternlen,
+			   unsigned *flags, int *nowildcardlen)
 {
 	const char *p = *pattern;
 	size_t i, len;
@@ -574,8 +543,8 @@ void parse_exclude_pattern(const char **pattern,
 	*patternlen = len;
 }
 
-void add_exclude(const char *string, const char *base,
-		 int baselen, struct exclude_list *el, int srcpos)
+void add_exclude(const char *string, const char *base, int baselen,
+		 struct exclude_list *el, int srcpos)
 {
 	struct exclude *x;
 	int patternlen;
@@ -674,9 +643,9 @@ static void trim_trailing_spaces(char *buf)
  *
  * If "name" has the trailing slash, it'll be excluded in the search.
  */
-static struct untracked_cache_dir *lookup_untracked(struct untracked_cache *uc,
-						    struct untracked_cache_dir *dir,
-						    const char *name, int len)
+static struct untracked_cache_dir *
+lookup_untracked(struct untracked_cache *uc, struct untracked_cache_dir *dir,
+		 const char *name, int len)
 {
 	int first, last;
 	struct untracked_cache_dir *d;
@@ -698,7 +667,7 @@ static struct untracked_cache_dir *lookup_untracked(struct untracked_cache *uc,
 			last = next;
 			continue;
 		}
-		first = next+1;
+		first = next + 1;
 	}
 
 	uc->dir_created++;
@@ -721,15 +690,15 @@ static void do_invalidate_gitignore(struct untracked_cache_dir *dir)
 		do_invalidate_gitignore(dir->dirs[i]);
 }
 
-static void invalidate_gitignore(struct untracked_cache *uc,
-				 struct untracked_cache_dir *dir)
+static void
+invalidate_gitignore(struct untracked_cache *uc, struct untracked_cache_dir *dir)
 {
 	uc->gitignore_invalidated++;
 	do_invalidate_gitignore(dir);
 }
 
-static void invalidate_directory(struct untracked_cache *uc,
-				 struct untracked_cache_dir *dir)
+static void
+invalidate_directory(struct untracked_cache *uc, struct untracked_cache_dir *dir)
 {
 	int i;
 	uc->dir_invalidated++;
@@ -749,8 +718,7 @@ static void invalidate_directory(struct untracked_cache *uc,
  * ss_valid is non-zero, "ss" must contain good value as input.
  */
 static int add_excludes(const char *fname, const char *base, int baselen,
-			struct exclude_list *el,
-			struct index_state *istate,
+			struct exclude_list *el, struct index_state *istate,
 			struct sha1_stat *sha1_stat)
 {
 	struct stat st;
@@ -765,13 +733,14 @@ static int add_excludes(const char *fname, const char *base, int baselen,
 		else
 			close(fd);
 		if (!istate ||
-		    (buf = read_skip_worktree_file_from_index(istate, fname, &size, sha1_stat)) == NULL)
+		    (buf = read_skip_worktree_file_from_index(istate, fname, &size,
+							      sha1_stat)) == NULL)
 			return -1;
 		if (size == 0) {
 			free(buf);
 			return 0;
 		}
-		if (buf[size-1] != '\n') {
+		if (buf[size - 1] != '\n') {
 			buf = xrealloc(buf, st_add(size, 1));
 			buf[size++] = '\n';
 		}
@@ -800,7 +769,8 @@ static int add_excludes(const char *fname, const char *base, int baselen,
 			    !match_stat_data_racy(istate, &sha1_stat->stat, &st))
 				; /* no content change, ss->sha1 still good */
 			else if (istate &&
-				 (pos = index_name_pos(istate, fname, strlen(fname))) >= 0 &&
+				 (pos = index_name_pos(istate, fname,
+						       strlen(fname))) >= 0 &&
 				 !ce_stage(istate->cache[pos]) &&
 				 ce_uptodate(istate->cache[pos]) &&
 				 !would_convert_to_git(istate, fname))
@@ -823,7 +793,7 @@ static int add_excludes(const char *fname, const char *base, int baselen,
 	for (i = 0; i < size; i++) {
 		if (buf[i] == '\n') {
 			if (entry != buf + i && entry[0] != '#') {
-				buf[i - (i && buf[i-1] == '\r')] = 0;
+				buf[i - (i && buf[i - 1] == '\r')] = 0;
 				trim_trailing_spaces(entry);
 				add_exclude(entry, base, baselen, el, lineno);
 			}
@@ -841,8 +811,8 @@ int add_excludes_from_file_to_list(const char *fname, const char *base,
 	return add_excludes(fname, base, baselen, el, istate, NULL);
 }
 
-struct exclude_list *add_exclude_list(struct dir_struct *dir,
-				      int group_type, const char *src)
+struct exclude_list *
+add_exclude_list(struct dir_struct *dir, int group_type, const char *src)
 {
 	struct exclude_list *el;
 	struct exclude_list_group *group;
@@ -880,9 +850,8 @@ void add_excludes_from_file(struct dir_struct *dir, const char *fname)
 	add_excludes_from_file_1(dir, fname, NULL);
 }
 
-int match_basename(const char *basename, int basenamelen,
-		   const char *pattern, int prefix, int patternlen,
-		   unsigned flags)
+int match_basename(const char *basename, int basenamelen, const char *pattern,
+		   int prefix, int patternlen, unsigned flags)
 {
 	if (prefix == patternlen) {
 		if (patternlen == basenamelen &&
@@ -892,21 +861,19 @@ int match_basename(const char *basename, int basenamelen,
 		/* "*literal" matching against "fooliteral" */
 		if (patternlen - 1 <= basenamelen &&
 		    !fspathncmp(pattern + 1,
-				   basename + basenamelen - (patternlen - 1),
-				   patternlen - 1))
+				basename + basenamelen - (patternlen - 1),
+				patternlen - 1))
 			return 1;
 	} else {
-		if (fnmatch_icase_mem(pattern, patternlen,
-				      basename, basenamelen,
-				      0) == 0)
+		if (fnmatch_icase_mem(pattern, patternlen, basename,
+				      basenamelen, 0) == 0)
 			return 1;
 	}
 	return 0;
 }
 
-int match_pathname(const char *pathname, int pathlen,
-		   const char *base, int baselen,
-		   const char *pattern, int prefix, int patternlen,
+int match_pathname(const char *pathname, int pathlen, const char *base,
+		   int baselen, const char *pattern, int prefix, int patternlen,
 		   unsigned flags)
 {
 	const char *name;
@@ -926,8 +893,7 @@ int match_pathname(const char *pathname, int pathlen,
 	 * baselen does not count the trailing slash. base[] may or
 	 * may not end with a trailing slash though.
 	 */
-	if (pathlen < baselen + 1 ||
-	    (baselen && pathname[baselen] != '/') ||
+	if (pathlen < baselen + 1 || (baselen && pathname[baselen] != '/') ||
 	    fspathncmp(pathname, base, baselen))
 		return 0;
 
@@ -946,7 +912,7 @@ int match_pathname(const char *pathname, int pathlen,
 			return 0;
 		pattern += prefix;
 		patternlen -= prefix;
-		name    += prefix;
+		name += prefix;
 		namelen -= prefix;
 
 		/*
@@ -958,8 +924,7 @@ int match_pathname(const char *pathname, int pathlen,
 			return 1;
 	}
 
-	return fnmatch_icase_mem(pattern, patternlen,
-				 name, namelen,
+	return fnmatch_icase_mem(pattern, patternlen, name, namelen,
 				 WM_PATHNAME) == 0;
 }
 
@@ -969,18 +934,16 @@ int match_pathname(const char *pathname, int pathlen,
  * any, determines the fate.  Returns the exclude_list element which
  * matched, or NULL for undecided.
  */
-static struct exclude *last_exclude_matching_from_list(const char *pathname,
-						       int pathlen,
-						       const char *basename,
-						       int *dtype,
-						       struct exclude_list *el,
-						       struct index_state *istate)
+static struct exclude *
+last_exclude_matching_from_list(const char *pathname, int pathlen,
+				const char *basename, int *dtype,
+				struct exclude_list *el, struct index_state *istate)
 {
 	struct exclude *exc = NULL; /* undecided */
 	int i;
 
 	if (!el->nr)
-		return NULL;	/* undefined */
+		return NULL; /* undefined */
 
 	for (i = el->nr - 1; 0 <= i; i--) {
 		struct exclude *x = el->excludes[i];
@@ -996,9 +959,8 @@ static struct exclude *last_exclude_matching_from_list(const char *pathname,
 
 		if (x->flags & EXC_FLAG_NODIR) {
 			if (match_basename(basename,
-					   pathlen - (basename - pathname),
-					   exclude, prefix, x->patternlen,
-					   x->flags)) {
+					   pathlen - (basename - pathname), exclude,
+					   prefix, x->patternlen, x->flags)) {
 				exc = x;
 				break;
 			}
@@ -1006,9 +968,9 @@ static struct exclude *last_exclude_matching_from_list(const char *pathname,
 		}
 
 		assert(x->baselen == 0 || x->base[x->baselen - 1] == '/');
-		if (match_pathname(pathname, pathlen,
-				   x->base, x->baselen ? x->baselen - 1 : 0,
-				   exclude, prefix, x->patternlen, x->flags)) {
+		if (match_pathname(pathname, pathlen, x->base,
+				   x->baselen ? x->baselen - 1 : 0, exclude,
+				   prefix, x->patternlen, x->flags)) {
 			exc = x;
 			break;
 		}
@@ -1020,8 +982,8 @@ static struct exclude *last_exclude_matching_from_list(const char *pathname,
  * Scan the list and let the last match determine the fate.
  * Return 1 for exclude, 0 for include and -1 for undecided.
  */
-int is_excluded_from_list(const char *pathname,
-			  int pathlen, const char *basename, int *dtype,
+int is_excluded_from_list(const char *pathname, int pathlen,
+			  const char *basename, int *dtype,
 			  struct exclude_list *el, struct index_state *istate)
 {
 	struct exclude *exclude;
@@ -1032,10 +994,10 @@ int is_excluded_from_list(const char *pathname,
 	return -1; /* undecided */
 }
 
-static struct exclude *last_exclude_matching_from_lists(struct dir_struct *dir,
-							struct index_state *istate,
-		const char *pathname, int pathlen, const char *basename,
-		int *dtype_p)
+static struct exclude *
+last_exclude_matching_from_lists(struct dir_struct *dir,
+				 struct index_state *istate, const char *pathname,
+				 int pathlen, const char *basename, int *dtype_p)
 {
 	int i, j;
 	struct exclude_list_group *group;
@@ -1043,9 +1005,10 @@ static struct exclude *last_exclude_matching_from_lists(struct dir_struct *dir,
 	for (i = EXC_CMDL; i <= EXC_FILE; i++) {
 		group = &dir->exclude_list_group[i];
 		for (j = group->nr - 1; j >= 0; j--) {
-			exclude = last_exclude_matching_from_list(
-				pathname, pathlen, basename, dtype_p,
-				&group->el[j], istate);
+			exclude = last_exclude_matching_from_list(pathname, pathlen,
+								  basename, dtype_p,
+								  &group->el[j],
+								  istate);
 			if (exclude)
 				return exclude;
 		}
@@ -1057,8 +1020,7 @@ static struct exclude *last_exclude_matching_from_lists(struct dir_struct *dir,
  * Loads the per-directory exclude list for the substring of base
  * which has a char length of baselen.
  */
-static void prep_exclude(struct dir_struct *dir,
-			 struct index_state *istate,
+static void prep_exclude(struct dir_struct *dir, struct index_state *istate,
 			 const char *base, int baselen)
 {
 	struct exclude_list_group *group;
@@ -1120,10 +1082,9 @@ static void prep_exclude(struct dir_struct *dir,
 			if (!cp)
 				die("oops in prep_exclude");
 			cp++;
-			untracked =
-				lookup_untracked(dir->untracked, untracked,
-						 base + current,
-						 cp - base - current);
+			untracked = lookup_untracked(dir->untracked, untracked,
+						     base + current,
+						     cp - base - current);
 		}
 		stk->prev = dir->exclude_stack;
 		stk->baselen = cp - base;
@@ -1137,13 +1098,11 @@ static void prep_exclude(struct dir_struct *dir,
 		if (stk->baselen) {
 			int dt = DT_DIR;
 			dir->basebuf.buf[stk->baselen - 1] = 0;
-			dir->exclude = last_exclude_matching_from_lists(dir,
-									istate,
-				dir->basebuf.buf, stk->baselen - 1,
+			dir->exclude = last_exclude_matching_from_lists(
+				dir, istate, dir->basebuf.buf, stk->baselen - 1,
 				dir->basebuf.buf + current, &dt);
 			dir->basebuf.buf[stk->baselen - 1] = '/';
-			if (dir->exclude &&
-			    dir->exclude->flags & EXC_FLAG_NEGATIVE)
+			if (dir->exclude && dir->exclude->flags & EXC_FLAG_NEGATIVE)
 				dir->exclude = NULL;
 			if (dir->exclude) {
 				dir->exclude_stack = stk;
@@ -1197,8 +1156,7 @@ static void prep_exclude(struct dir_struct *dir,
 		 * last_exclude_matching(). Be careful about ignore rule
 		 * order, though, if you do that.
 		 */
-		if (untracked &&
-		    hashcmp(sha1_stat.sha1, untracked->exclude_sha1)) {
+		if (untracked && hashcmp(sha1_stat.sha1, untracked->exclude_sha1)) {
 			invalidate_gitignore(dir->untracked, untracked);
 			hashcpy(untracked->exclude_sha1, sha1_stat.sha1);
 		}
@@ -1214,22 +1172,21 @@ static void prep_exclude(struct dir_struct *dir,
  * Returns the exclude_list element which matched, or NULL for
  * undecided.
  */
-struct exclude *last_exclude_matching(struct dir_struct *dir,
-				      struct index_state *istate,
-				      const char *pathname,
-				      int *dtype_p)
+struct exclude *
+last_exclude_matching(struct dir_struct *dir, struct index_state *istate,
+		      const char *pathname, int *dtype_p)
 {
 	int pathlen = strlen(pathname);
 	const char *basename = strrchr(pathname, '/');
-	basename = (basename) ? basename+1 : pathname;
+	basename = (basename) ? basename + 1 : pathname;
 
-	prep_exclude(dir, istate, pathname, basename-pathname);
+	prep_exclude(dir, istate, pathname, basename - pathname);
 
 	if (dir->exclude)
 		return dir->exclude;
 
 	return last_exclude_matching_from_lists(dir, istate, pathname, pathlen,
-			basename, dtype_p);
+						basename, dtype_p);
 }
 
 /*
@@ -1240,8 +1197,8 @@ struct exclude *last_exclude_matching(struct dir_struct *dir,
 int is_excluded(struct dir_struct *dir, struct index_state *istate,
 		const char *pathname, int *dtype_p)
 {
-	struct exclude *exclude =
-		last_exclude_matching(dir, istate, pathname, dtype_p);
+	struct exclude *exclude = last_exclude_matching(dir, istate, pathname,
+							dtype_p);
 	if (exclude)
 		return exclude->flags & EXC_FLAG_NEGATIVE ? 0 : 1;
 	return 0;
@@ -1256,41 +1213,38 @@ static struct dir_entry *dir_entry_new(const char *pathname, int len)
 	return ent;
 }
 
-static struct dir_entry *dir_add_name(struct dir_struct *dir,
-				      struct index_state *istate,
-				      const char *pathname, int len)
+static struct dir_entry *
+dir_add_name(struct dir_struct *dir, struct index_state *istate,
+	     const char *pathname, int len)
 {
 	if (index_file_exists(istate, pathname, len, ignore_case))
 		return NULL;
 
-	ALLOC_GROW(dir->entries, dir->nr+1, dir->alloc);
+	ALLOC_GROW(dir->entries, dir->nr + 1, dir->alloc);
 	return dir->entries[dir->nr++] = dir_entry_new(pathname, len);
 }
 
-struct dir_entry *dir_add_ignored(struct dir_struct *dir,
-				  struct index_state *istate,
-				  const char *pathname, int len)
+struct dir_entry *
+dir_add_ignored(struct dir_struct *dir, struct index_state *istate,
+		const char *pathname, int len)
 {
 	if (!index_name_is_other(istate, pathname, len))
 		return NULL;
 
-	ALLOC_GROW(dir->ignored, dir->ignored_nr+1, dir->ignored_alloc);
+	ALLOC_GROW(dir->ignored, dir->ignored_nr + 1, dir->ignored_alloc);
 	return dir->ignored[dir->ignored_nr++] = dir_entry_new(pathname, len);
 }
 
-enum exist_status {
-	index_nonexistent = 0,
-	index_directory,
-	index_gitdir
-};
+enum exist_status { index_nonexistent = 0, index_directory, index_gitdir };
 
 /*
  * Do not use the alphabetically sorted index to look up
  * the directory name; instead, use the case insensitive
  * directory hash.
  */
-static enum exist_status directory_exists_in_index_icase(struct index_state *istate,
-							 const char *dirname, int len)
+static enum exist_status
+directory_exists_in_index_icase(struct index_state *istate, const char *dirname,
+				int len)
 {
 	struct cache_entry *ce;
 
@@ -1321,7 +1275,7 @@ static enum exist_status directory_exists_in_index(struct index_state *istate,
 
 	pos = index_name_pos(istate, dirname, len);
 	if (pos < 0)
-		pos = -pos-1;
+		pos = -pos - 1;
 	while (pos < istate->cache_nr) {
 		const struct cache_entry *ce = istate->cache[pos++];
 		unsigned char endchar;
@@ -1372,14 +1326,13 @@ static enum exist_status directory_exists_in_index(struct index_state *istate,
  *      as a directory.
  *  (c) otherwise, we recurse into it.
  */
-static enum path_treatment treat_directory(struct dir_struct *dir,
-	struct index_state *istate,
-	struct untracked_cache_dir *untracked,
-	const char *dirname, int len, int baselen, int exclude,
-	const struct pathspec *pathspec)
+static enum path_treatment
+treat_directory(struct dir_struct *dir, struct index_state *istate,
+		struct untracked_cache_dir *untracked, const char *dirname,
+		int len, int baselen, int exclude, const struct pathspec *pathspec)
 {
 	/* The "len-1" is to strip the final '/' */
-	switch (directory_exists_in_index(istate, dirname, len-1)) {
+	switch (directory_exists_in_index(istate, dirname, len - 1)) {
 	case index_directory:
 		return path_recurse;
 
@@ -1409,8 +1362,8 @@ static enum path_treatment treat_directory(struct dir_struct *dir,
 	 * If this is an excluded directory, then we only need to check if
 	 * the directory contains any files.
 	 */
-	return read_directory_recursive(dir, istate, dirname, len,
-					untracked, 1, exclude, pathspec);
+	return read_directory_recursive(dir, istate, dirname, len, untracked, 1,
+					exclude, pathspec);
 }
 
 /*
@@ -1418,22 +1371,18 @@ static enum path_treatment treat_directory(struct dir_struct *dir,
  * reading - if the path cannot possibly be in the pathspec,
  * return true, and we'll skip it early.
  */
-static int simplify_away(const char *path, int pathlen,
-			 const struct pathspec *pathspec)
+static int
+simplify_away(const char *path, int pathlen, const struct pathspec *pathspec)
 {
 	int i;
 
 	if (!pathspec || !pathspec->nr)
 		return 0;
 
-	GUARD_PATHSPEC(pathspec,
-		       PATHSPEC_FROMTOP |
-		       PATHSPEC_MAXDEPTH |
-		       PATHSPEC_LITERAL |
-		       PATHSPEC_GLOB |
-		       PATHSPEC_ICASE |
-		       PATHSPEC_EXCLUDE |
-		       PATHSPEC_ATTR);
+	GUARD_PATHSPEC(pathspec, PATHSPEC_FROMTOP | PATHSPEC_MAXDEPTH |
+					 PATHSPEC_LITERAL | PATHSPEC_GLOB |
+					 PATHSPEC_ICASE | PATHSPEC_EXCLUDE |
+					 PATHSPEC_ATTR);
 
 	for (i = 0; i < pathspec->nr; i++) {
 		const struct pathspec_item *item = &pathspec->items[i];
@@ -1467,31 +1416,24 @@ static int exclude_matches_pathspec(const char *path, int pathlen,
 	if (!pathspec || !pathspec->nr)
 		return 0;
 
-	GUARD_PATHSPEC(pathspec,
-		       PATHSPEC_FROMTOP |
-		       PATHSPEC_MAXDEPTH |
-		       PATHSPEC_LITERAL |
-		       PATHSPEC_GLOB |
-		       PATHSPEC_ICASE |
-		       PATHSPEC_EXCLUDE);
+	GUARD_PATHSPEC(pathspec, PATHSPEC_FROMTOP | PATHSPEC_MAXDEPTH |
+					 PATHSPEC_LITERAL | PATHSPEC_GLOB |
+					 PATHSPEC_ICASE | PATHSPEC_EXCLUDE);
 
 	for (i = 0; i < pathspec->nr; i++) {
 		const struct pathspec_item *item = &pathspec->items[i];
 		int len = item->nowildcard_len;
 
-		if (len == pathlen &&
-		    !ps_strncmp(item, item->match, path, pathlen))
+		if (len == pathlen && !ps_strncmp(item, item->match, path, pathlen))
 			return 1;
-		if (len > pathlen &&
-		    item->match[pathlen] == '/' &&
+		if (len > pathlen && item->match[pathlen] == '/' &&
 		    !ps_strncmp(item, item->match, path, pathlen))
 			return 1;
 	}
 	return 0;
 }
 
-static int get_index_dtype(struct index_state *istate,
-			   const char *path, int len)
+static int get_index_dtype(struct index_state *istate, const char *path, int len)
 {
 	int pos;
 	const struct cache_entry *ce;
@@ -1513,7 +1455,7 @@ static int get_index_dtype(struct index_state *istate,
 	pos = index_name_pos(istate, path, len);
 	if (pos >= 0)
 		return DT_UNKNOWN;
-	pos = -pos-1;
+	pos = -pos - 1;
 	while (pos < istate->cache_nr) {
 		ce = istate->cache[pos++];
 		if (strncmp(ce->name, path, len))
@@ -1523,7 +1465,7 @@ static int get_index_dtype(struct index_state *istate,
 		if (ce->name[len] < '/')
 			continue;
 		if (!ce_uptodate(ce))
-			break;	/* continue? */
+			break; /* continue? */
 		return DT_DIR;
 	}
 	return DT_UNKNOWN;
@@ -1551,16 +1493,14 @@ static int get_dtype(struct dirent *de, struct index_state *istate,
 	return dtype;
 }
 
-static enum path_treatment treat_one_path(struct dir_struct *dir,
-					  struct untracked_cache_dir *untracked,
-					  struct index_state *istate,
-					  struct strbuf *path,
-					  int baselen,
-					  const struct pathspec *pathspec,
-					  int dtype, struct dirent *de)
+static enum path_treatment
+treat_one_path(struct dir_struct *dir, struct untracked_cache_dir *untracked,
+	       struct index_state *istate, struct strbuf *path, int baselen,
+	       const struct pathspec *pathspec, int dtype, struct dirent *de)
 {
 	int exclude;
-	int has_path_in_index = !!index_file_exists(istate, path->buf, path->len, ignore_case);
+	int has_path_in_index = !!index_file_exists(istate, path->buf,
+						    path->len, ignore_case);
 
 	if (dtype == DT_UNKNOWN)
 		dtype = get_dtype(de, istate, path->buf, path->len);
@@ -1587,10 +1527,10 @@ static enum path_treatment treat_one_path(struct dir_struct *dir,
 	 * know that everything inside P will not be killed without
 	 * recursing.
 	 */
-	if ((dir->flags & DIR_COLLECT_KILLED_ONLY) &&
-	    (dtype == DT_DIR) &&
+	if ((dir->flags & DIR_COLLECT_KILLED_ONLY) && (dtype == DT_DIR) &&
 	    !has_path_in_index &&
-	    (directory_exists_in_index(istate, path->buf, path->len) == index_nonexistent))
+	    (directory_exists_in_index(istate, path->buf, path->len) ==
+	     index_nonexistent))
 		return path_none;
 
 	exclude = is_excluded(dir, istate, path->buf, &dtype);
@@ -1599,7 +1539,7 @@ static enum path_treatment treat_one_path(struct dir_struct *dir,
 	 * Excluded? If we don't explicitly want to show
 	 * ignored files, ignore it
 	 */
-	if (exclude && !(dir->flags & (DIR_SHOW_IGNORED|DIR_SHOW_IGNORED_TOO)))
+	if (exclude && !(dir->flags & (DIR_SHOW_IGNORED | DIR_SHOW_IGNORED_TOO)))
 		return path_excluded;
 
 	switch (dtype) {
@@ -1607,21 +1547,18 @@ static enum path_treatment treat_one_path(struct dir_struct *dir,
 		return path_none;
 	case DT_DIR:
 		strbuf_addch(path, '/');
-		return treat_directory(dir, istate, untracked, path->buf, path->len,
-				       baselen, exclude, pathspec);
+		return treat_directory(dir, istate, untracked, path->buf,
+				       path->len, baselen, exclude, pathspec);
 	case DT_REG:
 	case DT_LNK:
 		return exclude ? path_excluded : path_untracked;
 	}
 }
 
-static enum path_treatment treat_path_fast(struct dir_struct *dir,
-					   struct untracked_cache_dir *untracked,
-					   struct cached_dir *cdir,
-					   struct index_state *istate,
-					   struct strbuf *path,
-					   int baselen,
-					   const struct pathspec *pathspec)
+static enum path_treatment
+treat_path_fast(struct dir_struct *dir, struct untracked_cache_dir *untracked,
+		struct cached_dir *cdir, struct index_state *istate,
+		struct strbuf *path, int baselen, const struct pathspec *pathspec)
 {
 	strbuf_setlen(path, baselen);
 	if (!cdir->ucd) {
@@ -1648,13 +1585,10 @@ static enum path_treatment treat_path_fast(struct dir_struct *dir,
 	return path_recurse;
 }
 
-static enum path_treatment treat_path(struct dir_struct *dir,
-				      struct untracked_cache_dir *untracked,
-				      struct cached_dir *cdir,
-				      struct index_state *istate,
-				      struct strbuf *path,
-				      int baselen,
-				      const struct pathspec *pathspec)
+static enum path_treatment
+treat_path(struct dir_struct *dir, struct untracked_cache_dir *untracked,
+	   struct cached_dir *cdir, struct index_state *istate,
+	   struct strbuf *path, int baselen, const struct pathspec *pathspec)
 {
 	int dtype;
 	struct dirent *de = cdir->de;
@@ -1670,23 +1604,21 @@ static enum path_treatment treat_path(struct dir_struct *dir,
 		return path_none;
 
 	dtype = DTYPE(de);
-	return treat_one_path(dir, untracked, istate, path, baselen, pathspec, dtype, de);
+	return treat_one_path(dir, untracked, istate, path, baselen, pathspec,
+			      dtype, de);
 }
 
 static void add_untracked(struct untracked_cache_dir *dir, const char *name)
 {
 	if (!dir)
 		return;
-	ALLOC_GROW(dir->untracked, dir->untracked_nr + 1,
-		   dir->untracked_alloc);
+	ALLOC_GROW(dir->untracked, dir->untracked_nr + 1, dir->untracked_alloc);
 	dir->untracked[dir->untracked_nr++] = xstrdup(name);
 }
 
-static int valid_cached_dir(struct dir_struct *dir,
-			    struct untracked_cache_dir *untracked,
-			    struct index_state *istate,
-			    struct strbuf *path,
-			    int check_only)
+static int
+valid_cached_dir(struct dir_struct *dir, struct untracked_cache_dir *untracked,
+		 struct index_state *istate, struct strbuf *path, int check_only)
 {
 	struct stat st;
 
@@ -1729,12 +1661,10 @@ static int valid_cached_dir(struct dir_struct *dir,
 	return untracked->valid;
 }
 
-static int open_cached_dir(struct cached_dir *cdir,
-			   struct dir_struct *dir,
-			   struct untracked_cache_dir *untracked,
-			   struct index_state *istate,
-			   struct strbuf *path,
-			   int check_only)
+static int
+open_cached_dir(struct cached_dir *cdir, struct dir_struct *dir,
+		struct untracked_cache_dir *untracked,
+		struct index_state *istate, struct strbuf *path, int check_only)
 {
 	memset(cdir, 0, sizeof(*cdir));
 	cdir->untracked = untracked;
@@ -1808,10 +1738,11 @@ static void close_cached_dir(struct cached_dir *cdir)
  * significant path_treatment value that will be returned.
  */
 
-static enum path_treatment read_directory_recursive(struct dir_struct *dir,
-	struct index_state *istate, const char *base, int baselen,
-	struct untracked_cache_dir *untracked, int check_only,
-	int stop_at_first_file, const struct pathspec *pathspec)
+static enum path_treatment
+read_directory_recursive(struct dir_struct *dir, struct index_state *istate,
+			 const char *base, int baselen,
+			 struct untracked_cache_dir *untracked, int check_only,
+			 int stop_at_first_file, const struct pathspec *pathspec)
 {
 	struct cached_dir cdir;
 	enum path_treatment state, subdir_state, dir_state = path_none;
@@ -1835,17 +1766,16 @@ static enum path_treatment read_directory_recursive(struct dir_struct *dir,
 
 		/* recurse into subdir if instructed by treat_path */
 		if ((state == path_recurse) ||
-			((state == path_untracked) &&
-			 (dir->flags & DIR_SHOW_IGNORED_TOO) &&
-			 (get_dtype(cdir.de, istate, path.buf, path.len) == DT_DIR))) {
+		    ((state == path_untracked) &&
+		     (dir->flags & DIR_SHOW_IGNORED_TOO) &&
+		     (get_dtype(cdir.de, istate, path.buf, path.len) == DT_DIR))) {
 			struct untracked_cache_dir *ud;
 			ud = lookup_untracked(dir->untracked, untracked,
 					      path.buf + baselen,
 					      path.len - baselen);
-			subdir_state =
-				read_directory_recursive(dir, istate, path.buf,
-							 path.len, ud,
-							 check_only, stop_at_first_file, pathspec);
+			subdir_state = read_directory_recursive(
+				dir, istate, path.buf, path.len, ud, check_only,
+				stop_at_first_file, pathspec);
 			if (subdir_state > dir_state)
 				dir_state = subdir_state;
 		}
@@ -1876,7 +1806,8 @@ static enum path_treatment read_directory_recursive(struct dir_struct *dir,
 			/* abort early if maximum state has been reached */
 			if (dir_state == path_untracked) {
 				if (cdir.fdir)
-					add_untracked(untracked, path.buf + baselen);
+					add_untracked(untracked,
+						      path.buf + baselen);
 				break;
 			}
 			/* skip the dir_add_* part */
@@ -1889,9 +1820,9 @@ static enum path_treatment read_directory_recursive(struct dir_struct *dir,
 			if (dir->flags & DIR_SHOW_IGNORED)
 				dir_add_name(dir, istate, path.buf, path.len);
 			else if ((dir->flags & DIR_SHOW_IGNORED_TOO) ||
-				((dir->flags & DIR_COLLECT_IGNORED) &&
-				exclude_matches_pathspec(path.buf, path.len,
-							 pathspec)))
+				 ((dir->flags & DIR_COLLECT_IGNORED) &&
+				  exclude_matches_pathspec(path.buf, path.len,
+							   pathspec)))
 				dir_add_ignored(dir, istate, path.buf, path.len);
 			break;
 
@@ -1908,7 +1839,7 @@ static enum path_treatment read_directory_recursive(struct dir_struct *dir,
 		}
 	}
 	close_cached_dir(&cdir);
- out:
+out:
 	strbuf_release(&path);
 
 	return dir_state;
@@ -1925,15 +1856,13 @@ int cmp_dir_entry(const void *p1, const void *p2)
 /* check if *out lexically strictly contains *in */
 int check_dir_entry_contains(const struct dir_entry *out, const struct dir_entry *in)
 {
-	return (out->len < in->len) &&
-		(out->name[out->len - 1] == '/') &&
-		!memcmp(out->name, in->name, out->len);
+	return (out->len < in->len) && (out->name[out->len - 1] == '/') &&
+	       !memcmp(out->name, in->name, out->len);
 }
 
-static int treat_leading_path(struct dir_struct *dir,
-			      struct index_state *istate,
-			      const char *path, int len,
-			      const struct pathspec *pathspec)
+static int
+treat_leading_path(struct dir_struct *dir, struct index_state *istate,
+		   const char *path, int len, const struct pathspec *pathspec)
 {
 	struct strbuf sb = STRBUF_INIT;
 	int baselen, rc = 0;
@@ -2042,9 +1971,9 @@ void remove_untracked_cache(struct index_state *istate)
 	}
 }
 
-static struct untracked_cache_dir *validate_untracked_cache(struct dir_struct *dir,
-						      int base_len,
-						      const struct pathspec *pathspec)
+static struct untracked_cache_dir *
+validate_untracked_cache(struct dir_struct *dir, int base_len,
+			 const struct pathspec *pathspec)
 {
 	struct untracked_cache_dir *root;
 
@@ -2079,8 +2008,8 @@ static struct untracked_cache_dir *validate_untracked_cache(struct dir_struct *d
 	     */
 	    !(dir->flags & DIR_SHOW_OTHER_DIRECTORIES) ||
 	    /* We don't support collecting ignore files */
-	    (dir->flags & (DIR_SHOW_IGNORED | DIR_SHOW_IGNORED_TOO |
-			   DIR_COLLECT_IGNORED)))
+	    (dir->flags &
+	     (DIR_SHOW_IGNORED | DIR_SHOW_IGNORED_TOO | DIR_COLLECT_IGNORED)))
 		return NULL;
 
 	/*
@@ -2143,7 +2072,8 @@ int read_directory(struct dir_struct *dir, struct index_state *istate,
 		 */
 		dir->untracked = NULL;
 	if (!len || treat_leading_path(dir, istate, path, len, pathspec))
-		read_directory_recursive(dir, istate, path, len, untracked, 0, 0, pathspec);
+		read_directory_recursive(dir, istate, path, len, untracked, 0,
+					 0, pathspec);
 	QSORT(dir->entries, dir->nr, cmp_dir_entry);
 	QSORT(dir->ignored, dir->ignored_nr, cmp_dir_entry);
 
@@ -2153,13 +2083,14 @@ int read_directory(struct dir_struct *dir, struct index_state *istate,
 	 * we discard these, but given DIR_KEEP_UNTRACKED_CONTENTS we do not.
 	 */
 	if ((dir->flags & DIR_SHOW_IGNORED_TOO) &&
-		     !(dir->flags & DIR_KEEP_UNTRACKED_CONTENTS)) {
+	    !(dir->flags & DIR_KEEP_UNTRACKED_CONTENTS)) {
 		int i, j;
 
-		/* remove from dir->entries untracked contents of untracked dirs */
+		/* remove from dir->entries untracked contents of untracked dirs
+		 */
 		for (i = j = 0; j < dir->nr; j++) {
-			if (i &&
-			    check_dir_entry_contains(dir->entries[i - 1], dir->entries[j])) {
+			if (i && check_dir_entry_contains(dir->entries[i - 1],
+							  dir->entries[j])) {
 				FREE_AND_NULL(dir->entries[j]);
 			} else {
 				dir->entries[i++] = dir->entries[j];
@@ -2170,7 +2101,8 @@ int read_directory(struct dir_struct *dir, struct index_state *istate,
 	}
 
 	if (dir->untracked) {
-		static struct trace_key trace_untracked_stats = TRACE_KEY_INIT(UNTRACKED_STATS);
+		static struct trace_key trace_untracked_stats = TRACE_KEY_INIT(
+			UNTRACKED_STATS);
 		trace_printf_key(&trace_untracked_stats,
 				 "node creation: %u\n"
 				 "gitignore invalidation: %u\n"
@@ -2324,8 +2256,7 @@ static int remove_dir_recurse(struct strbuf *path, int flag, int *kept_up)
 		} else if (S_ISDIR(st.st_mode)) {
 			if (!remove_dir_recurse(path, flag, &kept_down))
 				continue; /* happy */
-		} else if (!only_empty &&
-			   (!unlink(path->buf) || errno == ENOENT)) {
+		} else if (!only_empty && (!unlink(path->buf) || errno == ENOENT)) {
 			continue; /* happy, too */
 		}
 
@@ -2354,7 +2285,7 @@ int remove_dir_recursively(struct strbuf *path, int flag)
 
 static GIT_PATH_FUNC(git_path_info_exclude, "info/exclude")
 
-void setup_standard_excludes(struct dir_struct *dir)
+	void setup_standard_excludes(struct dir_struct *dir)
 {
 	dir->exclude_per_dir = ".gitignore";
 
@@ -2363,14 +2294,17 @@ void setup_standard_excludes(struct dir_struct *dir)
 		excludes_file = xdg_config_home("ignore");
 	if (excludes_file && !access_or_warn(excludes_file, R_OK, 0))
 		add_excludes_from_file_1(dir, excludes_file,
-					 dir->untracked ? &dir->ss_excludes_file : NULL);
+					 dir->untracked ? &dir->ss_excludes_file :
+							  NULL);
 
 	/* per repository user preference */
 	if (startup_info->have_repository) {
 		const char *path = git_path_info_exclude();
 		if (!access_or_warn(path, R_OK, 0))
 			add_excludes_from_file_1(dir, path,
-						 dir->untracked ? &dir->ss_info_exclude : NULL);
+						 dir->untracked ?
+							 &dir->ss_info_exclude :
+							 NULL);
 	}
 }
 
@@ -2437,9 +2371,9 @@ struct ondisk_untracked_cache {
 #define ouc_size(len) (ouc_offset(exclude_per_dir) + len + 1)
 
 struct write_data {
-	int index;	   /* number of written untracked_cache_dir */
+	int index; /* number of written untracked_cache_dir */
 	struct ewah_bitmap *check_only; /* from untracked_cache_dir */
-	struct ewah_bitmap *valid;	/* from untracked_cache_dir */
+	struct ewah_bitmap *valid; /* from untracked_cache_dir */
 	struct ewah_bitmap *sha1_valid; /* set if exclude_sha1 is not null */
 	struct strbuf out;
 	struct strbuf sb_stat;
@@ -2448,19 +2382,19 @@ struct write_data {
 
 static void stat_data_to_disk(struct stat_data *to, const struct stat_data *from)
 {
-	to->sd_ctime.sec  = htonl(from->sd_ctime.sec);
+	to->sd_ctime.sec = htonl(from->sd_ctime.sec);
 	to->sd_ctime.nsec = htonl(from->sd_ctime.nsec);
-	to->sd_mtime.sec  = htonl(from->sd_mtime.sec);
+	to->sd_mtime.sec = htonl(from->sd_mtime.sec);
 	to->sd_mtime.nsec = htonl(from->sd_mtime.nsec);
-	to->sd_dev	  = htonl(from->sd_dev);
-	to->sd_ino	  = htonl(from->sd_ino);
-	to->sd_uid	  = htonl(from->sd_uid);
-	to->sd_gid	  = htonl(from->sd_gid);
-	to->sd_size	  = htonl(from->sd_size);
+	to->sd_dev = htonl(from->sd_dev);
+	to->sd_ino = htonl(from->sd_ino);
+	to->sd_uid = htonl(from->sd_uid);
+	to->sd_gid = htonl(from->sd_gid);
+	to->sd_size = htonl(from->sd_size);
 }
 
-static void write_one_dir(struct untracked_cache_dir *untracked,
-			  struct write_data *wd)
+static void
+write_one_dir(struct untracked_cache_dir *untracked, struct write_data *wd)
 {
 	struct stat_data stat_data;
 	struct strbuf *out = &wd->out;
@@ -2519,8 +2453,10 @@ void write_untracked_extension(struct strbuf *out, struct untracked_cache *untra
 	size_t len = strlen(untracked->exclude_per_dir);
 
 	FLEX_ALLOC_MEM(ouc, exclude_per_dir, untracked->exclude_per_dir, len);
-	stat_data_to_disk(&ouc->info_exclude_stat, &untracked->ss_info_exclude.stat);
-	stat_data_to_disk(&ouc->excludes_file_stat, &untracked->ss_excludes_file.stat);
+	stat_data_to_disk(&ouc->info_exclude_stat,
+			  &untracked->ss_info_exclude.stat);
+	stat_data_to_disk(&ouc->excludes_file_stat,
+			  &untracked->ss_excludes_file.stat);
 	hashcpy(ouc->info_exclude_sha1, untracked->ss_info_exclude.sha1);
 	hashcpy(ouc->excludes_file_sha1, untracked->ss_excludes_file.sha1);
 	ouc->dir_flags = htonl(untracked->dir_flags);
@@ -2538,9 +2474,9 @@ void write_untracked_extension(struct strbuf *out, struct untracked_cache *untra
 		return;
 	}
 
-	wd.index      = 0;
+	wd.index = 0;
 	wd.check_only = ewah_new();
-	wd.valid      = ewah_new();
+	wd.valid = ewah_new();
 	wd.sha1_valid = ewah_new();
 	strbuf_init(&wd.out, 1024);
 	strbuf_init(&wd.sb_stat, 1024);
@@ -2599,19 +2535,19 @@ struct read_data {
 static void stat_data_from_disk(struct stat_data *to, const unsigned char *data)
 {
 	memcpy(to, data, sizeof(*to));
-	to->sd_ctime.sec  = ntohl(to->sd_ctime.sec);
+	to->sd_ctime.sec = ntohl(to->sd_ctime.sec);
 	to->sd_ctime.nsec = ntohl(to->sd_ctime.nsec);
-	to->sd_mtime.sec  = ntohl(to->sd_mtime.sec);
+	to->sd_mtime.sec = ntohl(to->sd_mtime.sec);
 	to->sd_mtime.nsec = ntohl(to->sd_mtime.nsec);
-	to->sd_dev	  = ntohl(to->sd_dev);
-	to->sd_ino	  = ntohl(to->sd_ino);
-	to->sd_uid	  = ntohl(to->sd_uid);
-	to->sd_gid	  = ntohl(to->sd_gid);
-	to->sd_size	  = ntohl(to->sd_size);
+	to->sd_dev = ntohl(to->sd_dev);
+	to->sd_ino = ntohl(to->sd_ino);
+	to->sd_uid = ntohl(to->sd_uid);
+	to->sd_gid = ntohl(to->sd_gid);
+	to->sd_size = ntohl(to->sd_size);
 }
 
-static int read_one_dir(struct untracked_cache_dir **untracked_,
-			struct read_data *rd)
+static int
+read_one_dir(struct untracked_cache_dir **untracked_, struct read_data *rd)
 {
 	struct untracked_cache_dir ud, *untracked;
 	const unsigned char *next, *data = rd->data, *end = rd->end;
@@ -2624,9 +2560,9 @@ static int read_one_dir(struct untracked_cache_dir **untracked_,
 	value = decode_varint(&next);
 	if (next > end)
 		return -1;
-	ud.recurse	   = 1;
+	ud.recurse = 1;
 	ud.untracked_alloc = value;
-	ud.untracked_nr	   = value;
+	ud.untracked_nr = value;
 	if (ud.untracked_nr)
 		ALLOC_ARRAY(ud.untracked, ud.untracked_nr);
 	data = next;
@@ -2652,7 +2588,7 @@ static int read_one_dir(struct untracked_cache_dir **untracked_,
 		next = data + len + 1;
 		if (next > rd->end)
 			return -1;
-		untracked->untracked[i] = xstrdup((const char*)data);
+		untracked->untracked[i] = xstrdup((const char *)data);
 		data = next;
 	}
 
@@ -2700,8 +2636,7 @@ static void read_sha1(size_t pos, void *cb)
 }
 
 static void load_sha1_stat(struct sha1_stat *sha1_stat,
-			   const unsigned char *data,
-			   const unsigned char *sha1)
+			   const unsigned char *data, const unsigned char *sha1)
 {
 	stat_data_from_disk(&sha1_stat->stat, data);
 	hashcpy(sha1_stat->sha1, sha1);
@@ -2733,8 +2668,7 @@ struct untracked_cache *read_untracked_extension(const void *data, unsigned long
 	uc = xcalloc(1, sizeof(*uc));
 	strbuf_init(&uc->ident, ident_len);
 	strbuf_add(&uc->ident, ident, ident_len);
-	load_sha1_stat(&uc->ss_info_exclude,
-		       next + ouc_offset(info_exclude_stat),
+	load_sha1_stat(&uc->ss_info_exclude, next + ouc_offset(info_exclude_stat),
 		       next + ouc_offset(info_exclude_sha1));
 	load_sha1_stat(&uc->ss_excludes_file,
 		       next + ouc_offset(excludes_file_stat),
@@ -2751,12 +2685,12 @@ struct untracked_cache *read_untracked_extension(const void *data, unsigned long
 	if (next > end || len == 0)
 		goto done2;
 
-	rd.valid      = ewah_new();
+	rd.valid = ewah_new();
 	rd.check_only = ewah_new();
 	rd.sha1_valid = ewah_new();
-	rd.data	      = next;
-	rd.end	      = end;
-	rd.index      = 0;
+	rd.data = next;
+	rd.end = end;
+	rd.index = 0;
 	ALLOC_ARRAY(rd.ucd, len);
 
 	if (read_one_dir(&uc->root, &rd) || rd.index != len)
@@ -2836,11 +2770,10 @@ static int invalidate_one_component(struct untracked_cache *uc,
 
 	if (rest) {
 		int component_len = rest - path;
-		struct untracked_cache_dir *d =
-			lookup_untracked(uc, dir, path, component_len);
-		int ret =
-			invalidate_one_component(uc, d, rest + 1,
-						 len - (component_len + 1));
+		struct untracked_cache_dir *d = lookup_untracked(uc, dir, path,
+								 component_len);
+		int ret = invalidate_one_component(uc, d, rest + 1,
+						   len - (component_len + 1));
 		if (ret)
 			invalidate_one_directory(uc, dir);
 		return ret;
@@ -2850,8 +2783,7 @@ static int invalidate_one_component(struct untracked_cache *uc,
 	return uc->dir_flags & DIR_SHOW_OTHER_DIRECTORIES;
 }
 
-void untracked_cache_invalidate_path(struct index_state *istate,
-				     const char *path)
+void untracked_cache_invalidate_path(struct index_state *istate, const char *path)
 {
 	if (!istate->untracked || !istate->untracked->root)
 		return;
@@ -2859,14 +2791,12 @@ void untracked_cache_invalidate_path(struct index_state *istate,
 				 path, strlen(path));
 }
 
-void untracked_cache_remove_from_index(struct index_state *istate,
-				       const char *path)
+void untracked_cache_remove_from_index(struct index_state *istate, const char *path)
 {
 	untracked_cache_invalidate_path(istate, path);
 }
 
-void untracked_cache_add_to_index(struct index_state *istate,
-				  const char *path)
+void untracked_cache_add_to_index(struct index_state *istate, const char *path)
 {
 	untracked_cache_invalidate_path(istate, path);
 }
@@ -2909,11 +2839,12 @@ void connect_work_tree_and_git_dir(const char *work_tree_, const char *git_dir_)
 /*
  * Migrate the git directory of the given path from old_git_dir to new_git_dir.
  */
-void relocate_gitdir(const char *path, const char *old_git_dir, const char *new_git_dir)
+void relocate_gitdir(const char *path, const char *old_git_dir,
+		     const char *new_git_dir)
 {
 	if (rename(old_git_dir, new_git_dir) < 0)
 		die_errno(_("could not migrate git directory from '%s' to '%s'"),
-			old_git_dir, new_git_dir);
+			  old_git_dir, new_git_dir);
 
 	connect_work_tree_and_git_dir(path, new_git_dir);
 }

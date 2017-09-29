@@ -24,18 +24,18 @@
  */
 static void sort_revindex(struct revindex_entry *entries, unsigned n, off_t max)
 {
-	/*
-	 * We use a "digit" size of 16 bits. That keeps our memory
-	 * usage reasonable, and we can generally (for a 4G or smaller
-	 * packfile) quit after two rounds of radix-sorting.
-	 */
+/*
+ * We use a "digit" size of 16 bits. That keeps our memory
+ * usage reasonable, and we can generally (for a 4G or smaller
+ * packfile) quit after two rounds of radix-sorting.
+ */
 #define DIGIT_SIZE (16)
 #define BUCKETS (1 << DIGIT_SIZE)
-	/*
-	 * We want to know the bucket that a[i] will go into when we are using
-	 * the digit that is N bits from the (least significant) end.
-	 */
-#define BUCKET_FOR(a, i, bits) (((a)[(i)].offset >> (bits)) & (BUCKETS-1))
+/*
+ * We want to know the bucket that a[i] will go into when we are using
+ * the digit that is N bits from the (least significant) end.
+ */
+#define BUCKET_FOR(a, i, bits) (((a)[(i)].offset >> (bits)) & (BUCKETS - 1))
 
 	/*
 	 * We need O(n) temporary storage. Rather than do an extra copy of the
@@ -74,7 +74,7 @@ static void sort_revindex(struct revindex_entry *entries, unsigned n, off_t max)
 		for (i = 0; i < n; i++)
 			pos[BUCKET_FOR(from, i, bits)]++;
 		for (i = 1; i < BUCKETS; i++)
-			pos[i] += pos[i-1];
+			pos[i] += pos[i - 1];
 
 		/*
 		 * Now we can drop the elements into their correct buckets (in
@@ -126,18 +126,17 @@ static void create_pack_revindex(struct packed_git *p)
 	index += 4 * 256;
 
 	if (p->index_version > 1) {
-		const uint32_t *off_32 =
-			(uint32_t *)(index + 8 + p->num_objects * (20 + 4));
+		const uint32_t *off_32 = (uint32_t *)(index + 8 +
+						      p->num_objects * (20 + 4));
 		const uint32_t *off_64 = off_32 + p->num_objects;
 		for (i = 0; i < num_ent; i++) {
 			uint32_t off = ntohl(*off_32++);
 			if (!(off & 0x80000000)) {
 				p->revindex[i].offset = off;
 			} else {
-				p->revindex[i].offset =
-					((uint64_t)ntohl(*off_64++)) << 32;
-				p->revindex[i].offset |=
-					ntohl(*off_64++);
+				p->revindex[i].offset = ((uint64_t)ntohl(*off_64++))
+							<< 32;
+				p->revindex[i].offset |= ntohl(*off_64++);
 			}
 			p->revindex[i].nr = i;
 		}

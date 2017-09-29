@@ -7,8 +7,13 @@
 #define debug_mm(...) fprintf(stderr, __VA_ARGS__)
 #define debug_str(X) ((X) ? (X) : "(none)")
 #else
-static inline void debug_mm(const char *format, ...) {}
-static inline const char *debug_str(const char *s) { return s; }
+static inline void debug_mm(const char *format, ...)
+{
+}
+static inline const char *debug_str(const char *s)
+{
+	return s;
+}
 #endif
 
 const char *git_mailmap_file;
@@ -31,8 +36,8 @@ struct mailmap_entry {
 static void free_mailmap_info(void *p, const char *s)
 {
 	struct mailmap_info *mi = (struct mailmap_info *)p;
-	debug_mm("mailmap: -- complex: '%s' -> '%s' <%s>\n",
-		 s, debug_str(mi->name), debug_str(mi->email));
+	debug_mm("mailmap: -- complex: '%s' -> '%s' <%s>\n", s,
+		 debug_str(mi->name), debug_str(mi->email));
 	free(mi->name);
 	free(mi->email);
 }
@@ -40,10 +45,10 @@ static void free_mailmap_info(void *p, const char *s)
 static void free_mailmap_entry(void *p, const char *s)
 {
 	struct mailmap_entry *me = (struct mailmap_entry *)p;
-	debug_mm("mailmap: removing entries for <%s>, with %d sub-entries\n",
-		 s, me->namemap.nr);
-	debug_mm("mailmap: - simple: '%s' <%s>\n",
-		 debug_str(me->name), debug_str(me->email));
+	debug_mm("mailmap: removing entries for <%s>, with %d sub-entries\n", s,
+		 me->namemap.nr);
+	debug_mm("mailmap: - simple: '%s' <%s>\n", debug_str(me->name),
+		 debug_str(me->email));
 
 	free(me->name);
 	free(me->email);
@@ -66,9 +71,8 @@ static int namemap_cmp(const char *a, const char *b)
 	return strcasecmp(a, b);
 }
 
-static void add_mapping(struct string_list *map,
-			char *new_name, char *new_email,
-			char *old_name, char *old_email)
+static void add_mapping(struct string_list *map, char *new_name,
+			char *new_email, char *old_name, char *old_email)
 {
 	struct mailmap_entry *me;
 	struct string_list_item *item;
@@ -108,42 +112,41 @@ static void add_mapping(struct string_list *map,
 		string_list_insert(&me->namemap, old_name)->util = mi;
 	}
 
-	debug_mm("mailmap:  '%s' <%s> -> '%s' <%s>\n",
-		 debug_str(old_name), old_email,
-		 debug_str(new_name), debug_str(new_email));
+	debug_mm("mailmap:  '%s' <%s> -> '%s' <%s>\n", debug_str(old_name),
+		 old_email, debug_str(new_name), debug_str(new_email));
 }
 
-static char *parse_name_and_email(char *buffer, char **name,
-				  char **email, int allow_empty_email)
+static char *parse_name_and_email(char *buffer, char **name, char **email,
+				  int allow_empty_email)
 {
 	char *left, *right, *nstart, *nend;
 	*name = *email = NULL;
 
 	if ((left = strchr(buffer, '<')) == NULL)
 		return NULL;
-	if ((right = strchr(left+1, '>')) == NULL)
+	if ((right = strchr(left + 1, '>')) == NULL)
 		return NULL;
-	if (!allow_empty_email && (left+1 == right))
+	if (!allow_empty_email && (left + 1 == right))
 		return NULL;
 
 	/* remove whitespace from beginning and end of name */
 	nstart = buffer;
 	while (isspace(*nstart) && nstart < left)
 		++nstart;
-	nend = left-1;
+	nend = left - 1;
 	while (nend > nstart && isspace(*nend))
 		--nend;
 
 	*name = (nstart <= nend ? nstart : NULL);
-	*email = left+1;
-	*(nend+1) = '\0';
+	*email = left + 1;
+	*(nend + 1) = '\0';
 	*right++ = '\0';
 
 	return (*right == '\0' ? NULL : right);
 }
 
-static void read_mailmap_line(struct string_list *map, char *buffer,
-			      char **repo_abbrev)
+static void
+read_mailmap_line(struct string_list *map, char *buffer, char **repo_abbrev)
 {
 	char *name1 = NULL, *email1 = NULL, *name2 = NULL, *email2 = NULL;
 	if (buffer[0] == '#') {
@@ -196,8 +199,8 @@ static int read_mailmap_file(struct string_list *map, const char *filename,
 	return 0;
 }
 
-static void read_mailmap_string(struct string_list *map, char *buf,
-				char **repo_abbrev)
+static void
+read_mailmap_string(struct string_list *map, char *buf, char **repo_abbrev)
 {
 	while (*buf) {
 		char *end = strchrnul(buf, '\n');
@@ -210,9 +213,8 @@ static void read_mailmap_string(struct string_list *map, char *buf,
 	}
 }
 
-static int read_mailmap_blob(struct string_list *map,
-			     const char *name,
-			     char **repo_abbrev)
+static int
+read_mailmap_blob(struct string_list *map, const char *name, char **repo_abbrev)
 {
 	struct object_id oid;
 	char *buf;
@@ -265,8 +267,8 @@ void clear_mailmap(struct string_list *map)
  * Look for an entry in map that match string[0:len]; string[len]
  * does not have to be NUL (but it could be).
  */
-static struct string_list_item *lookup_prefix(struct string_list *map,
-					      const char *string, size_t len)
+static struct string_list_item *
+lookup_prefix(struct string_list *map, const char *string, size_t len)
 {
 	int i = string_list_find_insert_index(map, string, 1);
 	if (i < 0) {
@@ -312,16 +314,14 @@ static struct string_list_item *lookup_prefix(struct string_list *map,
 	return NULL;
 }
 
-int map_user(struct string_list *map,
-	     const char **email, size_t *emaillen,
+int map_user(struct string_list *map, const char **email, size_t *emaillen,
 	     const char **name, size_t *namelen)
 {
 	struct string_list_item *item;
 	struct mailmap_entry *me;
 
-	debug_mm("map_user: map '%.*s' <%.*s>\n",
-		 (int)*namelen, debug_str(*name),
-		 (int)*emaillen, debug_str(*email));
+	debug_mm("map_user: map '%.*s' <%.*s>\n", (int)*namelen,
+		 debug_str(*name), (int)*emaillen, debug_str(*email));
 
 	item = lookup_prefix(map, *email, *emaillen);
 	if (item != NULL) {
@@ -345,16 +345,15 @@ int map_user(struct string_list *map,
 			return 0;
 		}
 		if (mi->email) {
-				*email = mi->email;
-				*emaillen = strlen(*email);
+			*email = mi->email;
+			*emaillen = strlen(*email);
 		}
 		if (mi->name) {
-				*name = mi->name;
-				*namelen = strlen(*name);
+			*name = mi->name;
+			*namelen = strlen(*name);
 		}
-		debug_mm("map_user:  to '%.*s' <%.*s>\n",
-			 (int)*namelen, debug_str(*name),
-			 (int)*emaillen, debug_str(*email));
+		debug_mm("map_user:  to '%.*s' <%.*s>\n", (int)*namelen,
+			 debug_str(*name), (int)*emaillen, debug_str(*email));
 		return 1;
 	}
 	debug_mm("map_user:  --\n");

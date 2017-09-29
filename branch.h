@@ -18,8 +18,7 @@
  *   - track causes the new branch to be configured to merge the remote branch
  *     that start_name is a tracking branch for (if any).
  */
-void create_branch(const char *name, const char *start_name,
-		   int force, int reflog,
+void create_branch(const char *name, const char *start_name, int force, int reflog,
 		   int clobber_head, int quiet, enum branch_track track);
 
 /*
@@ -38,7 +37,8 @@ void create_branch(const char *name, const char *start_name,
  * longer run for sanity.
  *
  */
-int validate_new_branchname(const char *name, struct strbuf *ref, int force, int attr_only);
+int validate_new_branchname(const char *name, struct strbuf *ref, int force,
+			    int attr_only);
 
 /*
  * Remove information about the state of working on the current
@@ -52,7 +52,8 @@ void remove_branch_state(void);
  * Returns 0 on success.
  */
 #define BRANCH_CONFIG_VERBOSE 01
-extern int install_branch_config(int flag, const char *local, const char *origin, const char *remote);
+extern int install_branch_config(int flag, const char *local,
+				 const char *origin, const char *remote);
 
 /*
  * Read branch description

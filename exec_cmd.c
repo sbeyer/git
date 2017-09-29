@@ -2,7 +2,7 @@
 #include "exec_cmd.h"
 #include "quote.h"
 #include "argv-array.h"
-#define MAX_ARGS	32
+#define MAX_ARGS 32
 
 static const char *argv_exec_path;
 
@@ -16,14 +16,14 @@ static const char *system_prefix(void)
 	assert(argv0_path);
 	assert(is_absolute_path(argv0_path));
 
-	if (!prefix &&
-	    !(prefix = strip_path_suffix(argv0_path, GIT_EXEC_PATH)) &&
+	if (!prefix && !(prefix = strip_path_suffix(argv0_path, GIT_EXEC_PATH)) &&
 	    !(prefix = strip_path_suffix(argv0_path, BINDIR)) &&
 	    !(prefix = strip_path_suffix(argv0_path, "git"))) {
 		prefix = PREFIX;
 		trace_printf("RUNTIME_PREFIX requested, "
-				"but prefix computation failed.  "
-				"Using static fallback '%s'.\n", prefix);
+			     "but prefix computation failed.  "
+			     "Using static fallback '%s'.\n",
+			     prefix);
 	}
 	return prefix;
 }
@@ -73,7 +73,6 @@ void git_set_argv_exec_path(const char *exec_path)
 	 */
 	setenv(EXEC_PATH_ENVIRONMENT, exec_path, 1);
 }
-
 
 /* Returns the highest-priority, location to look for git programs. */
 const char *git_exec_path(void)
@@ -125,7 +124,8 @@ const char **prepare_git_cmd(struct argv_array *out, const char **argv)
 	return out->argv;
 }
 
-int execv_git_cmd(const char **argv) {
+int execv_git_cmd(const char **argv)
+{
 	struct argv_array nargv = ARGV_ARRAY_INIT;
 
 	prepare_git_cmd(&nargv, argv);
@@ -140,8 +140,7 @@ int execv_git_cmd(const char **argv) {
 	return -1;
 }
 
-
-int execl_git_cmd(const char *cmd,...)
+int execl_git_cmd(const char *cmd, ...)
 {
 	int argc;
 	const char *argv[MAX_ARGS + 1];

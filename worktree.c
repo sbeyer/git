@@ -17,7 +17,7 @@ void free_worktrees(struct worktree **worktrees)
 		free(worktrees[i]->lock_reason);
 		free(worktrees[i]);
 	}
-	free (worktrees);
+	free(worktrees);
 }
 
 /**
@@ -28,9 +28,7 @@ static void add_head_info(struct worktree *wt)
 	int flags;
 	const char *target;
 
-	target = refs_resolve_ref_unsafe(get_worktree_ref_store(wt),
-					 "HEAD",
-					 0,
+	target = refs_resolve_ref_unsafe(get_worktree_ref_store(wt), "HEAD", 0,
 					 wt->head_sha1, &flags);
 	if (!target)
 		return;
@@ -179,8 +177,8 @@ const char *get_worktree_git_dir(const struct worktree *wt)
 		return git_common_path("worktrees/%s", wt->id);
 }
 
-static struct worktree *find_worktree_by_suffix(struct worktree **list,
-						const char *suffix)
+static struct worktree *
+find_worktree_by_suffix(struct worktree **list, const char *suffix)
 {
 	struct worktree *found = NULL;
 	int nr_found = 0, suffixlen;
@@ -190,9 +188,9 @@ static struct worktree *find_worktree_by_suffix(struct worktree **list,
 		return NULL;
 
 	for (; *list && nr_found < 2; list++) {
-		const char	*path	 = (*list)->path;
-		int		 pathlen = strlen(path);
-		int		 start	 = pathlen - suffixlen;
+		const char *path = (*list)->path;
+		int pathlen = strlen(path);
+		int start = pathlen - suffixlen;
 
 		/* suffix must start at directory boundary */
 		if ((!start || (start > 0 && is_dir_sep(path[start - 1]))) &&
@@ -204,9 +202,8 @@ static struct worktree *find_worktree_by_suffix(struct worktree **list,
 	return nr_found == 1 ? found : NULL;
 }
 
-struct worktree *find_worktree(struct worktree **list,
-			       const char *prefix,
-			       const char *arg)
+struct worktree *
+find_worktree(struct worktree **list, const char *prefix, const char *arg)
 {
 	struct worktree *wt;
 	char *path;
@@ -254,35 +251,31 @@ const char *is_worktree_locked(struct worktree *wt)
 	return wt->lock_reason;
 }
 
-int is_worktree_being_rebased(const struct worktree *wt,
-			      const char *target)
+int is_worktree_being_rebased(const struct worktree *wt, const char *target)
 {
 	struct wt_status_state state;
 	int found_rebase;
 
 	memset(&state, 0, sizeof(state));
 	found_rebase = wt_status_check_rebase(wt, &state) &&
-		((state.rebase_in_progress ||
-		  state.rebase_interactive_in_progress) &&
-		 state.branch &&
-		 starts_with(target, "refs/heads/") &&
-		 !strcmp(state.branch, target + strlen("refs/heads/")));
+		       ((state.rebase_in_progress ||
+			 state.rebase_interactive_in_progress) &&
+			state.branch && starts_with(target, "refs/heads/") &&
+			!strcmp(state.branch, target + strlen("refs/heads/")));
 	free(state.branch);
 	free(state.onto);
 	return found_rebase;
 }
 
-int is_worktree_being_bisected(const struct worktree *wt,
-			       const char *target)
+int is_worktree_being_bisected(const struct worktree *wt, const char *target)
 {
 	struct wt_status_state state;
 	int found_rebase;
 
 	memset(&state, 0, sizeof(state));
-	found_rebase = wt_status_check_bisect(wt, &state) &&
-		state.branch &&
-		starts_with(target, "refs/heads/") &&
-		!strcmp(state.branch, target + strlen("refs/heads/"));
+	found_rebase = wt_status_check_bisect(wt, &state) && state.branch &&
+		       starts_with(target, "refs/heads/") &&
+		       !strcmp(state.branch, target + strlen("refs/heads/"));
 	free(state.branch);
 	return found_rebase;
 }
@@ -293,8 +286,7 @@ int is_worktree_being_bisected(const struct worktree *wt,
  * bisect). New commands that do similar things should update this
  * function as well.
  */
-const struct worktree *find_shared_symref(const char *symref,
-					  const char *target)
+const struct worktree *find_shared_symref(const char *symref, const char *target)
 {
 	const struct worktree *existing = NULL;
 	static struct worktree **worktrees;
@@ -325,8 +317,8 @@ const struct worktree *find_shared_symref(const char *symref,
 		}
 
 		refs = get_worktree_ref_store(wt);
-		symref_target = refs_resolve_ref_unsafe(refs, symref, 0,
-							NULL, &flags);
+		symref_target = refs_resolve_ref_unsafe(refs, symref, 0, NULL,
+							&flags);
 		if ((flags & REF_ISSYMREF) && !strcmp(symref_target, target)) {
 			existing = wt;
 			break;

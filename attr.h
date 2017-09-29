@@ -46,8 +46,8 @@ extern struct attr_check *attr_check_alloc(void);
 extern struct attr_check *attr_check_initl(const char *, ...);
 extern struct attr_check *attr_check_dup(const struct attr_check *check);
 
-extern struct attr_check_item *attr_check_append(struct attr_check *check,
-						 const struct git_attr *attr);
+extern struct attr_check_item *
+attr_check_append(struct attr_check *check, const struct git_attr *attr);
 
 extern void attr_check_reset(struct attr_check *check);
 extern void attr_check_clear(struct attr_check *check);
@@ -68,11 +68,7 @@ extern int git_check_attr(const char *path, struct attr_check *check);
  */
 extern void git_all_attrs(const char *path, struct attr_check *check);
 
-enum git_attr_direction {
-	GIT_ATTR_CHECKIN,
-	GIT_ATTR_CHECKOUT,
-	GIT_ATTR_INDEX
-};
+enum git_attr_direction { GIT_ATTR_CHECKIN, GIT_ATTR_CHECKOUT, GIT_ATTR_INDEX };
 void git_attr_set_direction(enum git_attr_direction new_direction,
 			    struct index_state *istate);
 

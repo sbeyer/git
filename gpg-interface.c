@@ -29,10 +29,10 @@ static struct {
 	{ 'B', "\n[GNUPG:] BADSIG " },
 	{ 'U', "\n[GNUPG:] TRUST_NEVER" },
 	{ 'U', "\n[GNUPG:] TRUST_UNDEFINED" },
-	{ 'E', "\n[GNUPG:] ERRSIG "},
-	{ 'X', "\n[GNUPG:] EXPSIG "},
-	{ 'Y', "\n[GNUPG:] EXPKEYSIG "},
-	{ 'R', "\n[GNUPG:] REVKEYSIG "},
+	{ 'E', "\n[GNUPG:] ERRSIG " },
+	{ 'X', "\n[GNUPG:] EXPSIG " },
+	{ 'Y', "\n[GNUPG:] EXPKEYSIG " },
+	{ 'R', "\n[GNUPG:] REVKEYSIG " },
 };
 
 void parse_gpg_output(struct signature_check *sigc)
@@ -51,11 +51,13 @@ void parse_gpg_output(struct signature_check *sigc)
 			found += strlen(sigcheck_gpg_status[i].check);
 		}
 		sigc->result = sigcheck_gpg_status[i].result;
-		/* The trust messages are not followed by key/signer information */
+		/* The trust messages are not followed by key/signer information
+		 */
 		if (sigc->result != 'U') {
 			sigc->key = xmemdupz(found, 16);
-			/* The ERRSIG message is not followed by signer information */
-			if (sigc-> result != 'E') {
+			/* The ERRSIG message is not followed by signer
+			 * information */
+			if (sigc->result != 'E') {
 				found += 17;
 				next = strchrnul(found, '\n');
 				sigc->signer = xmemdupz(found, next - found);
@@ -65,7 +67,7 @@ void parse_gpg_output(struct signature_check *sigc)
 }
 
 int check_signature(const char *payload, size_t plen, const char *signature,
-	size_t slen, struct signature_check *sigc)
+		    size_t slen, struct signature_check *sigc)
 {
 	struct strbuf gpg_output = STRBUF_INIT;
 	struct strbuf gpg_status = STRBUF_INIT;
@@ -82,7 +84,7 @@ int check_signature(const char *payload, size_t plen, const char *signature,
 	sigc->gpg_status = strbuf_detach(&gpg_status, NULL);
 	parse_gpg_output(sigc);
 
- out:
+out:
 	strbuf_release(&gpg_status);
 	strbuf_release(&gpg_output);
 
@@ -91,8 +93,8 @@ int check_signature(const char *payload, size_t plen, const char *signature,
 
 void print_signature_buffer(const struct signature_check *sigc, unsigned flags)
 {
-	const char *output = flags & GPG_VERIFY_RAW ?
-		sigc->gpg_status : sigc->gpg_output;
+	const char *output = flags & GPG_VERIFY_RAW ? sigc->gpg_status :
+						      sigc->gpg_output;
 
 	if (flags & GPG_VERIFY_VERBOSE && sigc->payload)
 		fputs(sigc->payload, stdout);
@@ -112,7 +114,7 @@ size_t parse_signature(const char *buf, unsigned long size)
 	char *eol;
 	size_t len = 0;
 	while (len < size && !starts_with(buf + len, PGP_SIGNATURE) &&
-			!starts_with(buf + len, PGP_MESSAGE)) {
+	       !starts_with(buf + len, PGP_MESSAGE)) {
 		eol = memchr(buf + len, '\n', size - len);
 		len += eol ? eol - (buf + len) + 1 : size - len;
 	}
@@ -142,7 +144,7 @@ const char *get_signing_key(void)
 {
 	if (configured_signing_key)
 		return configured_signing_key;
-	return git_committer_info(IDENT_STRICT|IDENT_NO_DATE);
+	return git_committer_info(IDENT_STRICT | IDENT_NO_DATE);
 }
 
 /*
@@ -151,18 +153,16 @@ const char *get_signing_key(void)
  * strbuf instance, which would cause the detached signature appended
  * at the end.
  */
-int sign_buffer(struct strbuf *buffer, struct strbuf *signature, const char *signing_key)
+int sign_buffer(struct strbuf *buffer, struct strbuf *signature,
+		const char *signing_key)
 {
 	struct child_process gpg = CHILD_PROCESS_INIT;
 	int ret;
 	size_t i, j, bottom;
 	struct strbuf gpg_status = STRBUF_INIT;
 
-	argv_array_pushl(&gpg.args,
-			 gpg_program,
-			 "--status-fd=2",
-			 "-bsau", signing_key,
-			 NULL);
+	argv_array_pushl(&gpg.args, gpg_program, "--status-fd=2", "-bsau",
+			 signing_key, NULL);
 
 	bottom = signature->len;
 
@@ -171,8 +171,8 @@ int sign_buffer(struct strbuf *buffer, struct strbuf *signature, const char *sig
 	 * because gpg exits without reading and then write gets SIGPIPE.
 	 */
 	sigchain_push(SIGPIPE, SIG_IGN);
-	ret = pipe_command(&gpg, buffer->buf, buffer->len,
-			   signature, 1024, &gpg_status, 0);
+	ret = pipe_command(&gpg, buffer->buf, buffer->len, signature, 1024,
+			   &gpg_status, 0);
 	sigchain_pop(SIGPIPE);
 
 	ret |= !strstr(gpg_status.buf, "\n[GNUPG:] SIG_CREATED ");
@@ -217,19 +217,16 @@ int verify_signed_buffer(const char *payload, size_t payload_size,
 		return -1;
 	}
 
-	argv_array_pushl(&gpg.args,
-			 gpg_program,
-			 "--status-fd=1",
-			 "--keyid-format=long",
-			 "--verify", temp->filename.buf, "-",
-			 NULL);
+	argv_array_pushl(&gpg.args, gpg_program, "--status-fd=1",
+			 "--keyid-format=long", "--verify", temp->filename.buf,
+			 "-", NULL);
 
 	if (!gpg_status)
 		gpg_status = &buf;
 
 	sigchain_push(SIGPIPE, SIG_IGN);
-	ret = pipe_command(&gpg, payload, payload_size,
-			   gpg_status, 0, gpg_output, 0);
+	ret = pipe_command(&gpg, payload, payload_size, gpg_status, 0,
+			   gpg_output, 0);
 	sigchain_pop(SIGPIPE);
 
 	delete_tempfile(&temp);

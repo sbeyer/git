@@ -4,9 +4,8 @@
 #include "submodule-config.h"
 
 /* The main repository */
-static struct repository the_repo = {
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, &the_index, 0, 0
-};
+static struct repository the_repo = { NULL, NULL, NULL, NULL,       NULL, NULL,
+				      NULL, NULL, NULL, &the_index, 0,    0 };
 struct repository *the_repository = &the_repo;
 
 static char *git_path_from_env(const char *envvar, const char *git_dir,
@@ -152,8 +151,7 @@ error:
  * Return 0 upon success and a non-zero value upon failure.
  */
 int repo_submodule_init(struct repository *submodule,
-			struct repository *superproject,
-			const char *path)
+			struct repository *superproject, const char *path)
 {
 	const struct submodule *sub;
 	struct strbuf gitdir = STRBUF_INIT;
@@ -178,8 +176,8 @@ int repo_submodule_init(struct repository *submodule,
 		 * submodule would not have a worktree.
 		 */
 		strbuf_reset(&gitdir);
-		strbuf_repo_git_path(&gitdir, superproject,
-				     "modules/%s", sub->name);
+		strbuf_repo_git_path(&gitdir, superproject, "modules/%s",
+				     sub->name);
 
 		if (repo_init(submodule, gitdir.buf, NULL)) {
 			ret = -1;
@@ -189,8 +187,9 @@ int repo_submodule_init(struct repository *submodule,
 
 	submodule->submodule_prefix = xstrfmt("%s%s/",
 					      superproject->submodule_prefix ?
-					      superproject->submodule_prefix :
-					      "", path);
+						      superproject->submodule_prefix :
+						      "",
+					      path);
 
 out:
 	strbuf_release(&gitdir);

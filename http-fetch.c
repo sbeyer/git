@@ -4,8 +4,9 @@
 #include "http.h"
 #include "walker.h"
 
-static const char http_fetch_usage[] = "git http-fetch "
-"[-c] [-t] [-a] [-v] [--recover] [-w ref] [--stdin] commit-id url";
+static const char http_fetch_usage[] =
+	"git http-fetch "
+	"[-c] [-t] [-a] [-v] [--recover] [-w ref] [--stdin] commit-id url";
 
 int cmd_main(int argc, const char **argv)
 {
@@ -51,7 +52,7 @@ int cmd_main(int argc, const char **argv)
 	if (commits_on_stdin) {
 		commits = walker_targets_stdin(&commit_id, &write_ref);
 	} else {
-		commit_id = (char **) &argv[arg++];
+		commit_id = (char **)&argv[arg++];
 		commits = 1;
 	}
 
@@ -81,9 +82,9 @@ int cmd_main(int argc, const char **argv)
 
 	if (walker->corrupt_object_found) {
 		fprintf(stderr,
-"Some loose object were found to be corrupt, but they might be just\n"
-"a false '404 Not Found' error message sent with incorrect HTTP\n"
-"status code.  Suggest running 'git fsck'.\n");
+			"Some loose object were found to be corrupt, but they might be just\n"
+			"a false '404 Not Found' error message sent with incorrect HTTP\n"
+			"status code.  Suggest running 'git fsck'.\n");
 	}
 
 	walker_free(walker);

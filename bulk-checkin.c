@@ -9,7 +9,7 @@
 #include "packfile.h"
 
 static struct bulk_checkin_state {
-	unsigned plugged:1;
+	unsigned plugged : 1;
 
 	char *pack_tmp_name;
 	struct sha1file *f;
@@ -45,9 +45,8 @@ static void finish_bulk_checkin(struct bulk_checkin_state *state)
 	}
 
 	strbuf_addf(&packname, "%s/pack/pack-", get_object_directory());
-	finish_tmp_packfile(&packname, state->pack_tmp_name,
-			    state->written, state->nr_written,
-			    &state->pack_idx_opts, oid.hash);
+	finish_tmp_packfile(&packname, state->pack_tmp_name, state->written,
+			    state->nr_written, &state->pack_idx_opts, oid.hash);
 	for (i = 0; i < state->nr_written; i++)
 		free(state->written[i]);
 
@@ -92,10 +91,9 @@ static int already_written(struct bulk_checkin_state *state, unsigned char sha1[
  * status before calling us just in case we ask it to call us again
  * with a new pack.
  */
-static int stream_to_pack(struct bulk_checkin_state *state,
-			  git_SHA_CTX *ctx, off_t *already_hashed_to,
-			  int fd, size_t size, enum object_type type,
-			  const char *path, unsigned flags)
+static int stream_to_pack(struct bulk_checkin_state *state, git_SHA_CTX *ctx,
+			  off_t *already_hashed_to, int fd, size_t size,
+			  enum object_type type, const char *path, unsigned flags)
 {
 	git_zstream s;
 	unsigned char obuf[16384];
@@ -139,8 +137,7 @@ static int stream_to_pack(struct bulk_checkin_state *state,
 				size_t written = s.next_out - obuf;
 
 				/* would we bust the size limit? */
-				if (state->nr_written &&
-				    pack_size_limit_cfg &&
+				if (state->nr_written && pack_size_limit_cfg &&
 				    pack_size_limit_cfg < state->offset + written) {
 					git_deflate_abort(&s);
 					return -1;
@@ -167,8 +164,7 @@ static int stream_to_pack(struct bulk_checkin_state *state,
 }
 
 /* Lazily create backing packfile for the state */
-static void prepare_to_stream(struct bulk_checkin_state *state,
-			      unsigned flags)
+static void prepare_to_stream(struct bulk_checkin_state *state, unsigned flags)
 {
 	if (!(flags & HASH_WRITE_OBJECT) || state->f)
 		return;
@@ -183,10 +179,8 @@ static void prepare_to_stream(struct bulk_checkin_state *state,
 }
 
 static int deflate_to_pack(struct bulk_checkin_state *state,
-			   unsigned char result_sha1[],
-			   int fd, size_t size,
-			   enum object_type type, const char *path,
-			   unsigned flags)
+			   unsigned char result_sha1[], int fd, size_t size,
+			   enum object_type type, const char *path, unsigned flags)
 {
 	off_t seekback, already_hashed_to;
 	git_SHA_CTX ctx;
@@ -196,11 +190,12 @@ static int deflate_to_pack(struct bulk_checkin_state *state,
 	struct pack_idx_entry *idx = NULL;
 
 	seekback = lseek(fd, 0, SEEK_CUR);
-	if (seekback == (off_t) -1)
+	if (seekback == (off_t)-1)
 		return error("cannot find the current offset");
 
 	header_len = xsnprintf((char *)obuf, sizeof(obuf), "%s %" PRIuMAX,
-			       typename(type), (uintmax_t)size) + 1;
+			       typename(type), (uintmax_t)size) +
+		     1;
 	git_SHA1_Init(&ctx);
 	git_SHA1_Update(&ctx, obuf, header_len);
 
@@ -217,8 +212,8 @@ static int deflate_to_pack(struct bulk_checkin_state *state,
 			idx->offset = state->offset;
 			crc32_begin(state->f);
 		}
-		if (!stream_to_pack(state, &ctx, &already_hashed_to,
-				    fd, size, type, path, flags))
+		if (!stream_to_pack(state, &ctx, &already_hashed_to, fd, size,
+				    type, path, flags))
 			break;
 		/*
 		 * Writing this object to the current pack will make
@@ -230,7 +225,7 @@ static int deflate_to_pack(struct bulk_checkin_state *state,
 		sha1file_truncate(state->f, &checkpoint);
 		state->offset = checkpoint.offset;
 		finish_bulk_checkin(state);
-		if (lseek(fd, seekback, SEEK_SET) == (off_t) -1)
+		if (lseek(fd, seekback, SEEK_SET) == (off_t)-1)
 			return error("cannot seek back");
 	}
 	git_SHA1_Final(result_sha1, &ctx);
@@ -244,20 +239,17 @@ static int deflate_to_pack(struct bulk_checkin_state *state,
 		free(idx);
 	} else {
 		hashcpy(idx->oid.hash, result_sha1);
-		ALLOC_GROW(state->written,
-			   state->nr_written + 1,
+		ALLOC_GROW(state->written, state->nr_written + 1,
 			   state->alloc_written);
 		state->written[state->nr_written++] = idx;
 	}
 	return 0;
 }
 
-int index_bulk_checkin(unsigned char *sha1,
-		       int fd, size_t size, enum object_type type,
-		       const char *path, unsigned flags)
+int index_bulk_checkin(unsigned char *sha1, int fd, size_t size,
+		       enum object_type type, const char *path, unsigned flags)
 {
-	int status = deflate_to_pack(&state, sha1, fd, size, type,
-				     path, flags);
+	int status = deflate_to_pack(&state, sha1, fd, size, type, path, flags);
 	if (!state.plugged)
 		finish_bulk_checkin(&state);
 	return status;

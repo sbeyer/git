@@ -47,8 +47,8 @@ static int score_matches(unsigned mode1, unsigned mode2, const char *path)
 	return score;
 }
 
-static void *fill_tree_desc_strict(struct tree_desc *desc,
-				   const struct object_id *hash)
+static void *
+fill_tree_desc_strict(struct tree_desc *desc, const struct object_id *hash)
 {
 	void *buffer;
 	enum object_type type;
@@ -63,11 +63,11 @@ static void *fill_tree_desc_strict(struct tree_desc *desc,
 	return buffer;
 }
 
-static int base_name_entries_compare(const struct name_entry *a,
-				     const struct name_entry *b)
+static int
+base_name_entries_compare(const struct name_entry *a, const struct name_entry *b)
 {
-	return base_name_compare(a->path, tree_entry_len(a), a->mode,
-				 b->path, tree_entry_len(b), b->mode);
+	return base_name_compare(a->path, tree_entry_len(a), a->mode, b->path,
+				 tree_entry_len(b), b->mode);
 }
 
 /*
@@ -120,11 +120,8 @@ static int score_trees(const struct object_id *hash1, const struct object_id *ha
  * Match one itself and its subtrees with two and pick the best match.
  */
 static void match_trees(const struct object_id *hash1,
-			const struct object_id *hash2,
-			int *best_score,
-			char **best_match,
-			const char *base,
-			int recurse_limit)
+			const struct object_id *hash2, int *best_score,
+			char **best_match, const char *base, int recurse_limit)
 {
 	struct tree_desc one;
 	void *one_buf = fill_tree_desc_strict(&one, hash1);
@@ -161,10 +158,8 @@ static void match_trees(const struct object_id *hash1,
  * A tree "hash1" has a subdirectory at "prefix".  Come up with a
  * tree object by replacing it with another tree "hash2".
  */
-static int splice_tree(const unsigned char *hash1,
-		       const char *prefix,
-		       const unsigned char *hash2,
-		       unsigned char *result)
+static int splice_tree(const unsigned char *hash1, const char *prefix,
+		       const unsigned char *hash2, unsigned char *result)
 {
 	char *subpath;
 	int toplen;
@@ -194,26 +189,24 @@ static int splice_tree(const unsigned char *hash1,
 		const struct object_id *oid;
 
 		oid = tree_entry_extract(&desc, &name, &mode);
-		if (strlen(name) == toplen &&
-		    !memcmp(name, prefix, toplen)) {
+		if (strlen(name) == toplen && !memcmp(name, prefix, toplen)) {
 			if (!S_ISDIR(mode))
-				die("entry %s in tree %s is not a tree",
-				    name, sha1_to_hex(hash1));
-			rewrite_here = (unsigned char *) oid->hash;
+				die("entry %s in tree %s is not a tree", name,
+				    sha1_to_hex(hash1));
+			rewrite_here = (unsigned char *)oid->hash;
 			break;
 		}
 		update_tree_entry(&desc);
 	}
 	if (!rewrite_here)
-		die("entry %.*s not found in tree %s",
-		    toplen, prefix, sha1_to_hex(hash1));
+		die("entry %.*s not found in tree %s", toplen, prefix,
+		    sha1_to_hex(hash1));
 	if (*subpath) {
 		status = splice_tree(rewrite_here, subpath, hash2, subtree);
 		if (status)
 			return status;
 		rewrite_with = subtree;
-	}
-	else
+	} else
 		rewrite_with = hash2;
 	hashcpy(rewrite_here, rewrite_with);
 	status = write_sha1_file(buf, sz, tree_type, result);
@@ -229,10 +222,8 @@ static int splice_tree(const unsigned char *hash1,
  * other hand, it could cover tree one and we might need to pick a
  * subtree of it.
  */
-void shift_tree(const struct object_id *hash1,
-		const struct object_id *hash2,
-		struct object_id *shifted,
-		int depth_limit)
+void shift_tree(const struct object_id *hash1, const struct object_id *hash2,
+		struct object_id *shifted, int depth_limit)
 {
 	char *add_prefix;
 	char *del_prefix;
@@ -272,8 +263,8 @@ void shift_tree(const struct object_id *hash1,
 			return;
 
 		if (get_tree_entry(hash2->hash, del_prefix, shifted->hash, &mode))
-			die("cannot find path %s in tree %s",
-			    del_prefix, oid_to_hex(hash2));
+			die("cannot find path %s in tree %s", del_prefix,
+			    oid_to_hex(hash2));
 		return;
 	}
 
@@ -288,10 +279,8 @@ void shift_tree(const struct object_id *hash1,
  * Unfortunately we cannot fundamentally tell which one to
  * be prefixed, as recursive merge can work in either direction.
  */
-void shift_tree_by(const struct object_id *hash1,
-		   const struct object_id *hash2,
-		   struct object_id *shifted,
-		   const char *shift_prefix)
+void shift_tree_by(const struct object_id *hash1, const struct object_id *hash2,
+		   struct object_id *shifted, const char *shift_prefix)
 {
 	struct object_id sub1, sub2;
 	unsigned mode1, mode2;

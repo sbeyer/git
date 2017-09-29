@@ -24,19 +24,15 @@ void credential_clear(struct credential *c)
 	credential_init(c);
 }
 
-int credential_match(const struct credential *want,
-		     const struct credential *have)
+int credential_match(const struct credential *want, const struct credential *have)
 {
 #define CHECK(x) (!want->x || (have->x && !strcmp(want->x, have->x)))
-	return CHECK(protocol) &&
-	       CHECK(host) &&
-	       CHECK(path) &&
-	       CHECK(username);
+	return CHECK(protocol) && CHECK(host) && CHECK(path) && CHECK(username);
 #undef CHECK
 }
 
-static int credential_config_callback(const char *var, const char *value,
-				      void *data)
+static int
+credential_config_callback(const char *var, const char *value, void *data)
 {
 	struct credential *c = data;
 	const char *key, *dot;
@@ -72,8 +68,7 @@ static int credential_config_callback(const char *var, const char *value,
 	} else if (!strcmp(key, "username")) {
 		if (!c->username)
 			c->username = xstrdup(value);
-	}
-	else if (!strcmp(key, "usehttppath"))
+	} else if (!strcmp(key, "usehttppath"))
 		c->use_http_path = git_config_bool(var, value);
 
 	return 0;
@@ -111,8 +106,7 @@ static void credential_describe(struct credential *c, struct strbuf *out)
 		strbuf_addf(out, "/%s", c->path);
 }
 
-static char *credential_ask_one(const char *what, struct credential *c,
-				int flags)
+static char *credential_ask_one(const char *what, struct credential *c, int flags)
 {
 	struct strbuf desc = STRBUF_INIT;
 	struct strbuf prompt = STRBUF_INIT;
@@ -135,10 +129,9 @@ static void credential_getpass(struct credential *c)
 {
 	if (!c->username)
 		c->username = credential_ask_one("Username", c,
-						 PROMPT_ASKPASS|PROMPT_ECHO);
+						 PROMPT_ASKPASS | PROMPT_ECHO);
 	if (!c->password)
-		c->password = credential_ask_one("Password", c,
-						 PROMPT_ASKPASS);
+		c->password = credential_ask_one("Password", c, PROMPT_ASKPASS);
 }
 
 int credential_read(struct credential *c, FILE *fp)
@@ -206,9 +199,8 @@ void credential_write(const struct credential *c, FILE *fp)
 	credential_write_item(fp, "password", c->password);
 }
 
-static int run_credential_helper(struct credential *c,
-				 const char *cmd,
-				 int want_output)
+static int
+run_credential_helper(struct credential *c, const char *cmd, int want_output)
 {
 	struct child_process helper = CHILD_PROCESS_INIT;
 	const char *argv[] = { NULL, NULL };
@@ -246,8 +238,8 @@ static int run_credential_helper(struct credential *c,
 	return 0;
 }
 
-static int credential_do(struct credential *c, const char *helper,
-			 const char *operation)
+static int
+credential_do(struct credential *c, const char *helper, const char *operation)
 {
 	struct strbuf cmd = STRBUF_INIT;
 	int r;
@@ -342,8 +334,7 @@ void credential_from_url(struct credential *c, const char *url)
 	if (!at || slash <= at) {
 		/* Case (1) */
 		host = cp;
-	}
-	else if (!colon || at <= colon) {
+	} else if (!colon || at <= colon) {
 		/* Case (2) */
 		c->username = url_decode_mem(cp, at - cp);
 		host = at + 1;

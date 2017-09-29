@@ -9,12 +9,11 @@
 #include "unpack-trees.h"
 #include "dir.h"
 
-static char const * const archive_usage[] = {
+static char const *const archive_usage[] = {
 	N_("git archive [<options>] <tree-ish> [<path>...]"),
 	N_("git archive --list"),
 	N_("git archive --remote <repo> [--exec <cmd>] [<options>] <tree-ish> [<path>...]"),
-	N_("git archive --remote <repo> [--exec <cmd>] --list"),
-	NULL
+	N_("git archive --remote <repo> [--exec <cmd>] --list"), NULL
 };
 
 static const struct archiver **archivers;
@@ -28,13 +27,12 @@ void register_archiver(struct archiver *ar)
 	archivers[nr_archivers++] = ar;
 }
 
-static void format_subst(const struct commit *commit,
-                         const char *src, size_t len,
-                         struct strbuf *buf)
+static void format_subst(const struct commit *commit, const char *src,
+			 size_t len, struct strbuf *buf)
 {
 	char *to_free = NULL;
 	struct strbuf fmt = STRBUF_INIT;
-	struct pretty_print_context ctx = {0};
+	struct pretty_print_context ctx = { 0 };
 	ctx.date_mode.type = DATE_NORMAL;
 	ctx.abbrev = DEFAULT_ABBREV;
 
@@ -56,17 +54,16 @@ static void format_subst(const struct commit *commit,
 		strbuf_add(buf, src, b - src);
 		format_commit_message(commit, fmt.buf, buf, &ctx);
 		len -= c + 1 - src;
-		src  = c + 1;
+		src = c + 1;
 	}
 	strbuf_add(buf, src, len);
 	strbuf_release(&fmt);
 	free(to_free);
 }
 
-void *sha1_file_to_archive(const struct archiver_args *args,
-			   const char *path, const unsigned char *sha1,
-			   unsigned int mode, enum object_type *type,
-			   unsigned long *sizep)
+void *sha1_file_to_archive(const struct archiver_args *args, const char *path,
+			   const unsigned char *sha1, unsigned int mode,
+			   enum object_type *type, unsigned long *sizep)
 {
 	void *buffer;
 	const struct commit *commit = args->convert ? args->commit : NULL;
@@ -122,8 +119,8 @@ static int check_attr_export_subst(const struct attr_check *check)
 }
 
 static int write_archive_entry(const unsigned char *sha1, const char *base,
-		int baselen, const char *filename, unsigned mode, int stage,
-		void *context)
+			       int baselen, const char *filename, unsigned mode,
+			       int stage, void *context)
 {
 	static struct strbuf path = STRBUF_INIT;
 	struct archiver_context *c = context;
@@ -164,19 +161,20 @@ static int write_archive_entry(const unsigned char *sha1, const char *base,
 	return write_entry(args, sha1, path.buf, path.len, mode);
 }
 
-static void queue_directory(const unsigned char *sha1,
-		struct strbuf *base, const char *filename,
-		unsigned mode, int stage, struct archiver_context *c)
+static void queue_directory(const unsigned char *sha1, struct strbuf *base,
+			    const char *filename, unsigned mode, int stage,
+			    struct archiver_context *c)
 {
 	struct directory *d;
 	size_t len = st_add4(base->len, 1, strlen(filename), 1);
 	d = xmalloc(st_add(sizeof(*d), len));
-	d->up	   = c->bottom;
+	d->up = c->bottom;
 	d->baselen = base->len;
-	d->mode	   = mode;
-	d->stage   = stage;
-	c->bottom  = d;
-	d->len = xsnprintf(d->path, len, "%.*s%s/", (int)base->len, base->buf, filename);
+	d->mode = mode;
+	d->stage = stage;
+	c->bottom = d;
+	d->len = xsnprintf(d->path, len, "%.*s%s/", (int)base->len, base->buf,
+			   filename);
 	hashcpy(d->oid.hash, sha1);
 }
 
@@ -189,18 +187,17 @@ static int write_directory(struct archiver_context *c)
 		return 0;
 	c->bottom = d->up;
 	d->path[d->len - 1] = '\0'; /* no trailing slash */
-	ret =
-		write_directory(c) ||
-		write_archive_entry(d->oid.hash, d->path, d->baselen,
-				    d->path + d->baselen, d->mode,
-				    d->stage, c) != READ_TREE_RECURSIVE;
+	ret = write_directory(c) ||
+	      write_archive_entry(d->oid.hash, d->path, d->baselen,
+				  d->path + d->baselen, d->mode, d->stage,
+				  c) != READ_TREE_RECURSIVE;
 	free(d);
 	return ret ? -1 : 0;
 }
 
 static int queue_or_write_archive_entry(const unsigned char *sha1,
-		struct strbuf *base, const char *filename,
-		unsigned mode, int stage, void *context)
+					struct strbuf *base, const char *filename,
+					unsigned mode, int stage, void *context)
 {
 	struct archiver_context *c = context;
 
@@ -224,8 +221,7 @@ static int queue_or_write_archive_entry(const unsigned char *sha1,
 
 		if (check_attr_export_ignore(check))
 			return 0;
-		queue_directory(sha1, base, filename,
-				mode, stage, c);
+		queue_directory(sha1, base, filename, mode, stage, c);
 		return READ_TREE_RECURSIVE;
 	}
 
@@ -236,7 +232,7 @@ static int queue_or_write_archive_entry(const unsigned char *sha1,
 }
 
 int write_archive_entries(struct archiver_args *args,
-		write_archive_entry_fn_t write_entry)
+			  write_archive_entry_fn_t write_entry)
 {
 	struct archiver_context context;
 	struct unpack_trees_options opts;
@@ -277,8 +273,7 @@ int write_archive_entries(struct archiver_args *args,
 	}
 
 	err = read_tree_recursive(args->tree, "", 0, 0, &args->pathspec,
-				  queue_or_write_archive_entry,
-				  &context);
+				  queue_or_write_archive_entry, &context);
 	if (err == READ_TREE_RECURSIVE)
 		err = 0;
 	while (context.bottom) {
@@ -303,9 +298,9 @@ static const struct archiver *lookup_archiver(const char *name)
 	return NULL;
 }
 
-static int reject_entry(const unsigned char *sha1, struct strbuf *base,
-			const char *filename, unsigned mode,
-			int stage, void *context)
+static int
+reject_entry(const unsigned char *sha1, struct strbuf *base,
+	     const char *filename, unsigned mode, int stage, void *context)
 {
 	int ret = -1;
 	if (S_ISDIR(mode)) {
@@ -327,36 +322,33 @@ static int path_exists(struct tree *tree, const char *path)
 
 	parse_pathspec(&pathspec, 0, 0, "", paths);
 	pathspec.recursive = 1;
-	ret = read_tree_recursive(tree, "", 0, 0, &pathspec,
-				  reject_entry, &pathspec);
+	ret = read_tree_recursive(tree, "", 0, 0, &pathspec, reject_entry,
+				  &pathspec);
 	clear_pathspec(&pathspec);
 	return ret != 0;
 }
 
-static void parse_pathspec_arg(const char **pathspec,
-		struct archiver_args *ar_args)
+static void parse_pathspec_arg(const char **pathspec, struct archiver_args *ar_args)
 {
 	/*
 	 * must be consistent with parse_pathspec in path_exists()
 	 * Also if pathspec patterns are dependent, we're in big
 	 * trouble as we test each one separately
 	 */
-	parse_pathspec(&ar_args->pathspec, 0,
-		       PATHSPEC_PREFER_FULL,
-		       "", pathspec);
+	parse_pathspec(&ar_args->pathspec, 0, PATHSPEC_PREFER_FULL, "", pathspec);
 	ar_args->pathspec.recursive = 1;
 	if (pathspec) {
 		while (*pathspec) {
 			if (**pathspec && !path_exists(ar_args->tree, *pathspec))
-				die(_("pathspec '%s' did not match any files"), *pathspec);
+				die(_("pathspec '%s' did not match any files"),
+				    *pathspec);
 			pathspec++;
 		}
 	}
 }
 
-static void parse_treeish_arg(const char **argv,
-		struct archiver_args *ar_args, const char *prefix,
-		int remote)
+static void parse_treeish_arg(const char **argv, struct archiver_args *ar_args,
+			      const char *prefix, int remote)
 {
 	const char *name = argv[0];
 	const unsigned char *commit_sha1;
@@ -410,16 +402,21 @@ static void parse_treeish_arg(const char **argv,
 	ar_args->time = archive_time;
 }
 
-#define OPT__COMPR(s, v, h, p) \
-	{ OPTION_SET_INT, (s), NULL, (v), NULL, (h), \
-	  PARSE_OPT_NOARG | PARSE_OPT_NONEG, NULL, (p) }
-#define OPT__COMPR_HIDDEN(s, v, p) \
-	{ OPTION_SET_INT, (s), NULL, (v), NULL, "", \
-	  PARSE_OPT_NOARG | PARSE_OPT_NONEG | PARSE_OPT_HIDDEN, NULL, (p) }
+#define OPT__COMPR(s, v, h, p)                                       \
+	{                                                            \
+		OPTION_SET_INT, (s), NULL, (v), NULL, (h),           \
+			PARSE_OPT_NOARG | PARSE_OPT_NONEG, NULL, (p) \
+	}
+#define OPT__COMPR_HIDDEN(s, v, p)                                            \
+	{                                                                     \
+		OPTION_SET_INT, (s), NULL, (v), NULL, "",                     \
+			PARSE_OPT_NOARG | PARSE_OPT_NONEG | PARSE_OPT_HIDDEN, \
+			NULL, (p)                                             \
+	}
 
-static int parse_archive_args(int argc, const char **argv,
-		const struct archiver **ar, struct archiver_args *args,
-		const char *name_hint, int is_remote)
+static int
+parse_archive_args(int argc, const char **argv, const struct archiver **ar,
+		   struct archiver_args *args, const char *name_hint, int is_remote)
 {
 	const char *format = NULL;
 	const char *base = NULL;
@@ -435,11 +432,11 @@ static int parse_archive_args(int argc, const char **argv,
 		OPT_GROUP(""),
 		OPT_STRING(0, "format", &format, N_("fmt"), N_("archive format")),
 		OPT_STRING(0, "prefix", &base, N_("prefix"),
-			N_("prepend prefix to each pathname in the archive")),
+			   N_("prepend prefix to each pathname in the archive")),
 		OPT_STRING('o', "output", &output, N_("file"),
-			N_("write the archive to this file")),
+			   N_("write the archive to this file")),
 		OPT_BOOL(0, "worktree-attributes", &worktree_attributes,
-			N_("read .gitattributes in working directory")),
+			 N_("read .gitattributes in working directory")),
 		OPT__VERBOSE(&verbose, N_("report archived files on stderr")),
 		OPT__COMPR('0', &compression_level, N_("store only"), 0),
 		OPT__COMPR('1', &compression_level, N_("compress faster"), 1),
@@ -452,13 +449,12 @@ static int parse_archive_args(int argc, const char **argv,
 		OPT__COMPR_HIDDEN('8', &compression_level, 8),
 		OPT__COMPR('9', &compression_level, N_("compress better"), 9),
 		OPT_GROUP(""),
-		OPT_BOOL('l', "list", &list,
-			N_("list supported archive formats")),
+		OPT_BOOL('l', "list", &list, N_("list supported archive formats")),
 		OPT_GROUP(""),
 		OPT_STRING(0, "remote", &remote, N_("repo"),
-			N_("retrieve the archive from remote repository <repo>")),
+			   N_("retrieve the archive from remote repository <repo>")),
 		OPT_STRING(0, "exec", &exec, N_("command"),
-			N_("path to the remote git-upload-archive command")),
+			   N_("path to the remote git-upload-archive command")),
 		OPT_END()
 	};
 
@@ -499,7 +495,7 @@ static int parse_archive_args(int argc, const char **argv,
 			args->compression_level = compression_level;
 		else {
 			die(_("Argument not supported for format '%s': -%d"),
-					format, compression_level);
+			    format, compression_level);
 		}
 	}
 	args->verbose = verbose;
@@ -516,7 +512,8 @@ int write_archive(int argc, const char **argv, const char *prefix,
 	const struct archiver *ar = NULL;
 	struct archiver_args args;
 
-	git_config_get_bool("uploadarchive.allowunreachable", &remote_allow_unreachable);
+	git_config_get_bool("uploadarchive.allowunreachable",
+			    &remote_allow_unreachable);
 	git_config(git_default_config, NULL);
 
 	init_tar_archiver();

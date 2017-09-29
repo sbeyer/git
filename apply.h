@@ -8,10 +8,7 @@ enum apply_ws_error_action {
 	correct_ws_error
 };
 
-enum apply_ws_ignore {
-	ignore_ws_none,
-	ignore_ws_change
-};
+enum apply_ws_ignore { ignore_ws_none, ignore_ws_change };
 
 enum apply_verbosity {
 	verbosity_silent = -1,
@@ -49,8 +46,10 @@ struct apply_state {
 
 	/* These control cosmetic aspect of the output */
 	int diffstat; /* just show a diffstat, and don't actually apply */
-	int numstat; /* just show a numeric diffstat, and don't actually apply */
-	int summary; /* just report creation, deletion, etc, and don't actually apply */
+	int numstat; /* just show a numeric diffstat, and don't actually apply
+		      */
+	int summary; /* just report creation, deletion, etc, and don't actually
+			apply */
 
 	/* These boolean parameters control how the apply is done */
 	int allow_overlap;
@@ -112,11 +111,9 @@ struct apply_state {
 };
 
 extern int apply_parse_options(int argc, const char **argv,
-			       struct apply_state *state,
-			       int *force_apply, int *options,
-			       const char * const *apply_usage);
-extern int init_apply_state(struct apply_state *state,
-			    const char *prefix,
+			       struct apply_state *state, int *force_apply,
+			       int *options, const char *const *apply_usage);
+extern int init_apply_state(struct apply_state *state, const char *prefix,
 			    struct lock_file *lock_file);
 extern void clear_apply_state(struct apply_state *state);
 extern int check_apply_state(struct apply_state *state, int force_apply);
@@ -125,12 +122,10 @@ extern int check_apply_state(struct apply_state *state, int force_apply);
  * Some aspects of the apply behavior are controlled by the following
  * bits in the "options" parameter passed to apply_all_patches().
  */
-#define APPLY_OPT_INACCURATE_EOF	(1<<0) /* accept inaccurate eof */
-#define APPLY_OPT_RECOUNT		(1<<1) /* accept inaccurate line count */
+#define APPLY_OPT_INACCURATE_EOF (1 << 0) /* accept inaccurate eof */
+#define APPLY_OPT_RECOUNT (1 << 1) /* accept inaccurate line count */
 
-extern int apply_all_patches(struct apply_state *state,
-			     int argc,
-			     const char **argv,
-			     int options);
+extern int apply_all_patches(struct apply_state *state, int argc,
+			     const char **argv, int options);
 
 #endif

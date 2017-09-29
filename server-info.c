@@ -50,8 +50,8 @@ out:
 	return ret;
 }
 
-static int add_info_ref(const char *path, const struct object_id *oid,
-			int flag, void *cb_data)
+static int add_info_ref(const char *path, const struct object_id *oid, int flag,
+			void *cb_data)
 {
 	FILE *fp = cb_data;
 	struct object *o = parse_object(oid);
@@ -64,8 +64,8 @@ static int add_info_ref(const char *path, const struct object_id *oid,
 	if (o->type == OBJ_TAG) {
 		o = deref_tag(o, path, 0);
 		if (o)
-			if (fprintf(fp, "%s	%s^{}\n",
-				oid_to_hex(&o->oid), path) < 0)
+			if (fprintf(fp, "%s	%s^{}\n", oid_to_hex(&o->oid),
+				    path) < 0)
 				return -1;
 	}
 	return 0;
@@ -92,7 +92,7 @@ static struct pack_info {
 	int nr_alloc;
 	int nr_heads;
 	unsigned char (*head)[20];
-} **info;
+} * *info;
 static int num_pack;
 static const char *objdir;
 static int objdirlen;
@@ -118,8 +118,7 @@ static int parse_pack_def(const char *line, int old_cnt)
 	if (i) {
 		i->old_num = old_cnt;
 		return 0;
-	}
-	else {
+	} else {
 		/* The file describes a pack that is no longer here */
 		return 1;
 	}
@@ -140,7 +139,7 @@ static int read_pack_info_file(const char *infofile)
 
 	while (fgets(line, sizeof(line), fp)) {
 		int len = strlen(line);
-		if (len && line[len-1] == '\n')
+		if (len && line[len - 1] == '\n')
 			line[--len] = 0;
 
 		if (!len)
@@ -161,7 +160,7 @@ static int read_pack_info_file(const char *infofile)
 	}
 	fclose(fp);
 	return 0;
- out_stale:
+out_stale:
 	fclose(fp);
 	return 1;
 }

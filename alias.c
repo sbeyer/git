@@ -28,10 +28,8 @@ char *alias_lookup(const char *alias)
 
 #define SPLIT_CMDLINE_BAD_ENDING 1
 #define SPLIT_CMDLINE_UNCLOSED_QUOTE 2
-static const char *split_cmdline_errors[] = {
-	"cmdline ends with \\",
-	"unclosed quote"
-};
+static const char *split_cmdline_errors[] = { "cmdline ends with \\",
+					      "unclosed quote" };
 
 int split_cmdline(char *cmdline, const char ***argv)
 {
@@ -46,8 +44,7 @@ int split_cmdline(char *cmdline, const char ***argv)
 		char c = cmdline[src];
 		if (!quoted && isspace(c)) {
 			cmdline[dst++] = 0;
-			while (cmdline[++src]
-					&& isspace(cmdline[src]))
+			while (cmdline[++src] && isspace(cmdline[src]))
 				; /* skip */
 			ALLOC_GROW(*argv, count + 1, size);
 			(*argv)[count++] = cmdline + dst;

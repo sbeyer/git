@@ -65,8 +65,10 @@ static int die_is_recursing_builtin(void)
 
 /* If we are in a dlopen()ed .so write to a global variable would segfault
  * (ugh), so keep things static. */
-static NORETURN_PTR void (*usage_routine)(const char *err, va_list params) = usage_builtin;
-static NORETURN_PTR void (*die_routine)(const char *err, va_list params) = die_builtin;
+static NORETURN_PTR void (*usage_routine)(const char *err,
+					  va_list params) = usage_builtin;
+static NORETURN_PTR void (*die_routine)(const char *err,
+					va_list params) = die_builtin;
 static void (*error_routine)(const char *err, va_list params) = error_builtin;
 static void (*warn_routine)(const char *err, va_list params) = warn_builtin;
 static int (*die_is_recursing)(void) = die_is_recursing_builtin;
@@ -135,7 +137,7 @@ static const char *fmt_with_err(char *buf, int n, const char *fmt)
 	int i, j;
 
 	err = strerror(errno);
-	for (i = j = 0; err[i] && j < sizeof(str_error) - 1; ) {
+	for (i = j = 0; err[i] && j < sizeof(str_error) - 1;) {
 		if ((str_error[j++] = err[i++]) != '%')
 			continue;
 		if (j < sizeof(str_error) - 1) {
@@ -158,8 +160,7 @@ void NORETURN die_errno(const char *fmt, ...)
 	va_list params;
 
 	if (die_is_recursing()) {
-		fputs("fatal: recursion detected in die_errno handler\n",
-			stderr);
+		fputs("fatal: recursion detected in die_errno handler\n", stderr);
 		exit(128);
 	}
 
@@ -210,7 +211,8 @@ void warning(const char *warn, ...)
 	va_end(params);
 }
 
-static NORETURN void BUG_vfl(const char *file, int line, const char *fmt, va_list params)
+static NORETURN void
+BUG_vfl(const char *file, int line, const char *fmt, va_list params)
 {
 	char prefix[256];
 
@@ -248,7 +250,7 @@ void unleak_memory(const void *ptr, size_t len)
 	static struct suppressed_leak_root {
 		struct suppressed_leak_root *next;
 		char data[FLEX_ARRAY];
-	} *suppressed_leaks;
+	} * suppressed_leaks;
 	struct suppressed_leak_root *root;
 
 	FLEX_ALLOC_MEM(root, data, ptr, len);

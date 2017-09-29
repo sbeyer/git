@@ -10,7 +10,7 @@
 static struct replace_object {
 	unsigned char original[20];
 	unsigned char replacement[20];
-} **replace_object;
+} * *replace_object;
 
 static int replace_object_alloc, replace_object_nr;
 
@@ -26,8 +26,7 @@ static int replace_object_pos(const unsigned char *sha1)
 			replace_sha1_access);
 }
 
-static int register_replace_object(struct replace_object *replace,
-				   int ignore_dups)
+static int register_replace_object(struct replace_object *replace, int ignore_dups)
 {
 	int pos = replace_object_pos(replace->original);
 
@@ -44,16 +43,13 @@ static int register_replace_object(struct replace_object *replace,
 	ALLOC_GROW(replace_object, replace_object_nr + 1, replace_object_alloc);
 	replace_object_nr++;
 	if (pos < replace_object_nr)
-		memmove(replace_object + pos + 1,
-			replace_object + pos,
-			(replace_object_nr - pos - 1) *
-			sizeof(*replace_object));
+		memmove(replace_object + pos + 1, replace_object + pos,
+			(replace_object_nr - pos - 1) * sizeof(*replace_object));
 	replace_object[pos] = replace;
 	return 0;
 }
 
-static int register_replace_ref(const char *refname,
-				const struct object_id *oid,
+static int register_replace_ref(const char *refname, const struct object_id *oid,
 				int flag, void *cb_data)
 {
 	/* Get sha1 from refname */

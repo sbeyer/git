@@ -4,7 +4,8 @@
 /* git_config_parse_key() returns these negated: */
 #define CONFIG_INVALID_KEY 1
 #define CONFIG_NO_SECTION_OR_NAME 2
-/* git_config_set_gently(), git_config_set_multivar_gently() return the above or these: */
+/* git_config_set_gently(), git_config_set_multivar_gently() return the above or
+ * these: */
 #define CONFIG_NO_LOCK -1
 #define CONFIG_INVALID_FILE 3
 #define CONFIG_NO_WRITE 4
@@ -15,7 +16,7 @@
 #define CONFIG_REGEX_NONE ((void *)1)
 
 struct git_config_source {
-	unsigned int use_stdin:1;
+	unsigned int use_stdin : 1;
 	const char *file;
 	const char *blob;
 };
@@ -37,8 +38,9 @@ struct config_options {
 typedef int (*config_fn_t)(const char *, const char *, void *);
 extern int git_default_config(const char *, const char *, void *);
 extern int git_config_from_file(config_fn_t fn, const char *, void *);
-extern int git_config_from_mem(config_fn_t fn, const enum config_origin_type,
-					const char *name, const char *buf, size_t len, void *data);
+extern int
+git_config_from_mem(config_fn_t fn, const enum config_origin_type,
+		    const char *name, const char *buf, size_t len, void *data);
 extern int git_config_from_blob_oid(config_fn_t fn, const char *name,
 				    const struct object_id *oid, void *data);
 extern void git_config_push_parameter(const char *text);
@@ -64,12 +66,16 @@ extern int git_config_set_gently(const char *, const char *);
 extern void git_config_set(const char *, const char *);
 extern int git_config_parse_key(const char *, char **, int *);
 extern int git_config_key_is_valid(const char *key);
-extern int git_config_set_multivar_gently(const char *, const char *, const char *, int);
+extern int
+git_config_set_multivar_gently(const char *, const char *, const char *, int);
 extern void git_config_set_multivar(const char *, const char *, const char *, int);
-extern int git_config_set_multivar_in_file_gently(const char *, const char *, const char *, const char *, int);
-extern void git_config_set_multivar_in_file(const char *, const char *, const char *, const char *, int);
+extern int git_config_set_multivar_in_file_gently(const char *, const char *,
+						  const char *, const char *, int);
+extern void git_config_set_multivar_in_file(const char *, const char *,
+					    const char *, const char *, int);
 extern int git_config_rename_section(const char *, const char *);
-extern int git_config_rename_section_in_file(const char *, const char *, const char *);
+extern int
+git_config_rename_section_in_file(const char *, const char *, const char *);
 extern const char *git_etc_gitconfig(void);
 extern int git_env_bool(const char *, int);
 extern unsigned long git_env_ulong(const char *, unsigned long);
@@ -99,7 +105,10 @@ struct config_include_data {
 	void *data;
 	const struct config_options *opts;
 };
-#define CONFIG_INCLUDE_INIT { 0 }
+#define CONFIG_INCLUDE_INIT \
+	{                   \
+		0           \
+	}
 extern int git_config_include(const char *name, const char *value, void *data);
 
 /*
@@ -115,10 +124,9 @@ extern int git_config_include(const char *name, const char *value, void *data);
  * If the subsection pointer-to-pointer passed in is NULL, returns 0 only if
  * there is no subsection at all.
  */
-extern int parse_config_key(const char *var,
-			    const char *section,
-			    const char **subsection, int *subsection_len,
-			    const char **key);
+extern int
+parse_config_key(const char *var, const char *section, const char **subsection,
+		 int *subsection_len, const char **key);
 
 struct config_set_element {
 	struct hashmap_entry ent;
@@ -150,41 +158,51 @@ struct config_set {
 
 extern void git_configset_init(struct config_set *cs);
 extern int git_configset_add_file(struct config_set *cs, const char *filename);
-extern int git_configset_get_value(struct config_set *cs, const char *key, const char **value);
-extern const struct string_list *git_configset_get_value_multi(struct config_set *cs, const char *key);
+extern int git_configset_get_value(struct config_set *cs, const char *key,
+				   const char **value);
+extern const struct string_list *
+git_configset_get_value_multi(struct config_set *cs, const char *key);
 extern void git_configset_clear(struct config_set *cs);
-extern int git_configset_get_string_const(struct config_set *cs, const char *key, const char **dest);
-extern int git_configset_get_string(struct config_set *cs, const char *key, char **dest);
-extern int git_configset_get_int(struct config_set *cs, const char *key, int *dest);
-extern int git_configset_get_ulong(struct config_set *cs, const char *key, unsigned long *dest);
-extern int git_configset_get_bool(struct config_set *cs, const char *key, int *dest);
-extern int git_configset_get_bool_or_int(struct config_set *cs, const char *key, int *is_bool, int *dest);
-extern int git_configset_get_maybe_bool(struct config_set *cs, const char *key, int *dest);
-extern int git_configset_get_pathname(struct config_set *cs, const char *key, const char **dest);
+extern int git_configset_get_string_const(struct config_set *cs,
+					  const char *key, const char **dest);
+extern int
+git_configset_get_string(struct config_set *cs, const char *key, char **dest);
+extern int
+git_configset_get_int(struct config_set *cs, const char *key, int *dest);
+extern int git_configset_get_ulong(struct config_set *cs, const char *key,
+				   unsigned long *dest);
+extern int
+git_configset_get_bool(struct config_set *cs, const char *key, int *dest);
+extern int git_configset_get_bool_or_int(struct config_set *cs, const char *key,
+					 int *is_bool, int *dest);
+extern int
+git_configset_get_maybe_bool(struct config_set *cs, const char *key, int *dest);
+extern int git_configset_get_pathname(struct config_set *cs, const char *key,
+				      const char **dest);
 
 /* Functions for reading a repository's config */
 struct repository;
 extern void repo_config(struct repository *repo, config_fn_t fn, void *data);
-extern int repo_config_get_value(struct repository *repo,
-				 const char *key, const char **value);
-extern const struct string_list *repo_config_get_value_multi(struct repository *repo,
-							     const char *key);
+extern int repo_config_get_value(struct repository *repo, const char *key,
+				 const char **value);
+extern const struct string_list *
+repo_config_get_value_multi(struct repository *repo, const char *key);
 extern int repo_config_get_string_const(struct repository *repo,
 					const char *key, const char **dest);
-extern int repo_config_get_string(struct repository *repo,
-				  const char *key, char **dest);
-extern int repo_config_get_int(struct repository *repo,
-			       const char *key, int *dest);
-extern int repo_config_get_ulong(struct repository *repo,
-				 const char *key, unsigned long *dest);
-extern int repo_config_get_bool(struct repository *repo,
-				const char *key, int *dest);
-extern int repo_config_get_bool_or_int(struct repository *repo,
-				       const char *key, int *is_bool, int *dest);
-extern int repo_config_get_maybe_bool(struct repository *repo,
-				      const char *key, int *dest);
-extern int repo_config_get_pathname(struct repository *repo,
-				    const char *key, const char **dest);
+extern int
+repo_config_get_string(struct repository *repo, const char *key, char **dest);
+extern int
+repo_config_get_int(struct repository *repo, const char *key, int *dest);
+extern int repo_config_get_ulong(struct repository *repo, const char *key,
+				 unsigned long *dest);
+extern int
+repo_config_get_bool(struct repository *repo, const char *key, int *dest);
+extern int repo_config_get_bool_or_int(struct repository *repo, const char *key,
+				       int *is_bool, int *dest);
+extern int
+repo_config_get_maybe_bool(struct repository *repo, const char *key, int *dest);
+extern int repo_config_get_pathname(struct repository *repo, const char *key,
+				    const char **dest);
 
 /*
  * Note: This function exists solely to maintain backward compatibility with
@@ -215,7 +233,8 @@ extern int git_config_get_max_percent_split_change(void);
 extern int git_config_get_expiry(const char *key, const char **output);
 
 /* parse either "this many days" integer, or "5.days.ago" approxidate */
-extern int git_config_get_expiry_in_days(const char *key, timestamp_t *, timestamp_t now);
+extern int
+git_config_get_expiry_in_days(const char *key, timestamp_t *, timestamp_t now);
 
 struct key_value_info {
 	const char *filename;
@@ -224,7 +243,9 @@ struct key_value_info {
 	enum config_scope scope;
 };
 
-extern NORETURN void git_die_config(const char *key, const char *err, ...) __attribute__((format(printf, 2, 3)));
-extern NORETURN void git_die_config_linenr(const char *key, const char *filename, int linenr);
+extern NORETURN void git_die_config(const char *key, const char *err, ...)
+	__attribute__((format(printf, 2, 3)));
+extern NORETURN void
+git_die_config_linenr(const char *key, const char *filename, int linenr);
 
 #endif /* CONFIG_H */

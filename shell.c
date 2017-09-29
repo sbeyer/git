@@ -85,8 +85,8 @@ static void run_shell(void)
 		split_args = xstrdup(rawargs);
 		count = split_cmdline(split_args, &argv);
 		if (count < 0) {
-			fprintf(stderr, "invalid command format '%s': %s\n", rawargs,
-				split_cmdline_strerror(count));
+			fprintf(stderr, "invalid command format '%s': %s\n",
+				rawargs, split_cmdline_strerror(count));
 			free(split_args);
 			free(rawargs);
 			continue;
@@ -102,7 +102,8 @@ static void run_shell(void)
 			argv[0] = full_cmd;
 			code = run_command_v_opt(argv, RUN_SILENT_EXEC_FAILURE);
 			if (code == -1 && errno == ENOENT) {
-				fprintf(stderr, "unrecognized command '%s'\n", prog);
+				fprintf(stderr, "unrecognized command '%s'\n",
+					prog);
 			}
 			free(full_cmd);
 		} else {
@@ -160,7 +161,7 @@ int cmd_main(int argc, const char **argv)
 		/* Accept "git foo" as if the caller said "git-foo". */
 		prog[3] = '-';
 
-	for (cmd = cmd_list ; cmd->name ; cmd++) {
+	for (cmd = cmd_list; cmd->name; cmd++) {
 		int len = strlen(cmd->name);
 		char *arg;
 		if (strncmp(cmd->name, prog, len))
@@ -185,7 +186,7 @@ int cmd_main(int argc, const char **argv)
 		if (is_valid_cmd_name(user_argv[0])) {
 			prog = make_cmd(user_argv[0]);
 			user_argv[0] = prog;
-			execv(user_argv[0], (char *const *) user_argv);
+			execv(user_argv[0], (char *const *)user_argv);
 		}
 		free(prog);
 		free(user_argv);

@@ -27,7 +27,8 @@ void create_notes_commit(struct notes_tree *t, struct commit_list *parents,
 		/* else: t->ref points to nothing, assume root/orphan commit */
 	}
 
-	if (commit_tree(msg, msg_len, tree_oid.hash, parents, result_sha1, NULL, NULL))
+	if (commit_tree(msg, msg_len, tree_oid.hash, parents, result_sha1, NULL,
+			NULL))
 		die("Failed to commit notes tree to database");
 }
 
@@ -48,7 +49,8 @@ void commit_notes(struct notes_tree *t, const char *msg)
 	strbuf_complete_line(&buf);
 
 	create_notes_commit(t, NULL, buf.buf, buf.len, commit_oid.hash);
-	strbuf_insert(&buf, 0, "notes: ", 7); /* commit message starts at index 7 */
+	strbuf_insert(&buf, 0,
+		      "notes: ", 7); /* commit message starts at index 7 */
 	update_ref(buf.buf, t->update_ref, commit_oid.hash, NULL, 0,
 		   UPDATE_REFS_DIE_ON_ERR);
 
@@ -90,7 +92,7 @@ static combine_notes_fn parse_combine_notes_fn(const char *v)
 static int notes_rewrite_config(const char *k, const char *v, void *cb)
 {
 	struct notes_rewrite_cfg *c = cb;
-	if (starts_with(k, "notes.rewrite.") && !strcmp(k+14, c->cmd)) {
+	if (starts_with(k, "notes.rewrite.") && !strcmp(k + 14, c->cmd)) {
 		c->enabled = git_config_bool(k, v);
 		return 0;
 	} else if (!c->mode_from_env && !strcmp(k, "notes.rewritemode")) {
@@ -109,13 +111,13 @@ static int notes_rewrite_config(const char *k, const char *v, void *cb)
 			string_list_add_refs_by_glob(c->refs, v);
 		else
 			warning(_("Refusing to rewrite notes in %s"
-				" (outside of refs/notes/)"), v);
+				  " (outside of refs/notes/)"),
+				v);
 		return 0;
 	}
 
 	return 0;
 }
-
 
 struct notes_rewrite_cfg *init_copy_notes_for_rewrite(const char *cmd)
 {
@@ -138,8 +140,9 @@ struct notes_rewrite_cfg *init_copy_notes_for_rewrite(const char *cmd)
 			 * the environment variable, the second %s is
 			 * its value.
 			 */
-			error(_("Bad %s value: '%s'"), GIT_NOTES_REWRITE_MODE_ENVIRONMENT,
-					rewrite_mode_env);
+			error(_("Bad %s value: '%s'"),
+			      GIT_NOTES_REWRITE_MODE_ENVIRONMENT,
+			      rewrite_mode_env);
 	}
 	if (rewrite_refs_env) {
 		c->refs_from_env = 1;
@@ -159,12 +162,14 @@ struct notes_rewrite_cfg *init_copy_notes_for_rewrite(const char *cmd)
 }
 
 int copy_note_for_rewrite(struct notes_rewrite_cfg *c,
-			  const struct object_id *from_obj, const struct object_id *to_obj)
+			  const struct object_id *from_obj,
+			  const struct object_id *to_obj)
 {
 	int ret = 0;
 	int i;
 	for (i = 0; c->trees[i]; i++)
-		ret = copy_note(c->trees[i], from_obj, to_obj, 1, c->combine) || ret;
+		ret = copy_note(c->trees[i], from_obj, to_obj, 1, c->combine) ||
+		      ret;
 	return ret;
 }
 

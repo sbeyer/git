@@ -27,7 +27,7 @@ struct exclude {
 	int nowildcardlen;
 	const char *base;
 	int baselen;
-	unsigned flags;		/* EXC_FLAG_* */
+	unsigned flags; /* EXC_FLAG_* */
 
 	/*
 	 * Counting starts from 1 for line numbers in ignore files,
@@ -63,9 +63,11 @@ struct exclude_list {
  * directory is traversed.
  */
 struct exclude_stack {
-	struct exclude_stack *prev; /* the struct exclude_stack for the parent directory */
+	struct exclude_stack *prev; /* the struct exclude_stack for the parent
+				       directory */
 	int baselen;
-	int exclude_ix; /* index of exclude_list within EXC_DIRS exclude_list_group */
+	int exclude_ix; /* index of exclude_list within EXC_DIRS
+			   exclude_list_group */
 	struct untracked_cache_dir *ucd;
 };
 
@@ -144,16 +146,14 @@ struct untracked_cache {
 struct dir_struct {
 	int nr, alloc;
 	int ignored_nr, ignored_alloc;
-	enum {
-		DIR_SHOW_IGNORED = 1<<0,
-		DIR_SHOW_OTHER_DIRECTORIES = 1<<1,
-		DIR_HIDE_EMPTY_DIRECTORIES = 1<<2,
-		DIR_NO_GITLINKS = 1<<3,
-		DIR_COLLECT_IGNORED = 1<<4,
-		DIR_SHOW_IGNORED_TOO = 1<<5,
-		DIR_COLLECT_KILLED_ONLY = 1<<6,
-		DIR_KEEP_UNTRACKED_CONTENTS = 1<<7
-	} flags;
+	enum { DIR_SHOW_IGNORED = 1 << 0,
+	       DIR_SHOW_OTHER_DIRECTORIES = 1 << 1,
+	       DIR_HIDE_EMPTY_DIRECTORIES = 1 << 2,
+	       DIR_NO_GITLINKS = 1 << 3,
+	       DIR_COLLECT_IGNORED = 1 << 4,
+	       DIR_SHOW_IGNORED_TOO = 1 << 5,
+	       DIR_COLLECT_KILLED_ONLY = 1 << 6,
+	       DIR_KEEP_UNTRACKED_CONTENTS = 1 << 7 } flags;
 	struct dir_entry **entries;
 	struct dir_entry **ignored;
 
@@ -212,53 +212,51 @@ extern int count_slashes(const char *s);
 extern int simple_length(const char *match);
 extern int no_wildcard(const char *string);
 extern char *common_prefix(const struct pathspec *pathspec);
-extern int match_pathspec(const struct pathspec *pathspec,
-			  const char *name, int namelen,
-			  int prefix, char *seen, int is_dir);
-extern int report_path_error(const char *ps_matched, const struct pathspec *pathspec, const char *prefix);
+extern int match_pathspec(const struct pathspec *pathspec, const char *name,
+			  int namelen, int prefix, char *seen, int is_dir);
+extern int report_path_error(const char *ps_matched,
+			     const struct pathspec *pathspec, const char *prefix);
 extern int within_depth(const char *name, int namelen, int depth, int max_depth);
 
-extern int fill_directory(struct dir_struct *dir,
-			  struct index_state *istate,
+extern int fill_directory(struct dir_struct *dir, struct index_state *istate,
 			  const struct pathspec *pathspec);
-extern int read_directory(struct dir_struct *, struct index_state *istate,
-			  const char *path, int len,
-			  const struct pathspec *pathspec);
+extern int
+read_directory(struct dir_struct *, struct index_state *istate,
+	       const char *path, int len, const struct pathspec *pathspec);
 
-extern int is_excluded_from_list(const char *pathname, int pathlen,
-				 const char *basename, int *dtype,
-				 struct exclude_list *el,
-				 struct index_state *istate);
-struct dir_entry *dir_add_ignored(struct dir_struct *dir,
-				  struct index_state *istate,
-				  const char *pathname, int len);
+extern int
+is_excluded_from_list(const char *pathname, int pathlen, const char *basename,
+		      int *dtype, struct exclude_list *el,
+		      struct index_state *istate);
+struct dir_entry *
+dir_add_ignored(struct dir_struct *dir, struct index_state *istate,
+		const char *pathname, int len);
 
 /*
  * these implement the matching logic for dir.c:excluded_from_list and
  * attr.c:path_matches()
  */
-extern int match_basename(const char *, int,
-			  const char *, int, int, unsigned);
-extern int match_pathname(const char *, int,
-			  const char *, int,
-			  const char *, int, int, unsigned);
+extern int match_basename(const char *, int, const char *, int, int, unsigned);
+extern int match_pathname(const char *, int, const char *, int, const char *,
+			  int, int, unsigned);
 
-extern struct exclude *last_exclude_matching(struct dir_struct *dir,
-					     struct index_state *istate,
-					     const char *name, int *dtype);
+extern struct exclude *
+last_exclude_matching(struct dir_struct *dir, struct index_state *istate,
+		      const char *name, int *dtype);
 
-extern int is_excluded(struct dir_struct *dir,
-		       struct index_state *istate,
+extern int is_excluded(struct dir_struct *dir, struct index_state *istate,
 		       const char *name, int *dtype);
 
-extern struct exclude_list *add_exclude_list(struct dir_struct *dir,
-					     int group_type, const char *src);
-extern int add_excludes_from_file_to_list(const char *fname, const char *base, int baselen,
-					  struct exclude_list *el, struct  index_state *istate);
+extern struct exclude_list *
+add_exclude_list(struct dir_struct *dir, int group_type, const char *src);
+extern int add_excludes_from_file_to_list(const char *fname, const char *base,
+					  int baselen, struct exclude_list *el,
+					  struct index_state *istate);
 extern void add_excludes_from_file(struct dir_struct *, const char *fname);
-extern void parse_exclude_pattern(const char **string, int *patternlen, unsigned *flags, int *nowildcardlen);
-extern void add_exclude(const char *string, const char *base,
-			int baselen, struct exclude_list *el, int srcpos);
+extern void parse_exclude_pattern(const char **string, int *patternlen,
+				  unsigned *flags, int *nowildcardlen);
+extern void add_exclude(const char *string, const char *base, int baselen,
+			struct exclude_list *el, int srcpos);
 extern void clear_exclude_list(struct exclude_list *el);
 extern void clear_directory(struct dir_struct *dir);
 extern int file_exists(const char *);
@@ -269,14 +267,12 @@ extern int dir_inside_of(const char *subdir, const char *dir);
 static inline int is_dot_or_dotdot(const char *name)
 {
 	return (name[0] == '.' &&
-		(name[1] == '\0' ||
-		 (name[1] == '.' && name[2] == '\0')));
+		(name[1] == '\0' || (name[1] == '.' && name[2] == '\0')));
 }
 
 extern int is_empty_dir(const char *dir);
 
 extern void setup_standard_excludes(struct dir_struct *dir);
-
 
 /* Constants for remove_dir_recursively: */
 
@@ -315,25 +311,22 @@ extern int fspathncmp(const char *a, const char *b, size_t count);
  * The prefix part of pattern must not contains wildcards.
  */
 struct pathspec_item;
-extern int git_fnmatch(const struct pathspec_item *item,
-		       const char *pattern, const char *string,
-		       int prefix);
+extern int git_fnmatch(const struct pathspec_item *item, const char *pattern,
+		       const char *string, int prefix);
 
 extern int submodule_path_match(const struct pathspec *ps,
-				const char *submodule_name,
-				char *seen);
+				const char *submodule_name, char *seen);
 
 static inline int ce_path_match(const struct cache_entry *ce,
-				const struct pathspec *pathspec,
-				char *seen)
+				const struct pathspec *pathspec, char *seen)
 {
 	return match_pathspec(pathspec, ce->name, ce_namelen(ce), 0, seen,
 			      S_ISDIR(ce->ce_mode) || S_ISGITLINK(ce->ce_mode));
 }
 
-static inline int dir_path_match(const struct dir_entry *ent,
-				 const struct pathspec *pathspec,
-				 int prefix, char *seen)
+static inline int
+dir_path_match(const struct dir_entry *ent, const struct pathspec *pathspec,
+	       int prefix, char *seen)
 {
 	int has_trailing_dir = ent->len && ent->name[ent->len - 1] == '/';
 	int len = has_trailing_dir ? ent->len - 1 : ent->len;
@@ -342,19 +335,22 @@ static inline int dir_path_match(const struct dir_entry *ent,
 }
 
 int cmp_dir_entry(const void *p1, const void *p2);
-int check_dir_entry_contains(const struct dir_entry *out, const struct dir_entry *in);
+int check_dir_entry_contains(const struct dir_entry *out,
+			     const struct dir_entry *in);
 
 void untracked_cache_invalidate_path(struct index_state *, const char *);
 void untracked_cache_remove_from_index(struct index_state *, const char *);
 void untracked_cache_add_to_index(struct index_state *, const char *);
 
 void free_untracked_cache(struct untracked_cache *);
-struct untracked_cache *read_untracked_extension(const void *data, unsigned long sz);
-void write_untracked_extension(struct strbuf *out, struct untracked_cache *untracked);
+struct untracked_cache *
+read_untracked_extension(const void *data, unsigned long sz);
+void write_untracked_extension(struct strbuf *out,
+			       struct untracked_cache *untracked);
 void add_untracked_cache(struct index_state *istate);
 void remove_untracked_cache(struct index_state *istate);
-extern void connect_work_tree_and_git_dir(const char *work_tree, const char *git_dir);
-extern void relocate_gitdir(const char *path,
-			    const char *old_git_dir,
+extern void
+connect_work_tree_and_git_dir(const char *work_tree, const char *git_dir);
+extern void relocate_gitdir(const char *path, const char *old_git_dir,
 			    const char *new_git_dir);
 #endif

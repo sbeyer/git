@@ -10,8 +10,7 @@
 static struct whitespace_rule {
 	const char *rule_name;
 	unsigned rule_bits;
-	unsigned loosens_error:1,
-		exclude_default:1;
+	unsigned loosens_error : 1, exclude_default : 1;
 } whitespace_rule_names[] = {
 	{ "trailing-space", WS_TRAILING_SPACE, 0 },
 	{ "space-before-tab", WS_SPACE_BEFORE_TAB, 0 },
@@ -44,8 +43,7 @@ unsigned parse_whitespace_rule(const char *string)
 		if (!len)
 			break;
 		for (i = 0; i < ARRAY_SIZE(whitespace_rule_names); i++) {
-			if (strncmp(whitespace_rule_names[i].rule_name,
-				    string, len))
+			if (strncmp(whitespace_rule_names[i].rule_name, string, len))
 				continue;
 			if (negated)
 				rule &= ~whitespace_rule_names[i].rule_bits;
@@ -58,8 +56,7 @@ unsigned parse_whitespace_rule(const char *string)
 			if (0 < tabwidth && tabwidth < 0100) {
 				rule &= ~WS_TAB_WIDTH_MASK;
 				rule |= tabwidth;
-			}
-			else
+			} else
 				warning("tabwidth %.*s out of range",
 					(int)(len - 9), string + 9);
 		}
@@ -140,9 +137,9 @@ char *whitespace_error_string(unsigned ws)
 }
 
 /* If stream is non-NULL, emits the line after checking. */
-static unsigned ws_check_emit_1(const char *line, int len, unsigned ws_rule,
-				FILE *stream, const char *set,
-				const char *reset, const char *ws)
+static unsigned
+ws_check_emit_1(const char *line, int len, unsigned ws_rule, FILE *stream,
+		const char *set, const char *reset, const char *ws)
 {
 	unsigned result = 0;
 	int written = 0;
@@ -156,8 +153,7 @@ static unsigned ws_check_emit_1(const char *line, int len, unsigned ws_rule,
 		trailing_newline = 1;
 		len--;
 	}
-	if ((ws_rule & WS_CR_AT_EOL) &&
-	    len > 0 && line[len - 1] == '\r') {
+	if ((ws_rule & WS_CR_AT_EOL) && len > 0 && line[len - 1] == '\r') {
 		trailing_carriage_return = 1;
 		len--;
 	}
@@ -168,8 +164,7 @@ static unsigned ws_check_emit_1(const char *line, int len, unsigned ws_rule,
 			if (isspace(line[i])) {
 				trailing_whitespace = i;
 				result |= WS_BLANK_AT_EOL;
-			}
-			else
+			} else
 				break;
 		}
 	}
@@ -206,7 +201,8 @@ static unsigned ws_check_emit_1(const char *line, int len, unsigned ws_rule,
 	}
 
 	/* Check for indent using non-tab. */
-	if ((ws_rule & WS_INDENT_WITH_NON_TAB) && i - written >= ws_tab_width(ws_rule)) {
+	if ((ws_rule & WS_INDENT_WITH_NON_TAB) &&
+	    i - written >= ws_tab_width(ws_rule)) {
 		result |= WS_INDENT_WITH_NON_TAB;
 		if (stream) {
 			fputs(ws, stream);
@@ -225,8 +221,8 @@ static unsigned ws_check_emit_1(const char *line, int len, unsigned ws_rule,
 		/* Emit non-highlighted (middle) segment. */
 		if (trailing_whitespace - written > 0) {
 			fputs(set, stream);
-			fwrite(line + written,
-			    trailing_whitespace - written, 1, stream);
+			fwrite(line + written, trailing_whitespace - written, 1,
+			       stream);
 			fputs(reset, stream);
 		}
 
@@ -234,7 +230,7 @@ static unsigned ws_check_emit_1(const char *line, int len, unsigned ws_rule,
 		if (trailing_whitespace != len) {
 			fputs(ws, stream);
 			fwrite(line + trailing_whitespace,
-			    len - trailing_whitespace, 1, stream);
+			       len - trailing_whitespace, 1, stream);
 			fputs(reset, stream);
 		}
 		if (trailing_carriage_return)
@@ -245,9 +241,8 @@ static unsigned ws_check_emit_1(const char *line, int len, unsigned ws_rule,
 	return result;
 }
 
-void ws_check_emit(const char *line, int len, unsigned ws_rule,
-		   FILE *stream, const char *set,
-		   const char *reset, const char *ws)
+void ws_check_emit(const char *line, int len, unsigned ws_rule, FILE *stream,
+		   const char *set, const char *reset, const char *ws)
 {
 	(void)ws_check_emit_1(line, len, ws_rule, stream, set, reset, ws);
 }
@@ -273,7 +268,8 @@ int ws_blank_line(const char *line, int len, unsigned ws_rule)
 }
 
 /* Copy the line onto the end of the strbuf while fixing whitespaces */
-void ws_fix_copy(struct strbuf *dst, const char *src, int len, unsigned ws_rule, int *error_count)
+void ws_fix_copy(struct strbuf *dst, const char *src, int len, unsigned ws_rule,
+		 int *error_count)
 {
 	/*
 	 * len is number of bytes to be copied from src, starting
@@ -301,7 +297,7 @@ void ws_fix_copy(struct strbuf *dst, const char *src, int len, unsigned ws_rule,
 			}
 		}
 		if (0 < len && isspace(src[len - 1])) {
-			while (0 < len && isspace(src[len-1]))
+			while (0 < len && isspace(src[len - 1]))
 				len--;
 			fixed = 1;
 		}
@@ -316,7 +312,7 @@ void ws_fix_copy(struct strbuf *dst, const char *src, int len, unsigned ws_rule,
 			last_tab_in_indent = i;
 			if ((ws_rule & WS_SPACE_BEFORE_TAB) &&
 			    0 <= last_space_in_indent)
-			    need_fix_leading_space = 1;
+				need_fix_leading_space = 1;
 		} else if (ch == ' ') {
 			last_space_in_indent = i;
 			if ((ws_rule & WS_INDENT_WITH_NON_TAB) &&
@@ -369,7 +365,8 @@ void ws_fix_copy(struct strbuf *dst, const char *src, int len, unsigned ws_rule,
 			if (src[i] == '\t')
 				do {
 					strbuf_addch(dst, ' ');
-				} while ((dst->len - start) % ws_tab_width(ws_rule));
+				} while ((dst->len - start) %
+					 ws_tab_width(ws_rule));
 			else
 				strbuf_addch(dst, src[i]);
 		}

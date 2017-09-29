@@ -15,8 +15,7 @@
 #include "gpg-interface.h"
 #include "cache.h"
 
-int option_parse_push_signed(const struct option *opt,
-			     const char *arg, int unset)
+int option_parse_push_signed(const struct option *opt, const char *arg, int unset)
 {
 	if (unset) {
 		*(int *)(opt->value) = SEND_PACK_PUSH_CERT_NEVER;
@@ -51,7 +50,8 @@ static void feed_object(const unsigned char *sha1, FILE *fh, int negative)
 /*
  * Make a pack stream and spit it out into file descriptor fd
  */
-static int pack_objects(int fd, struct ref *refs, struct oid_array *extra, struct send_pack_args *args)
+static int pack_objects(int fd, struct ref *refs, struct oid_array *extra,
+			struct send_pack_args *args)
 {
 	/*
 	 * The child becomes pack-objects --revs; we feed
@@ -59,16 +59,11 @@ static int pack_objects(int fd, struct ref *refs, struct oid_array *extra, struc
 	 * let its stdout go back to the other end.
 	 */
 	const char *argv[] = {
-		"pack-objects",
-		"--all-progress-implied",
-		"--revs",
-		"--stdout",
-		NULL,
-		NULL,
-		NULL,
-		NULL,
-		NULL,
-		NULL,
+		"pack-objects", "--all-progress-implied",
+		"--revs",       "--stdout",
+		NULL,		NULL,
+		NULL,		NULL,
+		NULL,		NULL,
 	};
 	struct child_process po = CHILD_PROCESS_INIT;
 	FILE *po_in;
@@ -185,12 +180,12 @@ static int receive_status(int in, struct ref *refs)
 			hint = find_ref_by_name(refs, refname);
 		if (!hint) {
 			warning("remote reported status on unknown ref: %s",
-					refname);
+				refname);
 			continue;
 		}
 		if (hint->status != REF_STATUS_EXPECTING_REPORT) {
 			warning("remote reported status on unexpected ref: %s",
-					refname);
+				refname);
 			continue;
 		}
 
@@ -236,7 +231,8 @@ static void advertise_shallow_grafts_buf(struct strbuf *sb)
 #define CHECK_REF_NO_PUSH -1
 #define CHECK_REF_STATUS_REJECTED -2
 #define CHECK_REF_UPTODATE -3
-static int check_to_send_update(const struct ref *ref, const struct send_pack_args *args)
+static int
+check_to_send_update(const struct ref *ref, const struct send_pack_args *args)
 {
 	if (!ref->peer_ref && !args->send_mirror)
 		return CHECK_REF_NO_PUSH;
@@ -271,11 +267,10 @@ static const char *next_line(const char *line, size_t len)
 	return nl + 1;
 }
 
-static int generate_push_cert(struct strbuf *req_buf,
-			      const struct ref *remote_refs,
-			      struct send_pack_args *args,
-			      const char *cap_string,
-			      const char *push_cert_nonce)
+static int
+generate_push_cert(struct strbuf *req_buf, const struct ref *remote_refs,
+		   struct send_pack_args *args, const char *cap_string,
+		   const char *push_cert_nonce)
 {
 	const struct ref *ref;
 	struct string_list_item *item;
@@ -296,7 +291,7 @@ static int generate_push_cert(struct strbuf *req_buf,
 	if (push_cert_nonce[0])
 		strbuf_addf(&cert, "nonce %s\n", push_cert_nonce);
 	if (args->push_options)
-		for_each_string_list_item(item, args->push_options)
+		for_each_string_list_item (item, args->push_options)
 			strbuf_addf(&cert, "push-option %s\n", item->string);
 	strbuf_addstr(&cert, "\n");
 
@@ -304,10 +299,8 @@ static int generate_push_cert(struct strbuf *req_buf,
 		if (check_to_send_update(ref, args) < 0)
 			continue;
 		update_seen = 1;
-		strbuf_addf(&cert, "%s %s %s\n",
-			    oid_to_hex(&ref->old_oid),
-			    oid_to_hex(&ref->new_oid),
-			    ref->name);
+		strbuf_addf(&cert, "%s %s %s\n", oid_to_hex(&ref->old_oid),
+			    oid_to_hex(&ref->new_oid), ref->name);
 	}
 	if (!update_seen)
 		goto free_return;
@@ -318,8 +311,7 @@ static int generate_push_cert(struct strbuf *req_buf,
 	packet_buf_write(req_buf, "push-cert%c%s", 0, cap_string);
 	for (cp = cert.buf; cp < cert.buf + cert.len; cp = np) {
 		np = next_line(cp, cert.buf + cert.len - cp);
-		packet_buf_write(req_buf,
-				 "%.*s", (int)(np - cp), cp);
+		packet_buf_write(req_buf, "%.*s", (int)(np - cp), cp);
 	}
 	packet_buf_write(req_buf, "push-cert-end\n");
 
@@ -329,10 +321,8 @@ free_return:
 	return update_seen;
 }
 
-
 static int atomic_push_failure(struct send_pack_args *args,
-			       struct ref *remote_refs,
-			       struct ref *failing_ref)
+			       struct ref *remote_refs, struct ref *failing_ref)
 {
 	struct ref *ref;
 	/* Mark other refs as failed */
@@ -364,20 +354,16 @@ static void reject_invalid_nonce(const char *nonce, int len)
 
 	for (i = 0; i < len; i++) {
 		int ch = nonce[i] & 0xFF;
-		if (isalnum(ch) ||
-		    ch == '-' || ch == '.' ||
-		    ch == '/' || ch == '+' ||
-		    ch == '=' || ch == '_')
+		if (isalnum(ch) || ch == '-' || ch == '.' || ch == '/' ||
+		    ch == '+' || ch == '=' || ch == '_')
 			continue;
 		die("the receiving end asked to sign an invalid nonce <%.*s>",
 		    len, nonce);
 	}
 }
 
-int send_pack(struct send_pack_args *args,
-	      int fd[], struct child_process *conn,
-	      struct ref *remote_refs,
-	      struct oid_array *extra_have)
+int send_pack(struct send_pack_args *args, int fd[], struct child_process *conn,
+	      struct ref *remote_refs, struct oid_array *extra_have)
 {
 	int in = fd[0];
 	int out = fd[1];
@@ -435,7 +421,8 @@ int send_pack(struct send_pack_args *args,
 	}
 
 	if (!remote_refs) {
-		fprintf(stderr, "No refs in common and none specified; doing nothing.\n"
+		fprintf(stderr,
+			"No refs in common and none specified; doing nothing.\n"
 			"Perhaps you should specify a branch such as 'master'.\n");
 		return 0;
 	}
@@ -525,14 +512,12 @@ int send_pack(struct send_pack_args *args,
 		old_hex = oid_to_hex(&ref->old_oid);
 		new_hex = oid_to_hex(&ref->new_oid);
 		if (!cmds_sent) {
-			packet_buf_write(&req_buf,
-					 "%s %s %s%c%s",
-					 old_hex, new_hex, ref->name, 0,
-					 cap_buf.buf);
+			packet_buf_write(&req_buf, "%s %s %s%c%s", old_hex,
+					 new_hex, ref->name, 0, cap_buf.buf);
 			cmds_sent = 1;
 		} else {
-			packet_buf_write(&req_buf, "%s %s %s",
-					 old_hex, new_hex, ref->name);
+			packet_buf_write(&req_buf, "%s %s %s", old_hex, new_hex,
+					 ref->name);
 		}
 	}
 
@@ -540,14 +525,15 @@ int send_pack(struct send_pack_args *args,
 		struct string_list_item *item;
 
 		packet_buf_flush(&req_buf);
-		for_each_string_list_item(item, args->push_options)
+		for_each_string_list_item (item, args->push_options)
 			packet_buf_write(&req_buf, "%s", item->string);
 	}
 
 	if (args->stateless_rpc) {
 		if (!args->dry_run && (cmds_sent || is_repository_shallow())) {
 			packet_buf_flush(&req_buf);
-			send_sideband(out, -1, req_buf.buf, req_buf.len, LARGE_PACKET_MAX);
+			send_sideband(out, -1, req_buf.buf, req_buf.len,
+				      LARGE_PACKET_MAX);
 		}
 	} else {
 		write_or_die(out, req_buf.buf, req_buf.len);

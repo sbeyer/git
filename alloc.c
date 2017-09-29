@@ -28,8 +28,8 @@ union any_object {
 
 struct alloc_state {
 	int count; /* total number of nodes allocated */
-	int nr;    /* number of nodes left in current allocation */
-	void *p;   /* first free node in current allocation */
+	int nr; /* number of nodes left in current allocation */
+	void *p; /* first free node in current allocation */
 };
 
 static inline void *alloc_node(struct alloc_state *s, size_t node_size)
@@ -98,12 +98,12 @@ void *alloc_commit_node(void)
 
 static void report(const char *name, unsigned int count, size_t size)
 {
-	fprintf(stderr, "%10s: %8u (%"PRIuMAX" kB)\n",
-			name, count, (uintmax_t) size);
+	fprintf(stderr, "%10s: %8u (%" PRIuMAX " kB)\n", name, count,
+		(uintmax_t)size);
 }
 
-#define REPORT(name, type)	\
-    report(#name, name##_state.count, name##_state.count * sizeof(type) >> 10)
+#define REPORT(name, type) \
+	report(#name, name##_state.count, name##_state.count * sizeof(type) >> 10)
 
 void alloc_report(void)
 {

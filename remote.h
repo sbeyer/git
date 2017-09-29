@@ -4,15 +4,13 @@
 #include "parse-options.h"
 #include "hashmap.h"
 
-enum {
-	REMOTE_UNCONFIGURED = 0,
-	REMOTE_CONFIG,
-	REMOTE_REMOTES,
-	REMOTE_BRANCHES
-};
+enum { REMOTE_UNCONFIGURED = 0,
+       REMOTE_CONFIG,
+       REMOTE_REMOTES,
+       REMOTE_BRANCHES };
 
 struct remote {
-	struct hashmap_entry ent;  /* must be first */
+	struct hashmap_entry ent; /* must be first */
 
 	const char *name;
 	int origin, configured_in_repo;
@@ -85,17 +83,12 @@ struct ref {
 	struct object_id new_oid;
 	struct object_id old_oid_expect; /* used by expect-old */
 	char *symref;
-	unsigned int
-		force:1,
-		forced_update:1,
-		expect_old_sha1:1,
-		deletion:1;
+	unsigned int force : 1, forced_update : 1, expect_old_sha1 : 1,
+		deletion : 1;
 
-	enum {
-		REF_NOT_MATCHED = 0, /* initial value */
-		REF_MATCHED,
-		REF_UNADVERTISED_NOT_ALLOWED
-	} match_status;
+	enum { REF_NOT_MATCHED = 0, /* initial value */
+	       REF_MATCHED,
+	       REF_UNADVERTISED_NOT_ALLOWED } match_status;
 
 	/*
 	 * Order is important here, as we write to FETCH_HEAD
@@ -103,35 +96,31 @@ struct ref {
 	 * should be 0, so that xcalloc'd structures get it
 	 * by default.
 	 */
-	enum {
-		FETCH_HEAD_MERGE = -1,
-		FETCH_HEAD_NOT_FOR_MERGE = 0,
-		FETCH_HEAD_IGNORE = 1
-	} fetch_head_status;
+	enum { FETCH_HEAD_MERGE = -1,
+	       FETCH_HEAD_NOT_FOR_MERGE = 0,
+	       FETCH_HEAD_IGNORE = 1 } fetch_head_status;
 
-	enum {
-		REF_STATUS_NONE = 0,
-		REF_STATUS_OK,
-		REF_STATUS_REJECT_NONFASTFORWARD,
-		REF_STATUS_REJECT_ALREADY_EXISTS,
-		REF_STATUS_REJECT_NODELETE,
-		REF_STATUS_REJECT_FETCH_FIRST,
-		REF_STATUS_REJECT_NEEDS_FORCE,
-		REF_STATUS_REJECT_STALE,
-		REF_STATUS_REJECT_SHALLOW,
-		REF_STATUS_UPTODATE,
-		REF_STATUS_REMOTE_REJECT,
-		REF_STATUS_EXPECTING_REPORT,
-		REF_STATUS_ATOMIC_PUSH_FAILED
-	} status;
+	enum { REF_STATUS_NONE = 0,
+	       REF_STATUS_OK,
+	       REF_STATUS_REJECT_NONFASTFORWARD,
+	       REF_STATUS_REJECT_ALREADY_EXISTS,
+	       REF_STATUS_REJECT_NODELETE,
+	       REF_STATUS_REJECT_FETCH_FIRST,
+	       REF_STATUS_REJECT_NEEDS_FORCE,
+	       REF_STATUS_REJECT_STALE,
+	       REF_STATUS_REJECT_SHALLOW,
+	       REF_STATUS_UPTODATE,
+	       REF_STATUS_REMOTE_REJECT,
+	       REF_STATUS_EXPECTING_REPORT,
+	       REF_STATUS_ATOMIC_PUSH_FAILED } status;
 	char *remote_status;
 	struct ref *peer_ref; /* when renaming */
 	char name[FLEX_ARRAY]; /* more */
 };
 
-#define REF_NORMAL	(1u << 0)
-#define REF_HEADS	(1u << 1)
-#define REF_TAGS	(1u << 2)
+#define REF_NORMAL (1u << 0)
+#define REF_HEADS (1u << 1)
+#define REF_TAGS (1u << 2)
 
 extern struct ref *find_ref_by_name(const struct ref *list, const char *name);
 
@@ -139,7 +128,8 @@ struct ref *alloc_ref(const char *name);
 struct ref *copy_ref(const struct ref *ref);
 struct ref *copy_ref_list(const struct ref *ref);
 void sort_ref_list(struct ref **, int (*cmp)(const void *, const void *));
-extern int count_refspec_match(const char *, struct ref *refs, struct ref **matched_ref);
+extern int
+count_refspec_match(const char *, struct ref *refs, struct ref **matched_ref);
 int ref_compare_name(const void *, const void *);
 
 int check_ref_type(const struct ref *ref, int flags);
@@ -150,10 +140,10 @@ int check_ref_type(const struct ref *ref, int flags);
 void free_refs(struct ref *ref);
 
 struct oid_array;
-extern struct ref **get_remote_heads(int in, char *src_buf, size_t src_len,
-				     struct ref **list, unsigned int flags,
-				     struct oid_array *extra_have,
-				     struct oid_array *shallow);
+extern struct ref **
+get_remote_heads(int in, char *src_buf, size_t src_len, struct ref **list,
+		 unsigned int flags, struct oid_array *extra_have,
+		 struct oid_array *shallow);
 
 int resolve_remote_symref(struct ref *ref, struct ref *list);
 int ref_newer(const struct object_id *new_oid, const struct object_id *old_oid);
@@ -174,14 +164,13 @@ extern struct refspec *parse_push_refspec(int nr_refspec, const char **refspec);
 void free_refspec(int nr_refspec, struct refspec *refspec);
 
 extern int query_refspecs(struct refspec *specs, int nr, struct refspec *query);
-char *apply_refspecs(struct refspec *refspecs, int nr_refspec,
-		     const char *name);
+char *apply_refspecs(struct refspec *refspecs, int nr_refspec, const char *name);
 
 int check_push_refs(struct ref *src, int nr_refspec, const char **refspec);
-int match_push_refs(struct ref *src, struct ref **dst,
-		    int nr_refspec, const char **refspec, int all);
+int match_push_refs(struct ref *src, struct ref **dst, int nr_refspec,
+		    const char **refspec, int all);
 void set_ref_status_for_push(struct ref *remote_refs, int send_mirror,
-	int force_update);
+			     int force_update);
 
 /*
  * Given a list of the remote refs and the specification of things to
@@ -248,11 +237,11 @@ const char *branch_get_push(struct branch *branch, struct strbuf *err);
 
 /* Flags to match_refs. */
 enum match_refs_flags {
-	MATCH_REFS_NONE		= 0,
-	MATCH_REFS_ALL 		= (1 << 0),
-	MATCH_REFS_MIRROR	= (1 << 1),
-	MATCH_REFS_PRUNE	= (1 << 2),
-	MATCH_REFS_FOLLOW_TAGS	= (1 << 3)
+	MATCH_REFS_NONE = 0,
+	MATCH_REFS_ALL = (1 << 0),
+	MATCH_REFS_MIRROR = (1 << 1),
+	MATCH_REFS_PRUNE = (1 << 2),
+	MATCH_REFS_FOLLOW_TAGS = (1 << 3)
 };
 
 /* Reporting of tracking info */
@@ -267,12 +256,12 @@ struct ref *get_local_heads(void);
  * list of all candidate refs. If no match is found (or 'head' is NULL),
  * returns NULL. All returns are newly allocated and should be freed.
  */
-struct ref *guess_remote_head(const struct ref *head,
-			      const struct ref *refs,
-			      int all);
+struct ref *
+guess_remote_head(const struct ref *head, const struct ref *refs, int all);
 
 /* Return refs which no longer exist on remote */
-struct ref *get_stale_heads(struct refspec *refs, int ref_count, struct ref *fetch_map);
+struct ref *
+get_stale_heads(struct refspec *refs, int ref_count, struct ref *fetch_map);
 
 /*
  * Compare-and-swap
@@ -280,17 +269,18 @@ struct ref *get_stale_heads(struct refspec *refs, int ref_count, struct ref *fet
 #define CAS_OPT_NAME "force-with-lease"
 
 struct push_cas_option {
-	unsigned use_tracking_for_rest:1;
+	unsigned use_tracking_for_rest : 1;
 	struct push_cas {
 		struct object_id expect;
-		unsigned use_tracking:1;
+		unsigned use_tracking : 1;
 		char *refname;
-	} *entry;
+	} * entry;
 	int nr;
 	int alloc;
 };
 
-extern int parseopt_push_cas_option(const struct option *, const char *arg, int unset);
+extern int
+parseopt_push_cas_option(const struct option *, const char *arg, int unset);
 
 extern int is_empty_cas(const struct push_cas_option *);
 void apply_push_cas(struct push_cas_option *, struct remote *, struct ref *);

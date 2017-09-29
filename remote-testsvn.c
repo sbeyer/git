@@ -14,7 +14,9 @@ static int dump_from_file;
 static const char *private_ref;
 static const char *remote_ref = "refs/heads/master";
 static const char *marksfilename, *notes_ref;
-struct rev_note { unsigned int rev_nr; };
+struct rev_note {
+	unsigned int rev_nr;
+};
 
 static int cmd_capabilities(const char *line);
 static int cmd_import(const char *line);
@@ -24,15 +26,15 @@ typedef int (*input_command_handler)(const char *);
 struct input_command_entry {
 	const char *name;
 	input_command_handler fn;
-	unsigned char batchable;	/* whether the command starts or is part of a batch */
+	unsigned char batchable; /* whether the command starts or is part of a
+				    batch */
 };
 
-static const struct input_command_entry input_command_list[] = {
-	{ "capabilities", cmd_capabilities, 0 },
-	{ "import", cmd_import, 1 },
-	{ "list", cmd_list, 0 },
-	{ NULL, NULL }
-};
+static const struct input_command_entry input_command_list[] =
+	{ { "capabilities", cmd_capabilities, 0 },
+	  { "import", cmd_import, 1 },
+	  { "list", cmd_list, 0 },
+	  { NULL, NULL } };
 
 static int cmd_capabilities(const char *line)
 {
@@ -50,7 +52,8 @@ static void terminate_batch(void)
 	fflush(stdout);
 }
 
-/* NOTE: 'ref' refers to a git reference, while 'rev' refers to a svn revision. */
+/* NOTE: 'ref' refers to a git reference, while 'rev' refers to a svn revision.
+ */
 static char *read_ref_note(const struct object_id *oid)
 {
 	const struct object_id *note_oid;
@@ -60,12 +63,13 @@ static char *read_ref_note(const struct object_id *oid)
 
 	init_notes(NULL, notes_ref, NULL, 0);
 	if (!(note_oid = get_note(NULL, oid)))
-		return NULL;	/* note tree not found */
+		return NULL; /* note tree not found */
 	if (!(msg = read_sha1_file(note_oid->hash, &type, &msglen)))
 		error("Empty notes tree. %s", notes_ref);
 	else if (!msglen || type != OBJ_BLOB) {
 		error("Note contains unusable content. "
-			"Is something else using this notes tree? %s", notes_ref);
+		      "Is something else using this notes tree? %s",
+		      notes_ref);
 		FREE_AND_NULL(msg);
 	}
 	free_notes(NULL);
@@ -98,9 +102,9 @@ static int parse_rev_note(const char *msg, struct rev_note *res)
 	return -1;
 }
 
-static int note2mark_cb(const struct object_id *object_oid,
-		const struct object_id *note_oid, char *note_path,
-		void *cb_data)
+static int
+note2mark_cb(const struct object_id *object_oid,
+	     const struct object_id *note_oid, char *note_path, void *cb_data)
 {
 	FILE *file = (FILE *)cb_data;
 	char *msg;
@@ -109,7 +113,7 @@ static int note2mark_cb(const struct object_id *object_oid,
 	struct rev_note note;
 
 	if (!(msg = read_sha1_file(note_oid->hash, &type, &msglen)) ||
-			!msglen || type != OBJ_BLOB) {
+	    !msglen || type != OBJ_BLOB) {
 		free(msg);
 		return 1;
 	}
@@ -178,7 +182,7 @@ static int cmd_import(const char *line)
 		startrev = 0;
 	else {
 		note_msg = read_ref_note(&head_oid);
-		if(note_msg == NULL) {
+		if (note_msg == NULL) {
 			warning("No note found for %s.", private_ref);
 			startrev = 0;
 		} else {
@@ -193,7 +197,7 @@ static int cmd_import(const char *line)
 
 	if (dump_from_file) {
 		dumpin_fd = open(url, O_RDONLY);
-		if(dumpin_fd < 0)
+		if (dumpin_fd < 0)
 			die_errno("Couldn't open svn dump file %s.", url);
 	} else {
 		svndump_proc.out = -1;
@@ -209,7 +213,8 @@ static int cmd_import(const char *line)
 	}
 	/* setup marks file import/export */
 	printf("feature import-marks-if-exists=%s\n"
-			"feature export-marks=%s\n", marksfilename, marksfilename);
+	       "feature export-marks=%s\n",
+	       marksfilename, marksfilename);
 
 	svndump_init_fd(dumpin_fd, STDIN_FILENO);
 	svndump_read(url, private_ref, notes_ref);
@@ -241,32 +246,35 @@ static int do_command(struct strbuf *line)
 	/*
 	 * commands can be grouped together in a batch.
 	 * Batches are ended by \n. If no batch is active the program ends.
-	 * During a batch all lines are buffered and passed to the handler function
-	 * when the batch is terminated.
+	 * During a batch all lines are buffered and passed to the handler
+	 * function when the batch is terminated.
 	 */
 	if (line->len == 0) {
 		if (batch_cmd) {
 			struct string_list_item *item;
-			for_each_string_list_item(item, &batchlines)
+			for_each_string_list_item (item, &batchlines)
 				batch_cmd->fn(item->string);
 			terminate_batch();
 			batch_cmd = NULL;
 			string_list_clear(&batchlines, 0);
-			return 0;	/* end of the batch, continue reading other commands. */
+			return 0; /* end of the batch, continue reading other
+				     commands. */
 		}
-		return 1;	/* end of command stream, quit */
+		return 1; /* end of command stream, quit */
 	}
 	if (batch_cmd) {
 		if (!starts_with(batch_cmd->name, line->buf))
-			die("Active %s batch interrupted by %s", batch_cmd->name, line->buf);
+			die("Active %s batch interrupted by %s",
+			    batch_cmd->name, line->buf);
 		/* buffer batch lines */
 		string_list_append(&batchlines, line->buf);
 		return 0;
 	}
 
 	for (p = input_command_list; p->name; p++) {
-		if (starts_with(line->buf, p->name) && (strlen(p->name) == line->len ||
-				line->buf[strlen(p->name)] == ' ')) {
+		if (starts_with(line->buf, p->name) &&
+		    (strlen(p->name) == line->len ||
+		     line->buf[strlen(p->name)] == ' ')) {
 			if (p->batchable) {
 				batch_cmd = p;
 				string_list_append(&batchlines, line->buf);
@@ -282,8 +290,8 @@ static int do_command(struct strbuf *line)
 int cmd_main(int argc, const char **argv)
 {
 	struct strbuf buf = STRBUF_INIT, url_sb = STRBUF_INIT,
-			private_ref_sb = STRBUF_INIT, marksfilename_sb = STRBUF_INIT,
-			notes_ref_sb = STRBUF_INIT;
+		      private_ref_sb = STRBUF_INIT,
+		      marksfilename_sb = STRBUF_INIT, notes_ref_sb = STRBUF_INIT;
 	static struct remote *remote;
 	const char *url_in;
 
@@ -298,7 +306,7 @@ int cmd_main(int argc, const char **argv)
 
 	if (starts_with(url_in, "file://")) {
 		dump_from_file = 1;
-		url = url_decode(url_in + sizeof("file://")-1);
+		url = url_decode(url_in + sizeof("file://") - 1);
 	} else {
 		dump_from_file = 0;
 		end_url_with_slash(&url_sb, url_in);
@@ -312,7 +320,7 @@ int cmd_main(int argc, const char **argv)
 	notes_ref = notes_ref_sb.buf;
 
 	strbuf_addf(&marksfilename_sb, "%s/info/fast-import/remote-svn/%s.marks",
-		get_git_dir(), remote->name);
+		    get_git_dir(), remote->name);
 	marksfilename = marksfilename_sb.buf;
 
 	while (1) {

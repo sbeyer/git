@@ -8,12 +8,9 @@
 #include "revision.h"
 #include "list-objects.h"
 
-static void process_blob(struct rev_info *revs,
-			 struct blob *blob,
-			 show_object_fn show,
-			 struct strbuf *path,
-			 const char *name,
-			 void *cb_data)
+static void
+process_blob(struct rev_info *revs, struct blob *blob, show_object_fn show,
+	     struct strbuf *path, const char *name, void *cb_data)
 {
 	struct object *obj = &blob->object;
 	size_t pathlen;
@@ -54,28 +51,23 @@ static void process_blob(struct rev_info *revs,
  * the link, and how to do it. Whether it necessarily makes
  * any sense what-so-ever to ever do that is another issue.
  */
-static void process_gitlink(struct rev_info *revs,
-			    const unsigned char *sha1,
-			    show_object_fn show,
-			    struct strbuf *path,
-			    const char *name,
-			    void *cb_data)
+static void process_gitlink(struct rev_info *revs, const unsigned char *sha1,
+			    show_object_fn show, struct strbuf *path,
+			    const char *name, void *cb_data)
 {
 	/* Nothing to do */
 }
 
-static void process_tree(struct rev_info *revs,
-			 struct tree *tree,
-			 show_object_fn show,
-			 struct strbuf *base,
-			 const char *name,
-			 void *cb_data)
+static void
+process_tree(struct rev_info *revs, struct tree *tree, show_object_fn show,
+	     struct strbuf *base, const char *name, void *cb_data)
 {
 	struct object *obj = &tree->object;
 	struct tree_desc desc;
 	struct name_entry entry;
 	enum interesting match = revs->diffopt.pathspec.nr == 0 ?
-		all_entries_interesting: entry_not_interesting;
+					 all_entries_interesting :
+					 entry_not_interesting;
 	int baselen = base->len;
 
 	if (!revs->tree_objects)
@@ -109,27 +101,22 @@ static void process_tree(struct rev_info *revs,
 		}
 
 		if (S_ISDIR(entry.mode))
-			process_tree(revs,
-				     lookup_tree(entry.oid),
-				     show, base, entry.path,
-				     cb_data);
+			process_tree(revs, lookup_tree(entry.oid), show, base,
+				     entry.path, cb_data);
 		else if (S_ISGITLINK(entry.mode))
-			process_gitlink(revs, entry.oid->hash,
-					show, base, entry.path,
-					cb_data);
+			process_gitlink(revs, entry.oid->hash, show, base,
+					entry.path, cb_data);
 		else
-			process_blob(revs,
-				     lookup_blob(entry.oid),
-				     show, base, entry.path,
-				     cb_data);
+			process_blob(revs, lookup_blob(entry.oid), show, base,
+				     entry.path, cb_data);
 	}
 	strbuf_setlen(base, baselen);
 	free_tree_buffer(tree);
 }
 
-static void mark_edge_parents_uninteresting(struct commit *commit,
-					    struct rev_info *revs,
-					    show_edge_fn show_edge)
+static void
+mark_edge_parents_uninteresting(struct commit *commit, struct rev_info *revs,
+				show_edge_fn show_edge)
 {
 	struct commit_list *parents;
 
@@ -155,7 +142,8 @@ void mark_edges_uninteresting(struct rev_info *revs, show_edge_fn show_edge)
 
 		if (commit->object.flags & UNINTERESTING) {
 			mark_tree_uninteresting(commit->tree);
-			if (revs->edge_hint_aggressive && !(commit->object.flags & SHOWN)) {
+			if (revs->edge_hint_aggressive &&
+			    !(commit->object.flags & SHOWN)) {
 				commit->object.flags |= SHOWN;
 				show_edge(commit);
 			}
@@ -167,7 +155,8 @@ void mark_edges_uninteresting(struct rev_info *revs, show_edge_fn show_edge)
 		for (i = 0; i < revs->cmdline.nr; i++) {
 			struct object *obj = revs->cmdline.rev[i].item;
 			struct commit *commit = (struct commit *)obj;
-			if (obj->type != OBJ_COMMIT || !(obj->flags & UNINTERESTING))
+			if (obj->type != OBJ_COMMIT ||
+			    !(obj->flags & UNINTERESTING))
 				continue;
 			mark_tree_uninteresting(commit->tree);
 			if (!(obj->flags & SHOWN)) {
@@ -183,10 +172,8 @@ static void add_pending_tree(struct rev_info *revs, struct tree *tree)
 	add_pending_object(revs, &tree->object, "");
 }
 
-void traverse_commit_list(struct rev_info *revs,
-			  show_commit_fn show_commit,
-			  show_object_fn show_object,
-			  void *data)
+void traverse_commit_list(struct rev_info *revs, show_commit_fn show_commit,
+			  show_object_fn show_object, void *data)
 {
 	int i;
 	struct commit *commit;
@@ -226,8 +213,7 @@ void traverse_commit_list(struct rev_info *revs,
 				     &base, path, data);
 			continue;
 		}
-		die("unknown pending object %s (%s)",
-		    oid_to_hex(&obj->oid), name);
+		die("unknown pending object %s (%s)", oid_to_hex(&obj->oid), name);
 	}
 	object_array_clear(&revs->pending);
 	strbuf_release(&base);

@@ -26,9 +26,7 @@ static int parse_num(char **cp_p, int *num_p)
 	return 0;
 }
 
-int parse_hunk_header(char *line, int len,
-		      int *ob, int *on,
-		      int *nb, int *nn)
+int parse_hunk_header(char *line, int len, int *ob, int *on, int *nb, int *nn)
 {
 	char *cp;
 	cp = line + 4;
@@ -40,8 +38,7 @@ int parse_hunk_header(char *line, int len,
 		cp++;
 		if (parse_num(&cp, on))
 			goto bad_line;
-	}
-	else
+	} else
 		*on = 1;
 	if (*cp++ != ' ' || *cp++ != '+')
 		goto bad_line;
@@ -51,8 +48,7 @@ int parse_hunk_header(char *line, int len,
 		cp++;
 		if (parse_num(&cp, nn))
 			goto bad_line;
-	}
-	else
+	} else
 		*nn = 1;
 	return -!!memcmp(cp, " @@", 3);
 }
@@ -77,7 +73,7 @@ static int xdiff_outf(void *priv_, mmbuffer_t *mb, int nbuf)
 	int i;
 
 	for (i = 0; i < nbuf; i++) {
-		if (mb[i].ptr[mb[i].size-1] != '\n') {
+		if (mb[i].ptr[mb[i].size - 1] != '\n') {
 			/* Incomplete line */
 			strbuf_add(&priv->remainder, mb[i].ptr, mb[i].size);
 			continue;
@@ -124,7 +120,8 @@ static void trim_common_tail(mmfile_t *a, mmfile_t *b)
 	b->size -= trimmed - recovered;
 }
 
-int xdi_diff(mmfile_t *mf1, mmfile_t *mf2, xpparam_t const *xpp, xdemitconf_t const *xecfg, xdemitcb_t *xecb)
+int xdi_diff(mmfile_t *mf1, mmfile_t *mf2, xpparam_t const *xpp,
+	     xdemitconf_t const *xecfg, xdemitcb_t *xecb)
 {
 	mmfile_t a = *mf1;
 	mmfile_t b = *mf2;
@@ -138,9 +135,9 @@ int xdi_diff(mmfile_t *mf1, mmfile_t *mf2, xpparam_t const *xpp, xdemitconf_t co
 	return xdl_diff(&a, &b, xpp, xecfg, xecb);
 }
 
-int xdi_diff_outf(mmfile_t *mf1, mmfile_t *mf2,
-		  xdiff_emit_consume_fn fn, void *consume_callback_data,
-		  xpparam_t const *xpp, xdemitconf_t const *xecfg)
+int xdi_diff_outf(mmfile_t *mf1, mmfile_t *mf2, xdiff_emit_consume_fn fn,
+		  void *consume_callback_data, xpparam_t const *xpp,
+		  xdemitconf_t const *xecfg)
 {
 	int ret;
 	struct xdiff_emit_state state;
@@ -209,11 +206,11 @@ struct ff_regs {
 	struct ff_reg {
 		regex_t re;
 		int negate;
-	} *array;
+	} * array;
 };
 
-static long ff_regexp(const char *line, long len,
-		char *buffer, long buffer_size, void *priv)
+static long
+ff_regexp(const char *line, long len, char *buffer, long buffer_size, void *priv)
 {
 	struct ff_regs *regs = priv;
 	regmatch_t pmatch[2];
@@ -221,8 +218,8 @@ static long ff_regexp(const char *line, long len,
 	int result;
 
 	/* Exclude terminating newline (and cr) from matching */
-	if (len > 0 && line[len-1] == '\n') {
-		if (len > 1 && line[len-2] == '\r')
+	if (len > 0 && line[len - 1] == '\n') {
+		if (len > 1 && line[len - 2] == '\r')
 			len -= 2;
 		else
 			len--;
@@ -275,7 +272,8 @@ void xdiff_set_find_func(xdemitconf_t *xecfg, const char *value, int cflags)
 		else
 			expression = value;
 		if (regcomp(&reg->re, expression, cflags))
-			die("Invalid regexp to look for hunk header: %s", expression);
+			die("Invalid regexp to look for hunk header: %s",
+			    expression);
 		free(buffer);
 		value = ep + 1;
 	}
@@ -308,8 +306,7 @@ int git_xmerge_config(const char *var, const char *value, void *cb)
 		else if (!strcmp(value, "merge"))
 			git_xmerge_style = 0;
 		else
-			die("unknown style '%s' given for '%s'",
-			    value, var);
+			die("unknown style '%s' given for '%s'", value, var);
 		return 0;
 	}
 	return git_default_config(var, value, cb);

@@ -19,11 +19,11 @@ struct object *get_indexed_object(unsigned int idx)
 }
 
 static const char *object_type_strings[] = {
-	NULL,		/* OBJ_NONE = 0 */
-	"commit",	/* OBJ_COMMIT = 1 */
-	"tree",		/* OBJ_TREE = 2 */
-	"blob",		/* OBJ_BLOB = 3 */
-	"tag",		/* OBJ_TAG = 4 */
+	NULL, /* OBJ_NONE = 0 */
+	"commit", /* OBJ_COMMIT = 1 */
+	"tree", /* OBJ_TREE = 2 */
+	"blob", /* OBJ_BLOB = 3 */
+	"tag", /* OBJ_TAG = 4 */
 };
 
 const char *typename(unsigned int type)
@@ -66,7 +66,8 @@ static unsigned int hash_obj(const unsigned char *sha1, unsigned int n)
  * must be a power of 2).  On collisions, simply overflow to the next
  * empty bucket.
  */
-static void insert_obj_hash(struct object *obj, struct object **hash, unsigned int size)
+static void
+insert_obj_hash(struct object *obj, struct object **hash, unsigned int size)
 {
 	unsigned int j = hash_obj(obj->oid.hash, size);
 
@@ -161,11 +162,9 @@ void *object_as_type(struct object *obj, enum object_type type, int quiet)
 			((struct commit *)obj)->index = alloc_commit_index();
 		obj->type = type;
 		return obj;
-	}
-	else {
+	} else {
 		if (!quiet)
-			error("object %s is a %s, not a %s",
-			      oid_to_hex(&obj->oid),
+			error("object %s is a %s, not a %s", oid_to_hex(&obj->oid),
 			      typename(obj->type), typename(type));
 		return NULL;
 	}
@@ -179,7 +178,9 @@ struct object *lookup_unknown_object(const unsigned char *sha1)
 	return obj;
 }
 
-struct object *parse_object_buffer(const struct object_id *oid, enum object_type type, unsigned long size, void *buffer, int *eaten_p)
+struct object *
+parse_object_buffer(const struct object_id *oid, enum object_type type,
+		    unsigned long size, void *buffer, int *eaten_p)
 {
 	struct object *obj;
 	*eaten_p = 0;
@@ -219,7 +220,7 @@ struct object *parse_object_buffer(const struct object_id *oid, enum object_type
 		struct tag *tag = lookup_tag(oid);
 		if (tag) {
 			if (parse_tag_buffer(tag, buffer, size))
-			       return NULL;
+				return NULL;
 			obj = &tag->object;
 		}
 	} else {
@@ -229,8 +230,7 @@ struct object *parse_object_buffer(const struct object_id *oid, enum object_type
 	return obj;
 }
 
-struct object *parse_object_or_die(const struct object_id *oid,
-				   const char *name)
+struct object *parse_object_or_die(const struct object_id *oid, const char *name)
 {
 	struct object *o = parse_object(oid);
 	if (o)
@@ -279,8 +279,8 @@ struct object *parse_object(const struct object_id *oid)
 	return NULL;
 }
 
-struct object_list *object_list_insert(struct object *item,
-				       struct object_list **list_p)
+struct object_list *
+object_list_insert(struct object *item, struct object_list **list_p)
 {
 	struct object_list *new_list = xmalloc(sizeof(struct object_list));
 	new_list->item = item;
@@ -306,8 +306,8 @@ int object_list_contains(struct object_list *list, struct object *obj)
 static char object_array_slopbuf[1];
 
 void add_object_array_with_path(struct object *obj, const char *name,
-				struct object_array *array,
-				unsigned mode, const char *path)
+				struct object_array *array, unsigned mode,
+				const char *path)
 {
 	unsigned nr = array->nr;
 	unsigned alloc = array->alloc;
@@ -337,7 +337,8 @@ void add_object_array_with_path(struct object *obj, const char *name,
 	array->nr = ++nr;
 }
 
-void add_object_array(struct object *obj, const char *name, struct object_array *array)
+void add_object_array(struct object *obj, const char *name,
+		      struct object_array *array)
 {
 	add_object_array_with_path(obj, name, array, S_IFINVALID, NULL);
 }
@@ -428,7 +429,7 @@ void clear_object_flags(unsigned flags)
 {
 	int i;
 
-	for (i=0; i < obj_hash_size; i++) {
+	for (i = 0; i < obj_hash_size; i++) {
 		struct object *obj = obj_hash[i];
 		if (obj)
 			obj->flags &= ~flags;

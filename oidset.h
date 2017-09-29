@@ -20,7 +20,12 @@ struct oidset {
 	struct hashmap map;
 };
 
-#define OIDSET_INIT { { NULL } }
+#define OIDSET_INIT          \
+	{                    \
+		{            \
+			NULL \
+		}            \
+	}
 
 /**
  * Returns true iff `set` contains `oid`.

@@ -11,16 +11,17 @@ const char git_usage_string[] =
 	"           [--git-dir=<path>] [--work-tree=<path>] [--namespace=<name>]\n"
 	"           <command> [<args>]";
 
-const char git_more_info_string[] =
-	N_("'git help -a' and 'git help -g' list available subcommands and some\n"
-	   "concept guides. See 'git help <command>' or 'git help <concept>'\n"
-	   "to read about a specific subcommand or concept.");
+const char git_more_info_string[] = N_(
+	"'git help -a' and 'git help -g' list available subcommands and some\n"
+	"concept guides. See 'git help <command>' or 'git help <concept>'\n"
+	"to read about a specific subcommand or concept.");
 
 static int use_pager = -1;
 
 static void list_builtins(void);
 
-static void commit_pager_choice(void) {
+static void commit_pager_choice(void)
+{
 	switch (use_pager) {
 	case 0:
 		setenv("GIT_PAGER", "cat", 1);
@@ -92,7 +93,8 @@ static int handle_options(const char ***argv, int *argc, int *envchanged)
 				*envchanged = 1;
 		} else if (!strcmp(cmd, "--git-dir")) {
 			if (*argc < 2) {
-				fprintf(stderr, "No directory given for --git-dir.\n" );
+				fprintf(stderr,
+					"No directory given for --git-dir.\n");
 				usage(git_usage_string);
 			}
 			setenv(GIT_DIR_ENVIRONMENT, (*argv)[1], 1);
@@ -106,7 +108,8 @@ static int handle_options(const char ***argv, int *argc, int *envchanged)
 				*envchanged = 1;
 		} else if (!strcmp(cmd, "--namespace")) {
 			if (*argc < 2) {
-				fprintf(stderr, "No namespace given for --namespace.\n" );
+				fprintf(stderr,
+					"No namespace given for --namespace.\n");
 				usage(git_usage_string);
 			}
 			setenv(GIT_NAMESPACE_ENVIRONMENT, (*argv)[1], 1);
@@ -120,7 +123,8 @@ static int handle_options(const char ***argv, int *argc, int *envchanged)
 				*envchanged = 1;
 		} else if (!strcmp(cmd, "--work-tree")) {
 			if (*argc < 2) {
-				fprintf(stderr, "No directory given for --work-tree.\n" );
+				fprintf(stderr,
+					"No directory given for --work-tree.\n");
 				usage(git_usage_string);
 			}
 			setenv(GIT_WORK_TREE_ENVIRONMENT, (*argv)[1], 1);
@@ -134,7 +138,8 @@ static int handle_options(const char ***argv, int *argc, int *envchanged)
 				*envchanged = 1;
 		} else if (!strcmp(cmd, "--super-prefix")) {
 			if (*argc < 2) {
-				fprintf(stderr, "No prefix given for --super-prefix.\n" );
+				fprintf(stderr,
+					"No prefix given for --super-prefix.\n");
 				usage(git_usage_string);
 			}
 			setenv(GIT_SUPER_PREFIX_ENVIRONMENT, (*argv)[1], 1);
@@ -156,7 +161,8 @@ static int handle_options(const char ***argv, int *argc, int *envchanged)
 				*envchanged = 1;
 		} else if (!strcmp(cmd, "-c")) {
 			if (*argc < 2) {
-				fprintf(stderr, "-c expects a configuration string\n" );
+				fprintf(stderr,
+					"-c expects a configuration string\n");
 				usage(git_usage_string);
 			}
 			git_config_push_parameter((*argv)[1]);
@@ -190,12 +196,13 @@ static int handle_options(const char ***argv, int *argc, int *envchanged)
 				*envchanged = 1;
 		} else if (!strcmp(cmd, "-C")) {
 			if (*argc < 2) {
-				fprintf(stderr, "No directory given for -C.\n" );
+				fprintf(stderr, "No directory given for -C.\n");
 				usage(git_usage_string);
 			}
 			if ((*argv)[1][0]) {
 				if (chdir((*argv)[1]))
-					die_errno("Cannot change to '%s'", (*argv)[1]);
+					die_errno("Cannot change to '%s'",
+						  (*argv)[1]);
 				if (envchanged)
 					*envchanged = 1;
 			}
@@ -240,11 +247,11 @@ static int handle_alias(int *argcp, const char ***argv)
 			argv_array_pushv(&child.args, (*argv) + 1);
 
 			ret = run_command(&child);
-			if (ret >= 0)   /* normal exit */
+			if (ret >= 0) /* normal exit */
 				exit(ret);
 
 			die_errno("While expanding alias '%s': '%s'",
-			    alias_command, alias_string + 1);
+				  alias_command, alias_string + 1);
 		}
 		count = split_cmdline(alias_string, &new_argv);
 		if (count < 0)
@@ -253,10 +260,9 @@ static int handle_alias(int *argcp, const char ***argv)
 		option_count = handle_options(&new_argv, &count, &envchanged);
 		if (envchanged)
 			die("alias '%s' changes environment variables\n"
-				 "You can use '!git' in the alias to do this.",
-				 alias_command);
-		memmove(new_argv - option_count, new_argv,
-				count * sizeof(char *));
+			    "You can use '!git' in the alias to do this.",
+			    alias_command);
+		memmove(new_argv - option_count, new_argv, count * sizeof(char *));
 		new_argv -= option_count;
 
 		if (count < 1)
@@ -265,8 +271,7 @@ static int handle_alias(int *argcp, const char ***argv)
 		if (!strcmp(alias_command, new_argv[0]))
 			die("recursive alias: %s", alias_command);
 
-		trace_argv_printf(new_argv,
-				  "trace: alias expansion: %s =>",
+		trace_argv_printf(new_argv, "trace: alias expansion: %s =>",
 				  alias_command);
 
 		REALLOC_ARRAY(new_argv, count + *argcp);
@@ -284,16 +289,16 @@ static int handle_alias(int *argcp, const char ***argv)
 	return ret;
 }
 
-#define RUN_SETUP		(1<<0)
-#define RUN_SETUP_GENTLY	(1<<1)
-#define USE_PAGER		(1<<2)
+#define RUN_SETUP (1 << 0)
+#define RUN_SETUP_GENTLY (1 << 1)
+#define USE_PAGER (1 << 2)
 /*
  * require working tree to be present -- anything uses this needs
  * RUN_SETUP for reading from the configuration file.
  */
-#define NEED_WORK_TREE		(1<<3)
-#define SUPPORT_SUPER_PREFIX	(1<<4)
-#define DELAY_PAGER_CONFIG	(1<<5)
+#define NEED_WORK_TREE (1 << 3)
+#define SUPPORT_SUPER_PREFIX (1 << 4)
+#define DELAY_PAGER_CONFIG (1 << 5)
 
 struct cmd_struct {
 	const char *cmd;
@@ -324,7 +329,8 @@ static int run_builtin(struct cmd_struct *p, int argc, const char **argv)
 			use_pager = 1;
 
 		if ((p->option & (RUN_SETUP | RUN_SETUP_GENTLY)) &&
-		    startup_info->have_repository) /* get_git_dir() may set up repo, avoid that */
+		    startup_info->have_repository) /* get_git_dir() may set up
+						      repo, avoid that */
 			trace_repo_setup(prefix);
 	}
 	commit_pager_choice();
@@ -376,8 +382,7 @@ static struct cmd_struct commands[] = {
 	{ "check-mailmap", cmd_check_mailmap, RUN_SETUP },
 	{ "check-ref-format", cmd_check_ref_format },
 	{ "checkout", cmd_checkout, RUN_SETUP | NEED_WORK_TREE },
-	{ "checkout-index", cmd_checkout_index,
-		RUN_SETUP | NEED_WORK_TREE},
+	{ "checkout-index", cmd_checkout_index, RUN_SETUP | NEED_WORK_TREE },
 	{ "cherry", cmd_cherry, RUN_SETUP },
 	{ "cherry-pick", cmd_cherry_pick, RUN_SETUP | NEED_WORK_TREE },
 	{ "clean", cmd_clean, RUN_SETUP | NEED_WORK_TREE },
@@ -441,7 +446,7 @@ static struct cmd_struct commands[] = {
 	{ "prune-packed", cmd_prune_packed, RUN_SETUP },
 	{ "pull", cmd_pull, RUN_SETUP | NEED_WORK_TREE },
 	{ "push", cmd_push, RUN_SETUP },
-	{ "read-tree", cmd_read_tree, RUN_SETUP | SUPPORT_SUPER_PREFIX},
+	{ "read-tree", cmd_read_tree, RUN_SETUP | SUPPORT_SUPER_PREFIX },
 	{ "rebase--helper", cmd_rebase__helper, RUN_SETUP | NEED_WORK_TREE },
 	{ "receive-pack", cmd_receive_pack },
 	{ "reflog", cmd_reflog, RUN_SETUP },
@@ -464,7 +469,8 @@ static struct cmd_struct commands[] = {
 	{ "stage", cmd_add, RUN_SETUP | NEED_WORK_TREE },
 	{ "status", cmd_status, RUN_SETUP | NEED_WORK_TREE },
 	{ "stripspace", cmd_stripspace },
-	{ "submodule--helper", cmd_submodule__helper, RUN_SETUP | SUPPORT_SUPER_PREFIX},
+	{ "submodule--helper", cmd_submodule__helper,
+	  RUN_SETUP | SUPPORT_SUPER_PREFIX },
 	{ "symbolic-ref", cmd_symbolic_ref, RUN_SETUP },
 	{ "tag", cmd_tag, RUN_SETUP | DELAY_PAGER_CONFIG },
 	{ "unpack-file", cmd_unpack_file, RUN_SETUP },
@@ -680,7 +686,8 @@ int cmd_main(int argc, const char **argv)
 		if (errno != ENOENT)
 			break;
 		if (was_alias) {
-			fprintf(stderr, "Expansion of alias '%s' failed; "
+			fprintf(stderr,
+				"Expansion of alias '%s' failed; "
 				"'%s' is not a git command\n",
 				cmd, argv[0]);
 			exit(1);
@@ -692,8 +699,7 @@ int cmd_main(int argc, const char **argv)
 			break;
 	}
 
-	fprintf(stderr, "Failed to run command '%s': %s\n",
-		cmd, strerror(errno));
+	fprintf(stderr, "Failed to run command '%s': %s\n", cmd, strerror(errno));
 
 	return 1;
 }

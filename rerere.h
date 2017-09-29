@@ -5,9 +5,9 @@
 
 struct pathspec;
 
-#define RERERE_AUTOUPDATE   01
+#define RERERE_AUTOUPDATE 01
 #define RERERE_NOAUTOUPDATE 02
-#define RERERE_READONLY     04
+#define RERERE_READONLY 04
 
 /*
  * Marks paths that have been hand-resolved and added to the
@@ -36,7 +36,8 @@ extern int rerere_remaining(struct string_list *);
 extern void rerere_clear(struct string_list *);
 extern void rerere_gc(struct string_list *);
 
-#define OPT_RERERE_AUTOUPDATE(v) OPT_UYN(0, "rerere-autoupdate", (v), \
-	N_("update the index with reused conflict resolution if possible"))
+#define OPT_RERERE_AUTOUPDATE(v)             \
+	OPT_UYN(0, "rerere-autoupdate", (v), \
+		N_("update the index with reused conflict resolution if possible"))
 
 #endif

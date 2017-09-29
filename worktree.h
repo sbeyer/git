@@ -6,8 +6,8 @@
 struct worktree {
 	char *path;
 	char *id;
-	char *head_ref;		/* NULL if HEAD is broken or detached */
-	char *lock_reason;	/* internal use */
+	char *head_ref; /* NULL if HEAD is broken or detached */
+	char *lock_reason; /* internal use */
 	unsigned char head_sha1[20];
 	int is_detached;
 	int is_bare;
@@ -44,9 +44,8 @@ extern const char *get_worktree_git_dir(const struct worktree *wt);
  * Search a worktree that can be unambiguously identified by
  * "arg". "prefix" must not be NULL.
  */
-extern struct worktree *find_worktree(struct worktree **list,
-				      const char *prefix,
-				      const char *arg);
+extern struct worktree *
+find_worktree(struct worktree **list, const char *prefix, const char *arg);
 
 /*
  * Return true if the given worktree is the main one.
@@ -69,8 +68,8 @@ extern void free_worktrees(struct worktree **);
  * or any linked worktree, and return the worktree that holds the ref,
  * or NULL otherwise. The result may be destroyed by the next call.
  */
-extern const struct worktree *find_shared_symref(const char *symref,
-						 const char *target);
+extern const struct worktree *
+find_shared_symref(const char *symref, const char *target);
 
 /*
  * Similar to head_ref() for all HEADs _except_ one from the current
@@ -85,8 +84,7 @@ int is_worktree_being_bisected(const struct worktree *wt, const char *target);
  * Similar to git_path() but can produce paths for a specified
  * worktree instead of current one
  */
-extern const char *worktree_git_path(const struct worktree *wt,
-				     const char *fmt, ...)
-	__attribute__((format (printf, 2, 3)));
+extern const char *worktree_git_path(const struct worktree *wt, const char *fmt,
+				     ...) __attribute__((format(printf, 2, 3)));
 
 #endif

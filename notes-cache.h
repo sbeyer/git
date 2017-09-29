@@ -9,11 +9,11 @@ struct notes_cache {
 };
 
 void notes_cache_init(struct notes_cache *c, const char *name,
-		     const char *validity);
+		      const char *validity);
 int notes_cache_write(struct notes_cache *c);
 
-char *notes_cache_get(struct notes_cache *c, struct object_id *oid, size_t
-		      *outsize);
+char *
+notes_cache_get(struct notes_cache *c, struct object_id *oid, size_t *outsize);
 int notes_cache_put(struct notes_cache *c, struct object_id *oid,
 		    const char *data, size_t size);
 

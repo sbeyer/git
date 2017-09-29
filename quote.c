@@ -56,7 +56,7 @@ void sq_quotef(struct strbuf *dst, const char *fmt, ...)
 	strbuf_release(&src);
 }
 
-void sq_quote_argv(struct strbuf *dst, const char** argv, size_t maxlen)
+void sq_quote_argv(struct strbuf *dst, const char **argv, size_t maxlen)
 {
 	int i;
 
@@ -118,9 +118,8 @@ char *sq_dequote(char *arg)
 	return sq_dequote_step(arg, NULL);
 }
 
-static int sq_dequote_to_argv_internal(char *arg,
-				       const char ***argv, int *nr, int *alloc,
-				       struct argv_array *array)
+static int sq_dequote_to_argv_internal(char *arg, const char ***argv, int *nr,
+				       int *alloc, struct argv_array *array)
 {
 	char *next = arg;
 
@@ -156,18 +155,56 @@ int sq_dequote_to_argv_array(char *arg, struct argv_array *array)
  * -1 means: never quote
  * c: quote as "\\c"
  */
-#define X8(x)   x, x, x, x, x, x, x, x
-#define X16(x)  X8(x), X8(x)
+#define X8(x) x, x, x, x, x, x, x, x
+#define X16(x) X8(x), X8(x)
 static signed char const sq_lookup[256] = {
 	/*           0    1    2    3    4    5    6    7 */
-	/* 0x00 */   1,   1,   1,   1,   1,   1,   1, 'a',
-	/* 0x08 */ 'b', 't', 'n', 'v', 'f', 'r',   1,   1,
+	/* 0x00 */ 1,
+	1,
+	1,
+	1,
+	1,
+	1,
+	1,
+	'a',
+	/* 0x08 */ 'b',
+	't',
+	'n',
+	'v',
+	'f',
+	'r',
+	1,
+	1,
 	/* 0x10 */ X16(1),
-	/* 0x20 */  -1,  -1, '"',  -1,  -1,  -1,  -1,  -1,
-	/* 0x28 */ X16(-1), X16(-1), X16(-1),
-	/* 0x58 */  -1,  -1,  -1,  -1,'\\',  -1,  -1,  -1,
-	/* 0x60 */ X16(-1), X8(-1),
-	/* 0x78 */  -1,  -1,  -1,  -1,  -1,  -1,  -1,   1,
+	/* 0x20 */ -1,
+	-1,
+	'"',
+	-1,
+	-1,
+	-1,
+	-1,
+	-1,
+	/* 0x28 */ X16(-1),
+	X16(-1),
+	X16(-1),
+	/* 0x58 */ -1,
+	-1,
+	-1,
+	-1,
+	'\\',
+	-1,
+	-1,
+	-1,
+	/* 0x60 */ X16(-1),
+	X8(-1),
+	/* 0x78 */ -1,
+	-1,
+	-1,
+	-1,
+	-1,
+	-1,
+	-1,
+	1,
 	/* 0x80 */ /* set to 0 */
 };
 
@@ -183,9 +220,11 @@ static size_t next_quote_pos(const char *s, ssize_t maxlen)
 {
 	size_t len;
 	if (maxlen < 0) {
-		for (len = 0; !sq_must_quote(s[len]); len++);
+		for (len = 0; !sq_must_quote(s[len]); len++)
+			;
 	} else {
-		for (len = 0; len < maxlen && !sq_must_quote(s[len]); len++);
+		for (len = 0; len < maxlen && !sq_must_quote(s[len]); len++)
+			;
 	}
 	return len;
 }
@@ -204,20 +243,24 @@ static size_t next_quote_pos(const char *s, ssize_t maxlen)
  *     Return value is the same as in (1).
  */
 static size_t quote_c_style_counted(const char *name, ssize_t maxlen,
-                                    struct strbuf *sb, FILE *fp, int no_dq)
+				    struct strbuf *sb, FILE *fp, int no_dq)
 {
 #undef EMIT
-#define EMIT(c)                                 \
-	do {                                        \
-		if (sb) strbuf_addch(sb, (c));          \
-		if (fp) fputc((c), fp);                 \
-		count++;                                \
+#define EMIT(c)                                \
+	do {                                   \
+		if (sb)                        \
+			strbuf_addch(sb, (c)); \
+		if (fp)                        \
+			fputc((c), fp);        \
+		count++;                       \
 	} while (0)
-#define EMITBUF(s, l)                           \
-	do {                                        \
-		if (sb) strbuf_add(sb, (s), (l));       \
-		if (fp) fwrite((s), (l), 1, fp);        \
-		count += (l);                           \
+#define EMITBUF(s, l)                             \
+	do {                                      \
+		if (sb)                           \
+			strbuf_add(sb, (s), (l)); \
+		if (fp)                           \
+			fwrite((s), (l), 1, fp);  \
+		count += (l);                     \
 	} while (0)
 
 	size_t len, count = 0;
@@ -249,7 +292,7 @@ static size_t quote_c_style_counted(const char *name, ssize_t maxlen,
 	}
 
 	EMITBUF(p, len);
-	if (p == name)   /* no ending quote needed */
+	if (p == name) /* no ending quote needed */
 		return 0;
 
 	if (!no_dq)
@@ -262,7 +305,8 @@ size_t quote_c_style(const char *name, struct strbuf *sb, FILE *fp, int nodq)
 	return quote_c_style_counted(name, -1, sb, fp, nodq);
 }
 
-void quote_two_c_style(struct strbuf *sb, const char *prefix, const char *path, int nodq)
+void quote_two_c_style(struct strbuf *sb, const char *prefix, const char *path,
+		       int nodq)
 {
 	if (quote_c_style(prefix, NULL, NULL, 0) ||
 	    quote_c_style(path, NULL, NULL, 0)) {
@@ -288,8 +332,8 @@ void write_name_quoted(const char *name, FILE *fp, int terminator)
 	fputc(terminator, fp);
 }
 
-void write_name_quoted_relative(const char *name, const char *prefix,
-				FILE *fp, int terminator)
+void write_name_quoted_relative(const char *name, const char *prefix, FILE *fp,
+				int terminator)
 {
 	struct strbuf sb = STRBUF_INIT;
 
@@ -300,8 +344,7 @@ void write_name_quoted_relative(const char *name, const char *prefix,
 }
 
 /* quote path as relative to the given prefix */
-char *quote_path_relative(const char *in, const char *prefix,
-			  struct strbuf *out)
+char *quote_path_relative(const char *in, const char *prefix, struct strbuf *out)
 {
 	struct strbuf sb = STRBUF_INIT;
 	const char *rel = relative_path(in, prefix, &sb);
@@ -338,46 +381,64 @@ int unquote_c_style(struct strbuf *sb, const char *quoted, const char **endp)
 		quoted += len;
 
 		switch (*quoted++) {
-		  case '"':
+		case '"':
 			if (endp)
 				*endp = quoted;
 			return 0;
-		  case '\\':
+		case '\\':
 			break;
-		  default:
+		default:
 			goto error;
 		}
 
 		switch ((ch = *quoted++)) {
-		case 'a': ch = '\a'; break;
-		case 'b': ch = '\b'; break;
-		case 'f': ch = '\f'; break;
-		case 'n': ch = '\n'; break;
-		case 'r': ch = '\r'; break;
-		case 't': ch = '\t'; break;
-		case 'v': ch = '\v'; break;
+		case 'a':
+			ch = '\a';
+			break;
+		case 'b':
+			ch = '\b';
+			break;
+		case 'f':
+			ch = '\f';
+			break;
+		case 'n':
+			ch = '\n';
+			break;
+		case 'r':
+			ch = '\r';
+			break;
+		case 't':
+			ch = '\t';
+			break;
+		case 'v':
+			ch = '\v';
+			break;
 
-		case '\\': case '"':
+		case '\\':
+		case '"':
 			break; /* verbatim */
 
 		/* octal values with first digit over 4 overflow */
-		case '0': case '1': case '2': case '3':
-					ac = ((ch - '0') << 6);
+		case '0':
+		case '1':
+		case '2':
+		case '3':
+			ac = ((ch - '0') << 6);
 			if ((ch = *quoted++) < '0' || '7' < ch)
 				goto error;
-					ac |= ((ch - '0') << 3);
+			ac |= ((ch - '0') << 3);
 			if ((ch = *quoted++) < '0' || '7' < ch)
 				goto error;
-					ac |= (ch - '0');
-					ch = ac;
-					break;
-				default:
+			ac |= (ch - '0');
+			ch = ac;
+			break;
+		default:
 			goto error;
-			}
-		strbuf_addch(sb, ch);
 		}
+		strbuf_addch(sb, ch);
+	}
 
-  error:
+error:
 	strbuf_setlen(sb, oldlen);
 	return -1;
 }
@@ -427,9 +488,13 @@ void tcl_quote_buf(struct strbuf *sb, const char *src)
 	strbuf_addch(sb, '"');
 	while ((c = *src++)) {
 		switch (c) {
-		case '[': case ']':
-		case '{': case '}':
-		case '$': case '\\': case '"':
+		case '[':
+		case ']':
+		case '{':
+		case '}':
+		case '$':
+		case '\\':
+		case '"':
 			strbuf_addch(sb, '\\');
 			/* fallthrough */
 		default:
